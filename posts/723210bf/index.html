@@ -1,0 +1,249 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>与make命令的初邂逅 | 日拱一卒</title><meta name="author" content="Derrick Liu,1209830516abc@gmail.com"><meta name="copyright" content="Derrick Liu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="前情提要（偏题）：开学第一周费尽周折选上了学校的ICS（计算机系统导论） 课。此课无比硬核，以著名神书 《CSAPP》 为教材，PPT及部分资料均为全英文；学习了国内外多门著名相似主题高质量课程的成功经验，涉及内容广博无比（光是还未接触到课程核心内容的Lab0，就涉及到无数极其有用的知识：从手把手安装Linux到命令行基本操作，从双系统安装到WSL部署，从ssh到vim再到make、gdb……几">
+<meta property="og:type" content="article">
+<meta property="og:title" content="与make命令的初邂逅">
+<meta property="og:url" content="https://ziyuliu258.github.io/posts/723210bf/index.html">
+<meta property="og:site_name" content="日拱一卒">
+<meta property="og:description" content="前情提要（偏题）：开学第一周费尽周折选上了学校的ICS（计算机系统导论） 课。此课无比硬核，以著名神书 《CSAPP》 为教材，PPT及部分资料均为全英文；学习了国内外多门著名相似主题高质量课程的成功经验，涉及内容广博无比（光是还未接触到课程核心内容的Lab0，就涉及到无数极其有用的知识：从手把手安装Linux到命令行基本操作，从双系统安装到WSL部署，从ssh到vim再到make、gdb……几">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ziyuliu258.github.io/images/avatar.jpg">
+<meta property="article:published_time" content="2025-02-27T17:42:17.000Z">
+<meta property="article:modified_time" content="2026-01-14T12:50:14.114Z">
+<meta property="article:author" content="Derrick Liu">
+<meta property="article:tag" content="Linux命令行">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ziyuliu258.github.io/images/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "与make命令的初邂逅",
+  "url": "https://ziyuliu258.github.io/posts/723210bf/",
+  "image": "https://ziyuliu258.github.io/images/avatar.jpg",
+  "datePublished": "2025-02-27T17:42:17.000Z",
+  "dateModified": "2026-01-14T12:50:14.114Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Derrick Liu",
+      "url": "https://ziyuliu258.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/images/avatar.jpg"><link rel="canonical" href="https://ziyuliu258.github.io/posts/723210bf/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":1,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: false,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '与make命令的初邂逅',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(/images/bg2.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/images/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/images/bg2.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"></a><a class="nav-page-title" href="/"><span class="site-name">与make命令的初邂逅</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">与make命令的初邂逅</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-02-27T17:42:17.000Z" title="发表于 2025-02-28 01:42:17">2025-02-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-01-14T12:50:14.114Z" title="更新于 2026-01-14 20:50:14">2026-01-14</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">962</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>3分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p><em><strong>前情提要（偏题）</strong></em>：开学第一周费尽周折选上了学校的<strong>ICS（计算机系统导论）</strong> 课。此课无比硬核，以著名神书 <em>《CSAPP》</em> 为教材，PPT及部分资料均为全英文；学习了国内外多门著名相似主题高质量课程的成功经验，涉及内容广博无比（光是还未接触到课程核心内容的<code>Lab0</code>，就涉及到无数极其有用的知识：从<code>手把手安装Linux</code>到命令行基本操作，从双系统安装到<code>WSL</code>部署，从<code>ssh</code>到<code>vim</code>再到<code>make</code>、<code>gdb</code>……几乎无所不包）；而搭建课程网站以及编写课程配套的textbook等工作，均由往届选过此课并愿意作为助教的前辈们承担；同时，课程还使用<code>Piazza</code>这种国际化的平台作为答疑沟通渠道。正是在这门课的<code>attacklab</code>中的实践推动了我主动去使用<code>gdb</code>和<code>make</code>命令。<br>
+整个课程是我所见在西交<strong>最洋气，最现代化，最与时代接轨，含金量最高</strong>的一门计算机专业课，不过同时也确实带给了我很多压力。不过学点好东西，吃点细糠总是令人愉快的。希望十几周后的我依然能够跟上这门课程的进度并取得一个好结果吧。<strong>以下回归正题……</strong></p>
+</blockquote>
+<p>本人折腾<strong>WSL2</strong>已经好几个月了。前几天突发奇想，在写面向对象程序设计的作业时，要将主要代码环境转移到我的<strong>WSL2</strong>上。于是便用起了<code>vscode</code>的<code>Remote SSH</code>插件，连接WSL2，创建文件并开始敲代码。</p>
+<p>然而问题来了。在我好不容易敲完一个程序后，突然想起来在WSL2并没有配置好关于<code>C/C++</code>的编译和运行/调试选项。到处乱设置一通仍然无法跑通。本人初下载<code>vscode</code>时在配环境这件事上消耗了大量时间，已经对之有了心理阴影；而如果利用<code>g++</code>和<code>gdb</code>的命令行操作来执行各个步骤的话，又实在繁琐得很。正巧最近在ICS课上接触到了<strong>make</strong>的相关操作，看到使用一行<code>make</code>命令就可以利用<code>makefile</code>秒运行，效果堪比直接按下（配置好）的调试按钮。于是决定放弃配置<code>vscode</code>的一大坨<code>json</code>文件，而尝试使用<code>make</code>命令来跑代码。在一通学习过后，本人写出了人生中的第一个<code>makefile</code>。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">CC = g++ <span class="comment">#设置编译器</span></span><br><span class="line">CFLAGS = -g</span><br><span class="line">default_name = program</span><br><span class="line">TARGET = $&#123;f&#125;</span><br><span class="line"></span><br><span class="line">f ?= $&#123;default_name&#125; <span class="comment">#f代表文件名，如果不设置值就会采用&quot;program.cpp&quot;作为默认代码文件的名字</span></span><br><span class="line"><span class="comment">#make f=...</span></span><br><span class="line"><span class="section">$&#123;TARGET&#125;: $&#123;TARGET&#125;.cpp</span></span><br><span class="line">	$&#123;CC&#125; $&#123;CFLAGS&#125; $&#123;TARGET&#125;.cpp -o $&#123;f&#125; <span class="comment">#g++ -g test.c -o test 也就是表示这种命令</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># debug</span></span><br><span class="line"><span class="section">debug: $&#123;TARGET&#125;</span></span><br><span class="line">	gdb $&#123;TARGET&#125; -ex <span class="string">&quot;run&quot;</span> <span class="comment">#gdb test然后再执行run运行命令</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># clean</span></span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	rm -f $&#123;TARGET&#125;</span><br></pre></td></tr></table></figure>
+<p>有了这个<code>makefile</code>，在运行程序的时候，只要在命令行输入<code>make f=文件名 debug</code>就可以一键进入<code>gdb</code>来运行，运行完成后按<code>q</code>即可退出。而如果涉及到对程序的改动需要重新编译，只需要先输入<code>make f=文件名 clean</code>再重新执行上面一条命令就可以。示例：如果我有程序名为<code>test.cpp</code>，我只需要输入<code>make f=test debug</code>，就会自动对<code>test.cpp</code>编译生成<code>test</code>可执行文件并进入运行/调试状态。</p>
+<p>总之，虽然并不是什么大工作，但是毕竟是初次接触，还是有一点点成就感的。如有朋友正好刚入门，可以参考这一小段代码，至少应付日常写<code>leetcode</code>、做课程<code>OJ</code>题等任务是足够了。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://ziyuliu258.github.io">Derrick Liu</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://ziyuliu258.github.io/posts/723210bf/">https://ziyuliu258.github.io/posts/723210bf/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://ziyuliu258.github.io" target="_blank">日拱一卒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux%E5%91%BD%E4%BB%A4%E8%A1%8C/">Linux命令行</a><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF/">技术</a></div><div class="post-share"><div class="social-share" data-image="/images/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/images/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Derrick Liu</div><div class="author-info-description">An undergraduate majoring in CS.</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ziyuliu258"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/ziyuliu258" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1209830516abc@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">昼短苦夜长，何不秉烛游？</div></div><div class="sticky_layout"><div class="card-widget card-post-series"><div class="item-headline"><i class="fa-solid fa-layer-group"></i><span>系列文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/723210bf/" title="与make命令的初邂逅">与make命令的初邂逅</a><time datetime="2025-02-27T17:42:17.000Z" title="发表于 2025-02-28 01:42:17">2025-02-28</time></div></div></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/e26699b7/" title="XJTU-ICS Lab 1: Data Lab">XJTU-ICS Lab 1: Data Lab</a><time datetime="2026-01-14T12:48:52.000Z" title="发表于 2026-01-14 20:48:52">2026-01-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/ffcd24f1/" title="维护日志">维护日志</a><time datetime="2026-01-14T12:24:41.000Z" title="发表于 2026-01-14 20:24:41">2026-01-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/e4e5df54/" title="在香橙派OrangePi AIPro（8T）上实现基于ACLLite与PyACL的YOLOv10端侧推理">在香橙派OrangePi AIPro（8T）上实现基于ACLLite与PyACL的YOLOv10端侧推理</a><time datetime="2025-08-26T16:00:00.000Z" title="发表于 2025-08-27 00:00:00">2025-08-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/6bd52945/" title="网线直连情况下的开发板SSH连接指南">网线直连情况下的开发板SSH连接指南</a><time datetime="2025-08-01T16:00:00.000Z" title="发表于 2025-08-02 00:00:00">2025-08-02</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/fa9d3431/" title="ZeroTier使用指导">ZeroTier使用指导</a><time datetime="2025-07-31T16:00:00.000Z" title="发表于 2025-08-01 00:00:00">2025-08-01</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(/images/bg2.jpg);"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Derrick Liu</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script></div><div class="aplayer no-destroy" data-id="13273018321" data-server="netease" data-type="playlist" data-fixed="true" data-autoplay="true" data-mini="true" data-theme="#3F51B5"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script>(() => {
+  const destroyAplayer = () => {
+    if (window.aplayers) {
+      for (let i = 0; i < window.aplayers.length; i++) {
+        if (!window.aplayers[i].options.fixed) {
+          window.aplayers[i].destroy()
+        }
+      }
+    }
+  }
+
+  const runMetingJS = () => {
+    typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+  }
+
+  btf.addGlobalFn('pjaxSend', destroyAplayer, 'destroyAplayer')
+  btf.addGlobalFn('pjaxComplete', loadMeting, 'runMetingJS')
+})()</script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      pjax.loadUrl('/404.html')
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
