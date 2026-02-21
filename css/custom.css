@@ -1,0 +1,36 @@
+#article-container .markdown-alert {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border-left: 0.25rem solid var(--theme-color);
+  border-radius: 0.5rem;
+  background: var(--card-bg);
+}
+
+#article-container .markdown-alert > p:last-child {
+  margin-bottom: 0;
+}
+
+#article-container .markdown-alert .markdown-alert-title {
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+}
+
+#article-container .markdown-alert-note {
+  border-left-color: #3b82f6;
+}
+
+#article-container .markdown-alert-tip {
+  border-left-color: #10b981;
+}
+
+#article-container .markdown-alert-important {
+  border-left-color: #8b5cf6;
+}
+
+#article-container .markdown-alert-warning {
+  border-left-color: #f59e0b;
+}
+
+#article-container .markdown-alert-caution {
+  border-left-color: #ef4444;
+}
