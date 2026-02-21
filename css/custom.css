@@ -94,3 +94,56 @@
 [data-theme='dark'] #article-container .markdown-alert-caution {
   background: rgba(239, 68, 68, 0.18);
 }
+
+#article-container {
+  /* font-family: "LXGW WenKai", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif; */
+  color: var(--font-color);
+  line-height: 1.8;
+}
+
+#article-container p,
+#article-container li,
+#article-container blockquote,
+#article-container td,
+#article-container th {
+  color: var(--font-color);
+}
+
+#article-container h1,
+#article-container h2,
+#article-container h3,
+#article-container h4,
+#article-container h5,
+#article-container h6 {
+  color: var(--font-color);
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+#article-container h1 {
+  font-size: 2rem;
+}
+
+#article-container h2 {
+  font-size: 1.75rem;
+}
+
+#article-container h3 {
+  font-size: 1.5rem;
+}
+
+#article-container h4 {
+  font-size: 1.25rem;
+}
+
+#article-container h5 {
+  font-size: 1.125rem;
+}
+
+#article-container h6 {
+  font-size: 1rem;
+}
+
+#article-container a {
+  color: var(--theme-color);
+}
