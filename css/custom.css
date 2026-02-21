@@ -28,6 +28,15 @@
   height: 1em;
   flex: 0 0 auto;
   margin-top: 1px;
+  color: #111;
+}
+
+#article-container .markdown-alert .markdown-alert-title svg path {
+  fill: currentColor;
+}
+
+#article-container .markdown-alert .markdown-alert-title img {
+  filter: invert(0);
 }
 
 #article-container .markdown-alert-note {
@@ -95,6 +104,14 @@
   background: rgba(239, 68, 68, 0.18);
 }
 
+[data-theme='dark'] #article-container .markdown-alert .markdown-alert-title svg {
+  color: #fff;
+}
+
+[data-theme='dark'] #article-container .markdown-alert .markdown-alert-title img {
+  filter: invert(1);
+}
+
 #article-container {
   /* font-family: "LXGW WenKai", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif; */
   color: var(--font-color);
@@ -147,3 +164,28 @@
 #article-container a {
   color: var(--theme-color);
 }
+
+/* 设置行内代码颜色 */
+
+/* #article-container p code,
+#article-container li code,
+#article-container td code,
+#article-container th code,
+#article-container blockquote code {
+  font-family: "JetBrains Mono", "Victor Mono", "Fira Code", monospace;
+  color: #63f6cf;
+  background: rgba(119, 120, 120, 0.155);
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  font-size: 0.92em;
+} */
+
+/* 深色模式下的行内代码颜色 */
+/* [data-theme='dark'] #article-container p code,
+[data-theme='dark'] #article-container li code,
+[data-theme='dark'] #article-container td code,
+[data-theme='dark'] #article-container th code,
+[data-theme='dark'] #article-container blockquote code {
+  color: #ff9dbb;
+  background: rgba(255, 157, 187, 0.14);
+} */
