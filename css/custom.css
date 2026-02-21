@@ -132,13 +132,13 @@
 #article-container h4,
 #article-container h5,
 #article-container h6 {
-  color: var(--font-color);
+  /* color: var(--font-color); */
   line-height: 1.35;
   font-weight: 700;
 }
 
 #article-container h1 {
-  font-size: 2rem;
+  font-size: 3rem;
 }
 
 #article-container h2 {
@@ -146,7 +146,7 @@
 }
 
 #article-container h3 {
-  font-size: 1.5rem;
+  font-size: 1.375rem;
 }
 
 #article-container h4 {
@@ -161,9 +161,10 @@
   font-size: 1rem;
 }
 
-#article-container a {
+/* 设置链接颜色，注释掉，为了保持默认颜色 */
+/* #article-container a {
   color: var(--theme-color);
-}
+} */
 
 /* 设置行内代码颜色 */
 
