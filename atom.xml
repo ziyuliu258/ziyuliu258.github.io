@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <author>
+    <name>Derrick Liu</name>
+    <email>1209830516abc@gmail.com</email>
+  </author>
+  <generator uri="https://hexo.io/">Hexo</generator>
+  <icon>https://www.gravatar.com/avatar/1564a0eda5ed743ce92363a7754f83e5</icon>
+  <id>https://ziyuliu258.github.io/</id>
+  <link href="https://ziyuliu258.github.io/" rel="alternate"/>
+  <link href="https://ziyuliu258.github.io/atom.xml" rel="self"/>
+  <rights>All rights reserved 2026, Derrick Liu</rights>
+  <subtitle>日拱一卒，功不唐捐。</subtitle>
+  <title>Derrick Liu的个人博客</title>
+  <updated>2026-02-28T08:15:39.929Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="技术" scheme="https://ziyuliu258.github.io/tags/%E6%8A%80%E6%9C%AF/"/>
+    <id>https://ziyuliu258.github.io/posts/38bfdd33/</id>
+    <link href="https://ziyuliu258.github.io/posts/38bfdd33/"/>
+    <published>2026-02-24T16:39:16.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>本文由<code>Gemini 3.1 Pro</code>根据对话记录总结生成，适用于不同发行版的Linux。</p>
+</blockquote>
+<h3 id="📌-问题现象">📌 问题现象</h3>
+<p>使用腹灵 FL980 V2]]>
+    </summary>
+    <title>Linux下修复三模客制化机械键盘F系列键的失灵</title>
+    <updated>2026-02-28T08:15:39.929Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="技术" scheme="https://ziyuliu258.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://ziyuliu258.github.io/tags/%E6%8A%80%E6%9C%AF/"/>
+    <id>https://ziyuliu258.github.io/posts/d94c72e4/</id>
+    <link href="https://ziyuliu258.github.io/posts/d94c72e4/"/>
+    <published>2026-02-24T16:17:36.000Z</published>
+    <summary>
+      <![CDATA[<div class="markdown-alert markdown-alert-note"><p class="markdown-alert-title"><svg class="octicon octicon-info mr-2" viewbox="0 0 16 16"]]>
+    </summary>
+    <title>Git分支操作：利用新分支备份状态，实现多分支版本管理</title>
+    <updated>2026-02-24T16:33:08.226Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="ICS实验" scheme="https://ziyuliu258.github.io/tags/ICS%E5%AE%9E%E9%AA%8C/"/>
+    <id>https://ziyuliu258.github.io/posts/8eada4ef/</id>
+    <link href="https://ziyuliu258.github.io/posts/8eada4ef/"/>
+    <published>2026-02-18T08:54:45.000Z</published>
+    <summary>Here's something encrypted, password is required to continue reading.</summary>
+    <title>XJTU-ICS Lab 2: Bomb Lab</title>
+    <updated>2026-03-03T10:41:27.722Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="ICS实验" scheme="https://ziyuliu258.github.io/tags/ICS%E5%AE%9E%E9%AA%8C/"/>
+    <id>https://ziyuliu258.github.io/posts/e26699b7/</id>
+    <link href="https://ziyuliu258.github.io/posts/e26699b7/"/>
+    <published>2026-01-14T12:48:52.000Z</published>
+    <summary>Here's something encrypted, password is required to continue reading.</summary>
+    <title>XJTU-ICS Lab 1: Data Lab</title>
+    <updated>2026-03-03T10:41:21.691Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="其他" scheme="https://ziyuliu258.github.io/tags/%E5%85%B6%E4%BB%96/"/>
+    <id>https://ziyuliu258.github.io/posts/ffcd24f1/</id>
+    <link href="https://ziyuliu258.github.io/posts/ffcd24f1/"/>
+    <published>2026-01-14T12:24:41.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>此处记录本博客重要的维护更新动态。</p>
+</blockquote>
+<ul>
+<li><code>2026-1-14</code>：添加维护日志文档；</li>
+<li><code>2026-1-3</code>：成功申请域名<code>ziy]]>
+    </summary>
+    <title>维护日志</title>
+    <updated>2026-02-19T17:56:48.746Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="技术" scheme="https://ziyuliu258.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="昇腾开发板" scheme="https://ziyuliu258.github.io/tags/%E6%98%87%E8%85%BE%E5%BC%80%E5%8F%91%E6%9D%BF/"/>
+    <id>https://ziyuliu258.github.io/posts/e4e5df54/</id>
+    <link href="https://ziyuliu258.github.io/posts/e4e5df54/"/>
+    <published>2025-08-26T16:00:00.000Z</published>
+    <summary>
+      <![CDATA[<h2 id="一、基本准备工作">一、基本准备工作</h2>
+<h3 id="1-烧录系统">1. 烧录系统</h3>
+<p>详情参见官方教程。可以使用昇腾官方的制卡工具<code>Ascend devkit]]>
+    </summary>
+    <title>在香橙派OrangePi AIPro（8T）上实现基于ACLLite与PyACL的YOLOv10端侧推理</title>
+    <updated>2025-10-24T12:08:06.524Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="技术" scheme="https://ziyuliu258.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="昇腾开发板" scheme="https://ziyuliu258.github.io/tags/%E6%98%87%E8%85%BE%E5%BC%80%E5%8F%91%E6%9D%BF/"/>
+    <id>https://ziyuliu258.github.io/posts/6bd52945/</id>
+    <link href="https://ziyuliu258.github.io/posts/6bd52945/"/>
+    <published>2025-08-01T16:00:00.000Z</published>
+    <summary>
+      <![CDATA[<h2 id="前言">前言</h2>
+<p>通过在本子网内逐一搜索获得IP来连接开发板这一方法实在效率低下，当开发板在手的时候，设置以太网静态IP可以便捷地通过以太网私有IP地址连接开发板。以下给出具体步骤。</p>
+<h2 id="设置步骤">设置步骤</h2>
+<h3]]>
+    </summary>
+    <title>网线直连情况下的开发板SSH连接指南</title>
+    <updated>2025-09-04T17:13:29.787Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="技术" scheme="https://ziyuliu258.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="昇腾开发板" scheme="https://ziyuliu258.github.io/tags/%E6%98%87%E8%85%BE%E5%BC%80%E5%8F%91%E6%9D%BF/"/>
+    <id>https://ziyuliu258.github.io/posts/fa9d3431/</id>
+    <link href="https://ziyuliu258.github.io/posts/fa9d3431/"/>
+    <published>2025-07-31T16:00:00.000Z</published>
+    <summary>
+      <![CDATA[<h2 id="基本介绍">基本介绍</h2>
+<blockquote>
+<p>以下视频对于ZeroTier的介绍很好，推荐观看：</p>
+<p><a]]>
+    </summary>
+    <title>ZeroTier使用指导</title>
+    <updated>2025-09-04T17:07:38.361Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="其他" scheme="https://ziyuliu258.github.io/categories/%E5%85%B6%E4%BB%96/"/>
+    <category term="不务正业" scheme="https://ziyuliu258.github.io/tags/%E4%B8%8D%E5%8A%A1%E6%AD%A3%E4%B8%9A/"/>
+    <id>https://ziyuliu258.github.io/posts/d80dcaaa/</id>
+    <link href="https://ziyuliu258.github.io/posts/d80dcaaa/"/>
+    <published>2025-04-09T17:21:31.000Z</published>
+    <summary>
+      <![CDATA[<p>本片大概会成为本年度对本人来说印象最深刻的电影了……诚然这部电影的烂点无论如何都遮不住：超级刻板印象的亚裔选角+妆造，超级老套而又没有说服力的“回归家庭，你爱我我爱你”东亚家庭和解戏码，毫无下限挑战观众精神耐受力的低俗/猎奇设计（一个没有磕药的正常人是如何想到让人的手指变成]]>
+    </summary>
+    <title>影评：《瞬息全宇宙》</title>
+    <updated>2025-04-09T17:34:51.923Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="技术" scheme="https://ziyuliu258.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="ICS实验" scheme="https://ziyuliu258.github.io/tags/ICS%E5%AE%9E%E9%AA%8C/"/>
+    <category term="Linux命令行" scheme="https://ziyuliu258.github.io/tags/Linux%E5%91%BD%E4%BB%A4%E8%A1%8C/"/>
+    <id>https://ziyuliu258.github.io/posts/723210bf/</id>
+    <link href="https://ziyuliu258.github.io/posts/723210bf/"/>
+    <published>2025-02-27T17:42:17.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p><em><strong>前情提要（偏题）</strong></em>：开学第一周费尽周折选上了学校的<strong>ICS（计算机系统导论）</strong> 课。此课无比硬核，以著名神书 <em>《CSAPP》</em>]]>
+    </summary>
+    <title>与make命令的初邂逅</title>
+    <updated>2026-01-14T14:04:29.863Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="闲谈" scheme="https://ziyuliu258.github.io/categories/%E9%97%B2%E8%B0%88/"/>
+    <category term="闲谈" scheme="https://ziyuliu258.github.io/tags/%E9%97%B2%E8%B0%88/"/>
+    <id>https://ziyuliu258.github.io/posts/f68cb9bf/</id>
+    <link href="https://ziyuliu258.github.io/posts/f68cb9bf/"/>
+    <published>2025-02-03T05:31:03.000Z</published>
+    <summary>
+      <![CDATA[<h3 id="开头说什么？">开头说什么？</h3>
+<p>此网页于北京时间2025年2月3日凌晨正式与本人的<code>GitHub]]>
+    </summary>
+    <title>篇首语</title>
+    <updated>2025-02-28T07:01:24.050Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="其他" scheme="https://ziyuliu258.github.io/categories/%E5%85%B6%E4%BB%96/"/>
+    <category term="不务正业" scheme="https://ziyuliu258.github.io/tags/%E4%B8%8D%E5%8A%A1%E6%AD%A3%E4%B8%9A/"/>
+    <id>https://ziyuliu258.github.io/posts/3bed148d/</id>
+    <link href="https://ziyuliu258.github.io/posts/3bed148d/"/>
+    <published>2023-11-29T00:24:00.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>注：本文原载于本人微信公众号“偷闲胡说”，欢迎关注。出于某种强迫症，对原文有修改。</p>
+</blockquote>
+<p>本次演出以利盖蒂为特色，中间穿插着贝多芬、肖邦以及德彪西等人的音乐小品。具体曲目如下：</p>
+<p><img]]>
+    </summary>
+    <title>赏乐·现场·回顾：2023.11.26 Pierre-Laurent Aimard独奏音乐会</title>
+    <updated>2026-01-16T05:46:13.751Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="其他" scheme="https://ziyuliu258.github.io/categories/%E5%85%B6%E4%BB%96/"/>
+    <category term="不务正业" scheme="https://ziyuliu258.github.io/tags/%E4%B8%8D%E5%8A%A1%E6%AD%A3%E4%B8%9A/"/>
+    <id>https://ziyuliu258.github.io/posts/776bab35/</id>
+    <link href="https://ziyuliu258.github.io/posts/776bab35/"/>
+    <published>2023-11-28T04:13:00.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>注：本文原载于本人微信公众号“偷闲胡说”，欢迎关注，博客转载时可能对原文有修改。</p>
+</blockquote>
+<p><img src="/images/XSOimage.png"]]>
+    </summary>
+    <title>赏乐·现场·回顾：2023.10.9 XSO公益演出</title>
+    <updated>2026-01-16T06:00:05.497Z</updated>
+  </entry>
+</feed>
