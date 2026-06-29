@@ -91,9 +91,12 @@
     <id>https://ziyuliu258.github.io/posts/8eada4ef/</id>
     <link href="https://ziyuliu258.github.io/posts/8eada4ef/"/>
     <published>2026-02-18T08:54:45.000Z</published>
-    <summary>Here's something encrypted, password is required to continue reading.</summary>
+    <summary>
+      <![CDATA[<h2 id="前言">前言</h2>
+<p><code>Bomb Lab</code>是课程的第二个实验，它给出了一个“炸弹”文件，要求学习者从可执行文件反汇编得到汇编代码，然后通过<code>GDB（GNU]]>
+    </summary>
     <title>XJTU-ICS Lab 2: Bomb Lab</title>
-    <updated>2026-05-18T14:39:43.814Z</updated>
+    <updated>2026-06-29T05:24:30.748Z</updated>
   </entry>
   <entry>
     <author>
@@ -104,9 +107,13 @@
     <id>https://ziyuliu258.github.io/posts/e26699b7/</id>
     <link href="https://ziyuliu258.github.io/posts/e26699b7/"/>
     <published>2026-01-14T12:48:52.000Z</published>
-    <summary>Here's something encrypted, password is required to continue reading.</summary>
+    <summary>
+      <![CDATA[<h2 id="前言">前言</h2>
+<h3 id="实验文档与代码框架">实验文档与代码框架</h3>
+<p>本文档是参照笔者在sp25所选的西安交通大学计算机系统导论课程与配套实验内容而写成的，参考教材就是大名鼎鼎的<code>CSAPP</code>。至今<a]]>
+    </summary>
     <title>XJTU-ICS Lab 1: Data Lab</title>
-    <updated>2026-05-11T07:01:18.980Z</updated>
+    <updated>2026-06-29T05:24:18.861Z</updated>
   </entry>
   <entry>
     <author>
