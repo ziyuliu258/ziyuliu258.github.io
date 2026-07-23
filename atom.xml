@@ -12,7 +12,30 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>日拱一卒，功不唐捐。</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-06-03T20:11:16.049Z</updated>
+  <updated>2026-07-23T16:11:40.879Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="技术" scheme="https://ziyuliu258.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="Arch Linux" scheme="https://ziyuliu258.github.io/tags/Arch-Linux/"/>
+    <category term="Wayland" scheme="https://ziyuliu258.github.io/tags/Wayland/"/>
+    <category term="腾讯会议" scheme="https://ziyuliu258.github.io/tags/%E8%85%BE%E8%AE%AF%E4%BC%9A%E8%AE%AE/"/>
+    <category term="屏幕共享" scheme="https://ziyuliu258.github.io/tags/%E5%B1%8F%E5%B9%95%E5%85%B1%E4%BA%AB/"/>
+    <id>https://ziyuliu258.github.io/posts/fd1052a6/</id>
+    <link href="https://ziyuliu258.github.io/posts/fd1052a6/"/>
+    <published>2026-07-23T04:09:42.000Z</published>
+    <summary>
+      <![CDATA[<h2 id="问题现象">问题现象</h2>
+<p>在 KDE Plasma Wayland 环境中使用腾讯会议时，无法正常查看其他参会者共享的屏幕，发起屏幕共享也可能出现黑屏、白屏或没有视频流的情况。</p>
+<p>本机环境大致如下：</p>
+<ul>
+<li>Arch]]>
+    </summary>
+    <title>Arch Linux KDE Wayland 下腾讯会议屏幕共享黑屏修复</title>
+    <updated>2026-07-23T16:11:40.879Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -129,11 +152,12 @@
 <p>此处记录本博客重要的维护更新动态。</p>
 </blockquote>
 <ul>
-<li><code>2026-1-14</code>：添加维护日志文档；</li>
-<li><code>2026-1-3</code>：成功申请域名<code>ziy]]>
+<li><code>2026-6</code></li>
+<li><code>2026-6-4</code>：开始同步论文阅读笔记。</li>
+<li><code>2]]>
     </summary>
     <title>维护日志</title>
-    <updated>2026-06-03T20:12:12.413Z</updated>
+    <updated>2026-07-04T08:09:07.873Z</updated>
   </entry>
   <entry>
     <author>
