@@ -1,3 +1,67 @@
+#recent-posts .recent-post-item,
+#aside-content .card-widget,
+.layout > div:first-child:not(.nc),
+#article-container .shuoshuo-item,
+.type-404 .error-content,
+.layout .pagination > *:not(.space),
+#page-header.nav-fixed > #nav,
+#page-header.not-top-img > #nav {
+  /* 透明白底 + 背景模糊 = 磨砂玻璃 */
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 8px 32px rgba(31, 38, 135, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  backdrop-filter: blur(18px) saturate(135%);
+}
+
+#recent-posts .recent-post-item:hover,
+#aside-content .card-widget:hover,
+.layout > div:first-child:not(.nc):hover,
+#article-container .shuoshuo-item:hover,
+.type-404 .error-content:hover {
+  box-shadow:
+    0 12px 36px rgba(31, 38, 135, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.44);
+}
+
+#page-header.nav-fixed > #nav,
+#page-header.not-top-img > #nav {
+  border-width: 0 0 1px;
+  box-shadow: 0 8px 24px rgba(31, 38, 135, 0.12);
+}
+
+/* 深色模式下避免玻璃面板过亮 */
+[data-theme='dark'] #recent-posts .recent-post-item,
+[data-theme='dark'] #aside-content .card-widget,
+[data-theme='dark'] .layout > div:first-child:not(.nc),
+[data-theme='dark'] #article-container .shuoshuo-item,
+[data-theme='dark'] .type-404 .error-content,
+[data-theme='dark'] .layout .pagination > *:not(.space) {
+  background: rgba(20, 25, 35, 0.42);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+[data-theme='dark'] #recent-posts .recent-post-item:hover,
+[data-theme='dark'] #aside-content .card-widget:hover,
+[data-theme='dark'] .layout > div:first-child:not(.nc):hover,
+[data-theme='dark'] #article-container .shuoshuo-item:hover,
+[data-theme='dark'] .type-404 .error-content:hover {
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+[data-theme='dark'] #page-header.nav-fixed > #nav,
+[data-theme='dark'] #page-header.not-top-img > #nav {
+  background: rgba(20, 25, 35, 0.55);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
 #article-container .markdown-alert {
   margin: 1rem 0;
   padding: 0.9rem 1rem 0.8rem;
