@@ -12,7 +12,7 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>日拱一卒，功不唐捐。</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-07-24T01:44:47.593Z</updated>
+  <updated>2026-07-24T02:16:31.312Z</updated>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -28,13 +28,10 @@
     <published>2026-07-23T04:09:42.000Z</published>
     <summary>
       <![CDATA[<h2 id="问题现象">问题现象</h2>
-<p>在 KDE Plasma Wayland 环境中使用腾讯会议时，无法正常查看其他参会者共享的屏幕，发起屏幕共享也可能出现黑屏、白屏或没有视频流的情况。</p>
-<p>本机环境大致如下：</p>
-<ul>
-<li>Arch]]>
+<p>大概一两个月前，在 KDE Plasma Wayland]]>
     </summary>
     <title>Arch Linux KDE Wayland 下腾讯会议屏幕共享黑屏修复</title>
-    <updated>2026-07-24T01:44:47.593Z</updated>
+    <updated>2026-07-24T02:16:31.312Z</updated>
   </entry>
   <entry>
     <author>
