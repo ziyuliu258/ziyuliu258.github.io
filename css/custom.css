@@ -7,7 +7,7 @@
 #page-header.nav-fixed > #nav,
 #page-header.not-top-img > #nav {
   /* 透明白底 + 背景模糊 = 磨砂玻璃 */
-  background: rgba(255, 255, 255, 0.74);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow:
     0 8px 32px rgba(31, 38, 135, 0.16),
