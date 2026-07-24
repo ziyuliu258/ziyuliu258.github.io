@@ -12,17 +12,14 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>日拱一卒，功不唐捐。</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-07-24T02:16:31.312Z</updated>
+  <updated>2026-07-24T02:37:25.766Z</updated>
   <entry>
     <author>
       <name>Derrick Liu</name>
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="技术" scheme="https://ziyuliu258.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
-    <category term="Arch Linux" scheme="https://ziyuliu258.github.io/tags/Arch-Linux/"/>
-    <category term="Wayland" scheme="https://ziyuliu258.github.io/tags/Wayland/"/>
-    <category term="腾讯会议" scheme="https://ziyuliu258.github.io/tags/%E8%85%BE%E8%AE%AF%E4%BC%9A%E8%AE%AE/"/>
-    <category term="屏幕共享" scheme="https://ziyuliu258.github.io/tags/%E5%B1%8F%E5%B9%95%E5%85%B1%E4%BA%AB/"/>
+    <category term="Linux" scheme="https://ziyuliu258.github.io/tags/Linux/"/>
     <id>https://ziyuliu258.github.io/posts/fd1052a6/</id>
     <link href="https://ziyuliu258.github.io/posts/fd1052a6/"/>
     <published>2026-07-23T04:09:42.000Z</published>
@@ -31,7 +28,7 @@
 <p>大概一两个月前，在 KDE Plasma Wayland]]>
     </summary>
     <title>Arch Linux KDE Wayland 下腾讯会议屏幕共享黑屏修复</title>
-    <updated>2026-07-24T02:16:31.312Z</updated>
+    <updated>2026-07-24T02:37:25.766Z</updated>
   </entry>
   <entry>
     <author>
@@ -149,12 +146,11 @@
 <p>此处记录本博客重要的维护更新动态。</p>
 </blockquote>
 <ul>
-<li><code>2026-6</code></li>
 <li><code>2026-6-4</code>：开始同步论文阅读笔记。</li>
-<li><code>2]]>
+<li><code>2026-1-14</code>：添加维护日志文档；</li]]>
     </summary>
     <title>维护日志</title>
-    <updated>2026-07-04T08:09:07.873Z</updated>
+    <updated>2026-07-24T02:36:26.069Z</updated>
   </entry>
   <entry>
     <author>
