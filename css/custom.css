@@ -62,6 +62,17 @@
   border-color: rgba(255, 255, 255, 0.16);
 }
 
+/* 首页文章卡片与文章页主标题加粗 */
+#recent-posts .recent-post-item > .recent-post-info > .article-title,
+#post-info .post-title {
+  font-weight: 700;
+}
+
+/* 保留 Font Awesome 置顶图标自身的实心字重，避免继承标题字重后变形 */
+#recent-posts .article-title > .sticky {
+  font-weight: 900;
+}
+
 #article-container .markdown-alert {
   margin: 1rem 0;
   padding: 0.9rem 1rem 0.8rem;
