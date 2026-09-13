@@ -12,7 +12,24 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>日拱一卒，功不唐捐。</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-09-06T10:37:30.137Z</updated>
+  <updated>2026-09-13T17:36:19.707Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.github.io/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="3D生成" scheme="https://ziyuliu258.github.io/tags/3D%E7%94%9F%E6%88%90/"/>
+    <id>https://ziyuliu258.github.io/posts/50ab24e6/</id>
+    <link href="https://ziyuliu258.github.io/posts/50ab24e6/"/>
+    <published>2026-09-12T04:16:28.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：本文作者大多为VAST的科研人员，最大的亮点是提出了一种新的拓扑表示方式，从而避免了此前的方式——将Mesh表示为一串离散Token，并使用Transformer自回归生成——引入的<strong>自回归过程累计误差</strong>以及<st]]>
+    </summary>
+    <title>论文阅读：Nexus</title>
+    <updated>2026-09-13T17:36:19.707Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
