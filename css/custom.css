@@ -3,8 +3,8 @@
 #page-header[style*="/images/bg2.jpg"],
 #footer[style*="/images/bg2.jpg"] {
   background-image: image-set(
-    url("/images/bg2.avif") type("image/avif"),
-    url("/images/bg2.jpg") type("image/jpeg")
+    url("../images/bg2.avif") type("image/avif"),
+    url("../images/bg2.jpg") type("image/jpeg")
   ) !important;
 }
 
