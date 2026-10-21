@@ -73,6 +73,76 @@
   font-weight: 900;
 }
 
+/* 首页专栏与专栏阅读目录 */
+#aside-content .card-series-all {
+  float: right;
+  color: var(--font-color);
+}
+
+#aside-content .series-card-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.5rem;
+  border-radius: 0.4rem;
+  color: var(--font-color);
+  transition: background 0.2s, color 0.2s;
+}
+
+#aside-content .series-card-item:hover,
+#aside-content .series-card-item:focus-visible {
+  background: var(--text-bg-hover);
+  color: var(--white);
+}
+
+#aside-content .series-card-name {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+#aside-content .series-card-count {
+  flex-shrink: 0;
+  font-size: 0.85em;
+}
+
+#article-container .series-reading-list li {
+  padding: 0.5rem 0;
+}
+
+#article-container .series-reading-list time {
+  display: block;
+  color: var(--font-color);
+  opacity: 0.65;
+  font-size: 0.85em;
+}
+
+#article-container .series-directory {
+  display: grid;
+  gap: 1rem;
+}
+
+#article-container a.series-directory-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 1rem;
+  border: 1px solid var(--light-grey);
+  border-radius: 0.5rem;
+}
+
+#article-container .series-directory-name {
+  flex: 1;
+  min-width: 12rem;
+  font-weight: 700;
+}
+
+#article-container .series-directory-count {
+  font-size: 0.85em;
+}
+
 #article-container .markdown-alert {
   margin: 1rem 0;
   padding: 0.9rem 1rem 0.8rem;

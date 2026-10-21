@@ -12,7 +12,24 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>日拱一卒，功不唐捐。</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-09-13T18:34:20.486Z</updated>
+  <updated>2026-10-21T06:35:08.020Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="科研" scheme="https://ziyuliu258.github.io/categories/%E7%A7%91%E7%A0%94/"/>
+    <category term="科研方法论" scheme="https://ziyuliu258.github.io/tags/%E7%A7%91%E7%A0%94%E6%96%B9%E6%B3%95%E8%AE%BA/"/>
+    <id>https://ziyuliu258.github.io/posts/68e9ee50/</id>
+    <link href="https://ziyuliu258.github.io/posts/68e9ee50/"/>
+    <published>2026-10-21T05:45:40.000Z</published>
+    <summary>
+      <![CDATA[<p>本来前段时间说好了要一直更新阅读笔记，用这个方法来鞭策自己读论文；但是我仍然是只有三分钟热度，热情持续没几天，就变成了“既不想读论文，又不想写博客”的状态。</p>
+<p>这个情况，当然有一部分原因是开始在新的课题组做事之后，工作量和工作压力比以前要大得多，老板对进度的要求]]>
+    </summary>
+    <title>一个有关论文阅读和记录的工作方法设想</title>
+    <updated>2026-10-21T06:35:08.020Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -28,7 +45,7 @@
 <p>引：本文作者大多为VAST的科研人员，最大的亮点是提出了一种新的拓扑表示方式，从而避免了此前的方式——将Mesh表示为一串离散Token，并使用Transformer自回归生成——引入的<strong>自回归过程累计误差</strong>以及<st]]>
     </summary>
     <title>论文阅读：Nexus</title>
-    <updated>2026-09-13T18:34:20.486Z</updated>
+    <updated>2026-10-04T14:42:16.095Z</updated>
   </entry>
   <entry>
     <author>
@@ -66,8 +83,8 @@
       <name>Derrick Liu</name>
       <email>1209830516abc@gmail.com</email>
     </author>
-    <category term="随感" scheme="https://ziyuliu258.github.io/tags/%E9%9A%8F%E6%84%9F/"/>
     <category term="科研方法论" scheme="https://ziyuliu258.github.io/tags/%E7%A7%91%E7%A0%94%E6%96%B9%E6%B3%95%E8%AE%BA/"/>
+    <category term="随感" scheme="https://ziyuliu258.github.io/tags/%E9%9A%8F%E6%84%9F/"/>
     <id>https://ziyuliu258.github.io/posts/a2661911/</id>
     <link href="https://ziyuliu258.github.io/posts/a2661911/"/>
     <published>2026-08-16T19:22:53.000Z</published>
@@ -341,24 +358,5 @@
     </summary>
     <title>赏乐·现场·回顾：2023.11.26 Pierre-Laurent Aimard独奏音乐会</title>
     <updated>2026-01-16T05:46:13.751Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="其他" scheme="https://ziyuliu258.github.io/categories/%E5%85%B6%E4%BB%96/"/>
-    <category term="不务正业" scheme="https://ziyuliu258.github.io/tags/%E4%B8%8D%E5%8A%A1%E6%AD%A3%E4%B8%9A/"/>
-    <id>https://ziyuliu258.github.io/posts/776bab35/</id>
-    <link href="https://ziyuliu258.github.io/posts/776bab35/"/>
-    <published>2023-11-28T04:13:00.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>注：本文原载于本人微信公众号“偷闲胡说”，欢迎关注，博客转载时可能对原文有修改。</p>
-</blockquote>
-<p><img src="/images/XSOimage.png"]]>
-    </summary>
-    <title>赏乐·现场·回顾：2023.10.9 XSO公益演出</title>
-    <updated>2026-01-16T06:00:05.497Z</updated>
   </entry>
 </feed>
