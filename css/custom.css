@@ -134,6 +134,11 @@
   color: var(--font-color);
 }
 
+/* 评论区以留白衔接正文，不显示装饰分隔线 */
+#post-comment {
+  margin-top: 40px;
+}
+
 #article-container .markdown-alert {
   margin: 1rem 0;
   padding: 0.9rem 1rem 0.8rem;
