@@ -1,3 +1,13 @@
+/* 支持 AVIF 的浏览器加载小体积背景，原 JPG 用于兼容回退。 */
+#web_bg[style*="/images/bg2.jpg"],
+#page-header[style*="/images/bg2.jpg"],
+#footer[style*="/images/bg2.jpg"] {
+  background-image: image-set(
+    url("/images/bg2.avif") type("image/avif"),
+    url("/images/bg2.jpg") type("image/jpeg")
+  ) !important;
+}
+
 #recent-posts .recent-post-item,
 #aside-content .card-widget,
 .layout > div:first-child:not(.nc),
