@@ -1,74 +1,111 @@
-<!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light dark">
-    <meta name="description" content="Derrick Liu 的个人主页。">
-    <title>Derrick Liu · 个人主页</title>
-    <link rel="icon" href="assets/avatar.jpg" type="image/jpeg">
-    <link rel="stylesheet" href="assets/home.css">
-  </head>
-  <body>
-    <a class="skip-link" href="#main">跳到正文</a>
-    <header class="site-header">
-      <nav class="navigation container" aria-label="主导航">
-        <a class="brand" href="./"><strong>Derrick</strong> Liu</a>
-        <div class="nav-links">
-          <a class="active" href="#about" aria-current="page">About</a>
-          <a href="blog/">Blog</a>
-          <!-- 将简历 PDF 放到 assets/cv.pdf。 -->
-          <a href="assets/cv.pdf">CV</a>
-        </div>
-      </nav>
-    </header>
-
-    <main class="container" id="main">
-      <section class="about" id="about" aria-labelledby="name">
-        <h1 id="name"><strong>Derrick</strong> Liu</h1>
-        <p class="subtitle">日拱一卒，功不唐捐。</p>
-
-        <div class="biography">
-          <figure class="profile-photo">
-            <img src="assets/avatar.jpg" width="940" height="940" alt="博客头像：戴着圣诞帽的小猫" fetchpriority="high">
-            <figcaption>像一面风旗，把住一些把不住的事体。</figcaption>
-          </figure>
-          <!-- 简介开始：手动修改下面各个 <p> 段落即可。 -->
-          <div class="bio-text">
-            <p>你好，我是 Derrick。欢迎来到我的个人主页。</p>
-            <p>我把论文阅读、技术实践和日常想法记录在<a href="blog/">博客</a>里。最近的阅读涉及三维生成与网格表示，也会整理时间序列预测等方向的学习笔记，记录自己对问题、方法和实现细节的理解。</p>
-            <p>在代码实践方面，我整理了计算机系统导论实验中的学习过程，包括位运算、汇编与 GDB 调试。相关记录和代码可以在下方的 projects 中找到。</p>
-            <p>学习之外，我也喜欢古典音乐，偶尔写一些音乐会现场的听感与<a href="blog/series/乐评/">乐评</a>。欢迎通过邮件交流。</p>
-          </div>
-          <!-- 简介结束 -->
-        </div>
-      </section>
-
-      <section class="news" aria-labelledby="news-heading">
-        <h2 id="news-heading">News</h2>
-        <ul class="post-list">
-          <!-- 在这里填写动态，每条使用一个 <li>。例如：
-          <li><time datetime="YYYY-MM-DD">日期</time><span>动态内容</span></li>
-          -->
-        </ul>
-      </section>
-
-      <section class="latest-posts" aria-labelledby="latest-heading">
-        <div class="section-heading">
-          <h2 id="latest-heading">Latest Posts</h2>
-          <a class="section-more" href="blog/archives/">全部文章 &rarr;</a>
-        </div>
-        <ul class="post-list">
-          <li><time datetime="2026-10-21">Oct 21, 2026</time><a href="blog/posts/68e9ee50/">一个有关论文阅读和记录的工作方法设想</a></li>
-          <li><time datetime="2026-09-12">Sep 12, 2026</time><a href="blog/posts/50ab24e6/">论文阅读：Nexus</a></li>
-          <li><time datetime="2026-09-06">Sep 06, 2026</time><a href="blog/posts/e3d0e307/">转几个弯，重新再来——记我在西湖大学访问的一个月</a></li>
-        </ul>
-      </section>
-
-    </main>
-
-    <footer class="site-footer">
-      <div class="container">© 2026 Derrick Liu. Design inspired by <a href="https://github.com/alshedivat/al-folio">al-folio</a>. Hosted on GitHub Pages.</div>
-    </footer>
-  </body>
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Derrick Liu · 个人主页</title>
+<meta name="author" content="Derrick Liu">
+<meta name="description" content="Derrick Liu 的个人主页。">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;">
+<style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style>
+<link rel="shortcut icon" href="assets/avatar.jpg" type="image/jpeg">
+<link rel="canonical" href="https://ziyuliu258.cn/">
+<link rel="stylesheet" href="assets/al-folio/tailwind.css">
+<link rel="stylesheet" href="assets/al-folio/fonts.css">
+<link rel="stylesheet" href="assets/al-folio/main.css">
+</head>
+<body class="fixed-top-nav ">
+<header>
+<nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation">
+<div class="container">
+<button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button>
+<div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav">
+<ul class="navbar-nav navbar-menu-list flex-nowrap">
+<li class="nav-item active"> <a class="nav-link" href="#about">About <span class="sr-only">(current)</span></a>
+</li>
+<li class="nav-item"> <a class="nav-link" href="blog/">Blog</a>
+</li>
+<li class="nav-item"> <a class="nav-link" href="assets/cv.pdf">CV</a>
+</li>
+</ul>
+</div>
+</div>
+</nav> <progress id="progress" value="0">
+<div class="progress-container"> <span class="progress-bar"></span>
+</div> </progress>
+</header>
+<div class="container mt-5" role="main" id="main">
+<div class="post" id="about">
+<header class="post-header">
+<h1 class="post-title"><span class="font-weight-bold">Derrick</span> Liu</h1>
+<p class="desc">日拱一卒，功不唐捐。</p>
+</header>
+<article>
+<div class="profile float-right">
+<figure><img src="assets/avatar.jpg" class="img-fluid z-depth-1 rounded" width="100%" height="auto" alt="博客头像：戴着圣诞帽的小猫" loading="eager">
+</figure>
+<div class="more-info">
+<p>像一面风旗，把住一些把不住的事体。</p>
+</div>
+</div>
+<!-- 简介开始：手动修改 bio-text 内的各个 p 段落。 -->
+<div class="clearfix bio-text" id="biography">
+<p>你好，我是 Derrick。欢迎来到我的个人主页。</p>
+<p>我把论文阅读、技术实践和日常想法记录在<a href="blog/">博客</a>里。最近的阅读涉及三维生成与网格表示，也会整理时间序列预测等方向的学习笔记，记录自己对问题、方法和实现细节的理解。</p>
+<p>在代码实践方面，我整理了计算机系统导论实验中的学习过程，包括位运算、汇编与 GDB 调试。相关记录和代码可以在下方的 projects 中找到。</p>
+<p>学习之外，我也喜欢古典音乐，偶尔写一些音乐会现场的听感与<a href="blog/series/乐评/">乐评</a>。欢迎通过邮件交流。</p>
+</div>
+<!-- 简介结束 -->
+<h2 id="news-heading"> <a href="#news" style="color: inherit">News</a> </h2>
+<div class="news" id="news">
+<div class="table-responsive">
+<table class="table table-sm table-borderless">
+<tbody>
+<!-- News：在此添加动态，例如：
+<tr>
+<th scope="row" style="width: 20%"><time datetime="YYYY-MM-DD">日期</time></th>
+<td>动态内容</td>
+</tr>
+-->
+</tbody>
+</table>
+</div>
+</div>
+<h2 id="latest-heading"> <a href="blog/" style="color: inherit">Latest Posts</a> </h2>
+<div class="news" id="latest-posts">
+<div class="table-responsive" style="max-height: 60vw">
+<table class="table table-sm table-borderless">
+<tbody>
+<tr>
+<th scope="row" style="width: 20%"><time datetime="2026-10-21">Oct 21, 2026</time></th>
+<td> <a class="news-title" href="blog/posts/68e9ee50/">一个有关论文阅读和记录的工作方法设想</a> </td>
+</tr>
+<tr>
+<th scope="row" style="width: 20%"><time datetime="2026-09-12">Sep 12, 2026</time></th>
+<td> <a class="news-title" href="blog/posts/50ab24e6/">论文阅读：Nexus</a> </td>
+</tr>
+<tr>
+<th scope="row" style="width: 20%"><time datetime="2026-09-06">Sep 06, 2026</time></th>
+<td> <a class="news-title" href="blog/posts/e3d0e307/">转几个弯，重新再来——记我在西湖大学访问的一个月</a> </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</article>
+</div>
+</div>
+<footer class="fixed-bottom" role="contentinfo">
+<div class="container mt-0">© 2026 Derrick Liu. Theme: <a href="https://github.com/alshedivat/al-folio">al-folio</a>. Hosted by GitHub Pages.
+</div>
+</footer>
+<script src="assets/al-folio/nav-toggle.js" defer></script>
+<script src="assets/al-folio/progress-bar.js" defer></script>
+</body>
 </html>
