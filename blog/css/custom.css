@@ -149,6 +149,16 @@
   margin-top: 40px;
 }
 
+/* 无图的推荐卡片：在文章底色上叠一层中性灰，文字沿用正文颜色。 */
+.relatedPosts .pagination-related.no-cover {
+  background: rgba(128, 128, 128, 0.12);
+}
+
+.relatedPosts .pagination-related.no-cover .info .info-item-1,
+.relatedPosts .pagination-related.no-cover .info .info-item-2 {
+  color: var(--font-color);
+}
+
 #article-container .markdown-alert {
   margin: 1rem 0;
   padding: 0.9rem 1rem 0.8rem;
