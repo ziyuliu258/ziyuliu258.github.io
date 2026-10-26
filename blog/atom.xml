@@ -45,7 +45,7 @@
 <p>引：本文作者大多为VAST的科研人员，最大的亮点是提出了一种新的拓扑表示方式，从而避免了此前的方式——将Mesh表示为一串离散Token，并使用Transformer自回归生成——引入的<strong>自回归过程累计误差</strong>以及<st]]>
     </summary>
     <title>论文阅读：Nexus</title>
-    <updated>2026-10-04T14:42:16.095Z</updated>
+    <updated>2026-10-25T19:34:11.777Z</updated>
   </entry>
   <entry>
     <author>
@@ -226,11 +226,11 @@
 <p>此处记录本博客重要的维护更新动态。</p>
 </blockquote>
 <ul>
-<li><code>2026-6-4</code>：开始同步论文阅读笔记。</li>
-<li><code>2026-1-14</code>：添加维护日志文档；</li]]>
+<li><code>2026-10-23</code>：原域名根路径增设个人主页，博客入口改为子路径<code>/blog</code>。</li>
+<li><cod]]>
     </summary>
     <title>维护日志</title>
-    <updated>2026-07-24T02:36:26.069Z</updated>
+    <updated>2026-10-23T19:07:02.599Z</updated>
   </entry>
   <entry>
     <author>
