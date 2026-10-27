@@ -12,7 +12,43 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>日拱一卒，功不唐捐。</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-10-27T15:35:16.101Z</updated>
+  <updated>2026-10-27T19:24:26.621Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="生成模型" scheme="https://ziyuliu258.cn/blog/tags/%E7%94%9F%E6%88%90%E6%A8%A1%E5%9E%8B/"/>
+    <category term="VAE" scheme="https://ziyuliu258.cn/blog/tags/VAE/"/>
+    <id>https://ziyuliu258.cn/blog/posts/81cd8b0a/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/81cd8b0a/"/>
+    <published>2026-10-27T19:19:46.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：这篇由 Aaron van den Oord、Oriol Vinyals 和 Koray Kavukcuoglu 提出的工作，提出了 <strong>VQ-VAE（Vector Quantised Variational]]>
+    </summary>
+    <title>论文阅读：Neural Discrete Representation Learning</title>
+    <updated>2026-10-27T19:24:26.621Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="机器人" scheme="https://ziyuliu258.cn/blog/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/"/>
+    <category term="VLA" scheme="https://ziyuliu258.cn/blog/tags/VLA/"/>
+    <id>https://ziyuliu258.cn/blog/posts/ab786ad6/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/ab786ad6/"/>
+    <published>2026-10-27T19:19:43.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：Moo Jin Kim、Chelsea Finn 和 Percy Liang 在这篇文章中研究，怎样更有效地将已有的 Vision-Language-Action 模型微调到新机器人和新任务。作者以 OpenVLA]]>
+    </summary>
+    <title>论文阅读：Fine-Tuning Vision-Language-Action Models - Optimizing Speed and Success</title>
+    <updated>2026-10-27T19:23:18.262Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -323,39 +359,5 @@
     </summary>
     <title>ZeroTier使用指导</title>
     <updated>2025-09-04T17:07:38.361Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="其他" scheme="https://ziyuliu258.cn/blog/categories/%E5%85%B6%E4%BB%96/"/>
-    <category term="不务正业" scheme="https://ziyuliu258.cn/blog/tags/%E4%B8%8D%E5%8A%A1%E6%AD%A3%E4%B8%9A/"/>
-    <id>https://ziyuliu258.cn/blog/posts/d80dcaaa/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/d80dcaaa/"/>
-    <published>2025-04-09T17:21:31.000Z</published>
-    <summary>
-      <![CDATA[<p>本片大概会成为本年度对本人来说印象最深刻的电影了……诚然这部电影的烂点无论如何都遮不住：超级刻板印象的亚裔选角+妆造，超级老套而又没有说服力的“回归家庭，你爱我我爱你”东亚家庭和解戏码，毫无下限挑战观众精神耐受力的低俗/猎奇设计（一个没有磕药的正常人是如何想到让人的手指变成]]>
-    </summary>
-    <title>影评：《瞬息全宇宙》</title>
-    <updated>2025-04-09T17:34:51.923Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="技术" scheme="https://ziyuliu258.cn/blog/categories/%E6%8A%80%E6%9C%AF/"/>
-    <category term="ICS实验" scheme="https://ziyuliu258.cn/blog/tags/ICS%E5%AE%9E%E9%AA%8C/"/>
-    <category term="Linux命令行" scheme="https://ziyuliu258.cn/blog/tags/Linux%E5%91%BD%E4%BB%A4%E8%A1%8C/"/>
-    <id>https://ziyuliu258.cn/blog/posts/723210bf/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/723210bf/"/>
-    <published>2025-02-27T17:42:17.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p><em><strong>前情提要（偏题）</strong></em>：开学第一周费尽周折选上了学校的<strong>ICS（计算机系统导论）</strong> 课。此课无比硬核，以著名神书 <em>《CSAPP》</em>]]>
-    </summary>
-    <title>与make命令的初邂逅</title>
-    <updated>2026-01-14T14:04:29.863Z</updated>
   </entry>
 </feed>
