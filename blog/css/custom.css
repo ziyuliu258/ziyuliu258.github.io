@@ -13,7 +13,7 @@
   position: absolute;
   inset: 0;
   content: '';
-  background: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 [data-theme='dark'] #web_bg::before {
