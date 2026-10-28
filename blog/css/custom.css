@@ -8,7 +8,20 @@
   ) !important;
 }
 
+/* 让背景融入日夜模式，而不是覆盖页面原本的白色或深色底色。 */
+#web_bg::before {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: rgba(255, 255, 255, 0.38);
+}
+
+[data-theme='dark'] #web_bg::before {
+  background: rgba(0, 0, 0, 0.58);
+}
+
 #recent-posts .recent-post-item,
+#recent-posts .home-announcement,
 #aside-content .card-widget,
 .layout > div:first-child:not(.nc),
 #article-container .shuoshuo-item,
@@ -17,13 +30,13 @@
 #page-header.nav-fixed > #nav,
 #page-header.not-top-img > #nav {
   /* 透明白底 + 背景模糊 = 磨砂玻璃 */
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow:
     0 8px 32px rgba(31, 38, 135, 0.16),
     inset 0 1px 0 rgba(255, 255, 255, 0.36);
-  -webkit-backdrop-filter: blur(18px) saturate(135%);
-  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(12px) saturate(135%);
+  backdrop-filter: blur(12px) saturate(135%);
 }
 
 #recent-posts .recent-post-item:hover,
@@ -44,16 +57,48 @@
 
 /* 深色模式下避免玻璃面板过亮 */
 [data-theme='dark'] #recent-posts .recent-post-item,
+[data-theme='dark'] #recent-posts .home-announcement,
 [data-theme='dark'] #aside-content .card-widget,
 [data-theme='dark'] .layout > div:first-child:not(.nc),
 [data-theme='dark'] #article-container .shuoshuo-item,
 [data-theme='dark'] .type-404 .error-content,
 [data-theme='dark'] .layout .pagination > *:not(.space) {
-  background: rgba(20, 25, 35, 0.42);
+  background: rgba(20, 25, 35, 0.62);
   border-color: rgba(255, 255, 255, 0.16);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* 首页公告沿用卡片的玻璃质感，但保持比文章卡片更轻。 */
+#recent-posts .home-announcement {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  margin-bottom: 20px;
+  padding: 0.8rem 1.15rem;
+  border-radius: 8px;
+  color: var(--font-color);
+  line-height: 1.6;
+}
+
+.home-announcement-icon,
+.home-announcement-label {
+  flex: none;
+  color: #3976a9;
+}
+
+.home-announcement-label {
+  font-weight: 600;
+}
+
+.home-announcement-content {
+  min-width: 0;
+}
+
+[data-theme='dark'] .home-announcement-icon,
+[data-theme='dark'] .home-announcement-label {
+  color: #9bcdf3;
 }
 
 [data-theme='dark'] #recent-posts .recent-post-item:hover,
