@@ -65,7 +65,7 @@
 <p>引：DDPM 是 Jonathan Ho、Ajay Jain 和 Pieter Abbeel 在 2020]]>
     </summary>
     <title>论文阅读：Denoising Diffusion Probabilistic Models</title>
-    <updated>2026-10-27T15:35:16.101Z</updated>
+    <updated>2026-10-28T10:27:58.635Z</updated>
   </entry>
   <entry>
     <author>
@@ -117,7 +117,7 @@
 <p>引：本文作者大多为VAST的科研人员，最大的亮点是提出了一种新的拓扑表示方式，从而避免了此前的方式——将Mesh表示为一串离散Token，并使用Transformer自回归生成——引入的<strong>自回归过程累计误差</strong>以及<st]]>
     </summary>
     <title>论文阅读：Nexus</title>
-    <updated>2026-10-25T19:34:11.777Z</updated>
+    <updated>2026-10-28T10:27:58.635Z</updated>
   </entry>
   <entry>
     <author>
@@ -265,7 +265,7 @@
 <p><code>Bomb Lab</code>是课程的第二个实验，它给出了一个“炸弹”文件，要求学习者从可执行文件反汇编得到汇编代码，然后通过<code>GDB（GNU]]>
     </summary>
     <title>XJTU-ICS Lab 2: Bomb Lab</title>
-    <updated>2026-06-29T05:24:30.748Z</updated>
+    <updated>2026-10-28T10:27:58.636Z</updated>
   </entry>
   <entry>
     <author>
