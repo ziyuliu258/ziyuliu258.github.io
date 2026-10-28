@@ -13,11 +13,11 @@
   position: absolute;
   inset: 0;
   content: '';
-  background: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.64);
 }
 
 [data-theme='dark'] #web_bg::before {
-  background: rgba(0, 0, 0, 0.58);
+  background: rgba(0, 0, 0, 0.74);
 }
 
 #recent-posts .recent-post-item,
@@ -70,21 +70,30 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-/* 首页公告沿用卡片的玻璃质感，但保持比文章卡片更轻。 */
+/* 公告作为首页的独立卡片，内容仍读取主题设置。 */
 #recent-posts .home-announcement {
   display: flex;
-  align-items: baseline;
-  gap: 0.65rem;
+  align-items: center;
+  gap: 1rem;
+  min-height: 96px;
   margin-bottom: 20px;
-  padding: 0.8rem 1.15rem;
+  padding: 1.2rem 2rem;
   border-radius: 8px;
   color: var(--font-color);
+  font-size: 1.05em;
   line-height: 1.6;
 }
 
 .home-announcement-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   color: #3976a9;
+  background: rgba(73, 177, 245, 0.12);
 }
 
 .home-announcement-content {
@@ -93,6 +102,14 @@
 
 [data-theme='dark'] .home-announcement-icon {
   color: #9bcdf3;
+  background: rgba(73, 177, 245, 0.16);
+}
+
+@media (max-width: 768px) {
+  #recent-posts .home-announcement {
+    min-height: 84px;
+    padding: 1rem 1.25rem;
+  }
 }
 
 [data-theme='dark'] #recent-posts .recent-post-item:hover,
