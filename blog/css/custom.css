@@ -13,11 +13,11 @@
   position: absolute;
   inset: 0;
   content: '';
-  background: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.24);
 }
 
 [data-theme='dark'] #web_bg::before {
-  background: rgba(0, 0, 0, 0.74);
+  background: rgba(0, 0, 0, 0.54);
 }
 
 #recent-posts .recent-post-item,
