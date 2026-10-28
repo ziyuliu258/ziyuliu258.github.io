@@ -82,22 +82,16 @@
   line-height: 1.6;
 }
 
-.home-announcement-icon,
-.home-announcement-label {
+.home-announcement-icon {
   flex: none;
   color: #3976a9;
-}
-
-.home-announcement-label {
-  font-weight: 600;
 }
 
 .home-announcement-content {
   min-width: 0;
 }
 
-[data-theme='dark'] .home-announcement-icon,
-[data-theme='dark'] .home-announcement-label {
+[data-theme='dark'] .home-announcement-icon {
   color: #9bcdf3;
 }
 
