@@ -13,7 +13,7 @@
   position: absolute;
   inset: 0;
   content: '';
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 [data-theme='dark'] #web_bg::before {
@@ -34,6 +34,7 @@
   --glass-refract-scale: 65;
   --glass-chroma-strength: 0.35;
   --glass-spec-strength: 0.70;
+  --glass-border: rgba(255, 255, 255, 0.45);
   --glass-shadow: rgba(20, 32, 54, 0.16);
   --glass-shadow-hover: rgba(20, 32, 54, 0.24);
 }
@@ -45,6 +46,7 @@
   --glass-blur: 14px;
   --glass-saturate: 165%;
   --glass-spec-strength: 0.75;
+  --glass-border: rgba(255, 255, 255, 0.18);
   --glass-shadow: rgba(0, 0, 0, 0.32);
   --glass-shadow-hover: rgba(0, 0, 0, 0.44);
 }
@@ -68,6 +70,16 @@
   backdrop-filter: var(--glass-backdrop, blur(var(--glass-blur)) saturate(var(--glass-saturate)));
 }
 
+/* 彻底裁剪掉圆角矩形外的 backdrop-filter 溢出残影，保证边缘绝对锐利干净 */
+#recent-posts .recent-post-item,
+#recent-posts .home-announcement,
+#aside-content .card-widget,
+#article-container .shuoshuo-item,
+.type-404 .error-content,
+.layout .pagination > *:not(.space) {
+  clip-path: inset(0 round var(--glass-radius));
+}
+
 #recent-posts .recent-post-item:hover,
 #recent-posts .home-announcement:hover,
 #aside-content .card-widget:hover,
@@ -79,10 +91,14 @@
     0 6px 14px -4px var(--glass-shadow);
 }
 
+/* 顶部导航栏维持干净的直边毛玻璃，不套用圆角折射滤镜 */
 #page-header.nav-fixed > #nav,
 #page-header.not-top-img > #nav {
+  border-bottom: 1px solid var(--glass-border);
   border-radius: 0;
   box-shadow: 0 8px 24px -12px var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
 }
 
 /* 阅读区域更厚一些，保留长篇正文、公式和代码的清晰度。 */
@@ -111,10 +127,10 @@
   background-repeat: no-repeat;
 }
 
-/* 非 Chromium 浏览器或長篇阅读卡片的静态对角高光回退 */
+/* 非 Chromium 浏览器或长篇阅读卡片的静态对角高光回退 */
 @supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
   .liquid-glass:not([data-shader-glass="1"])::after {
-    padding: 2px;
+    padding: 1.5px;
     background: linear-gradient(
       135deg,
       rgba(255, 250, 240, 0.65) 0%,
