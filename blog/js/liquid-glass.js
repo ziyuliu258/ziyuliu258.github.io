@@ -3,7 +3,7 @@
  * - Snell-on-a-dome edge refraction: sinThetaI = (1-t)^2, thetaT = asin(sinThetaI / IOR), edgeMag = tan(thetaI - thetaT)
  * - RGB chromatic dispersion along -ndir inside the edge band
  * - Static cornerSpecular (TL primary + BR antipodal at 65% with exponential taper) + directional edgeSpec lip
- * - No pointer-following spotlight glow
+ * - Applied ONLY to announcement, post cards, and sidebar widgets (NOT #nav menu bar)
  */
 (() => {
   'use strict'
@@ -14,9 +14,7 @@
   const selector = [
     '#recent-posts .recent-post-item',
     '#recent-posts .home-announcement',
-    '#aside-content .card-widget',
-    '.layout > div:first-child:not(.nc)',
-    '#nav'
+    '#aside-content .card-widget'
   ].join(', ')
 
   const pointer = matchMedia('(hover: hover) and (pointer: fine)')
@@ -102,8 +100,8 @@
     const refractScale = Number.parseFloat(style.getPropertyValue('--glass-refract-scale')) || 65
     const chromaStrength = Number.parseFloat(style.getPropertyValue('--glass-chroma-strength')) || 0.35
     const specStrength = Number.parseFloat(style.getPropertyValue('--glass-spec-strength')) || 0.70
-    const roundness = Number.parseFloat(style.getPropertyValue('--glass-roundness')) || 2.2
-    const radius = Number.parseFloat(style.borderTopLeftRadius) || 26
+    const roundness = Number.parseFloat(style.getPropertyValue('--glass-roundness')) || 2.0
+    const radius = Number.parseFloat(style.borderTopLeftRadius) || 0
 
     if (!refractScale || !rect.width || !rect.height || rect.height > 900) {
       surface.style.removeProperty('--glass-backdrop')
@@ -176,8 +174,8 @@
       const maxDisplacePx = maxEdgeMag * refractScale
       const maxChromaPx = chromaStrength * refractThickness * 0.35
 
-      // 1. Build displacement map for Snell-on-a-dome refraction
-      const dispScale = Math.min(0.5, 640 / w, 320 / h)
+      // 1. Build 1:1 resolution displacement map with zero displacement outside the rounded rect (depthPx < 0)
+      const dispScale = Math.min(1.0, 960 / w, 480 / h)
       const dispCanvas = document.createElement('canvas')
       dispCanvas.width = Math.max(1, Math.ceil(w * dispScale))
       dispCanvas.height = Math.max(1, Math.ceil(h * dispScale))
@@ -191,12 +189,12 @@
         for (let col = 0; col < dispCanvas.width; col++) {
           const px = (col + 0.5) / dispCanvas.width * w - halfW
           const py = (row + 0.5) / dispCanvas.height * h - halfH
-          // Use CSS rounded-box (n=2.0) for the displacement boundary so it aligns 1:1 with CSS border-radius clipping
           const { d, nx, ny } = sceneSDFAndNormal(px, py, halfW, halfH, radius, 2.0)
           const depthPx = -d
 
           let normMag = 0.0
-          if (depthPx > -2.0 && depthPx < refractThickness) {
+          // Strictly inside the rounded rectangle (depthPx >= 0): no displacement outside the corner!
+          if (depthPx >= 0.0 && depthPx < refractThickness) {
             const t = Math.min(Math.max(depthPx / refractThickness, 0.0), 1.0)
             const sinThetaI = (1.0 - t) * (1.0 - t)
             const thetaI = Math.asin(Math.min(Math.max(sinThetaI, 0.0), 1.0))
@@ -206,7 +204,6 @@
             normMag = edgeMag / maxEdgeMag
           }
 
-          // Displace inward (-ndir), matching displacePx = -ndir * edgeMag * refractScale
           const vx = -nx * normMag
           const vy = -ny * normMag
           const idx = (row * dispCanvas.width + col) * 4
@@ -219,7 +216,7 @@
       dispCtx.putImageData(dispPixels, 0, 0)
       const dispUrl = dispCanvas.toDataURL()
       entry.image.setAttribute('href', dispUrl)
-      entry.image.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', dispUrl)
+      entry.image.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', dataUrlCompat(dispUrl))
 
       for (const element of [entry.filter, entry.image]) {
         element.setAttribute('x', '0')
@@ -228,7 +225,6 @@
         element.setAttribute('height', h)
       }
 
-      // 2.0 * scale because feDisplacementMap maps [0..1] around 0.5 -> [-0.5..+0.5] * scale
       const scaleG = 2.0 * maxDisplacePx
       const scaleR = 2.0 * (maxDisplacePx + maxChromaPx)
       const scaleB = 2.0 * Math.max(0, maxDisplacePx - maxChromaPx)
@@ -236,18 +232,18 @@
       entry.dispG.setAttribute('scale', scaleG.toFixed(2))
       entry.dispB.setAttribute('scale', scaleB.toFixed(2))
 
-      // 2. Build static cornerSpec + edgeSpec overlay matching liquidglass.frag (lines 125-162)
-      const specScale = Math.min(1.0, 960 / w, 480 / h)
+      // 2. Build sharp full-DPR static cornerSpec + edgeSpec overlay strictly inside the rounded rect (depthPx >= 0)
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const specScale = Math.min(dpr, 1440 / w, 720 / h)
       const specCanvas = document.createElement('canvas')
-      specCanvas.width = Math.max(1, Math.ceil(w * specScale))
-      specCanvas.height = Math.max(1, Math.ceil(h * specScale))
+      specCanvas.width = Math.max(1, Math.round(w * specScale))
+      specCanvas.height = Math.max(1, Math.round(h * specScale))
       const specCtx = specCanvas.getContext('2d')
       if (specCtx && specStrength > 0) {
         const specPixels = specCtx.createImageData(specCanvas.width, specCanvas.height)
-        const MAX_STROKE_PX = 3.2
-        const FEATHER_PX = 2.2
+        const MAX_STROKE_PX = 2.6
+        const FEATHER_PX = 1.6
         const SECONDARY_INT = 0.65
-        // In screen coordinates (y down), top-left is (-halfW, -halfH)
         const lightX = -halfW * 1.2
         const lightY = -halfH * 1.2
         const antiX = -lightX
@@ -264,7 +260,9 @@
             const { d, nx, ny } = sceneSDFAndNormal(px, py, halfW, halfH, radius, 2.0)
             const depthPx = -d
 
-            if (depthPx < -0.5 || depthPx > MAX_STROKE_PX + FEATHER_PX + 1.0) continue
+            // Sharp outer boundary: 1px anti-aliased mask at d = 0, zero bleed outside
+            if (d > 0.5 || depthPx > MAX_STROKE_PX + FEATHER_PX + 1.0) continue
+            const outerMask = 1.0 - smoothstep(-0.5, 0.5, d)
 
             // cornerSpec
             const distPrimary = Math.hypot(px - lightX, py - lightY)
@@ -272,20 +270,19 @@
             const primaryAtt = Math.exp(-distPrimary / taper)
             const secondaryAtt = Math.exp(-distSecondary / taper) * SECONDARY_INT
             const tPx = Math.max(primaryAtt, secondaryAtt) * MAX_STROKE_PX
-            const stroke = 1.0 - smoothstep(tPx - FEATHER_PX, tPx, depthPx)
+            const stroke = 1.0 - smoothstep(tPx - FEATHER_PX, tPx, Math.max(depthPx, 0.0))
             const cornerI = stroke * specStrength * 0.62
 
             // edgeSpec
-            const lip = 1.0 - smoothstep(0.0, 3.0, Math.max(depthPx, 0.0))
+            const lip = 1.0 - smoothstep(0.0, 2.5, Math.max(depthPx, 0.0))
             const dotProduct = nx * lightDirX + ny * lightDirY
             const facing = 0.35 + 0.65 * Math.min(Math.max(dotProduct * 0.5 + 0.5, 0.0), 1.0)
             const edgeI = lip * facing * specStrength * 0.14
 
-            const totalI = Math.min(1.0, cornerI + edgeI)
+            const totalI = Math.min(1.0, (cornerI + edgeI) * outerMask)
             if (totalI <= 0.004) continue
 
             const idx = (row * specCanvas.width + col) * 4
-            // vec3(1.0, 0.98, 0.94) warm-white specular from liquidglass.frag
             specPixels.data[idx] = 255
             specPixels.data[idx + 1] = 250
             specPixels.data[idx + 2] = 240
@@ -301,10 +298,13 @@
       entry.signature = signature
     }
 
-    // Important: blur FIRST, then displace via url(#id), just like LiquidGlass.qml (Kawase blur -> glassShader)
     surface.style.setProperty('--glass-backdrop', `blur(var(--glass-blur)) saturate(var(--glass-saturate, 165%)) url("#${entry.id}")`)
     surface.style.setProperty('--glass-spec-image', entry.specUrl)
     surface.setAttribute('data-shader-glass', '1')
+  }
+
+  function dataUrlCompat(url) {
+    return url
   }
 
   const resize = refracting ? new ResizeObserver(entries => {
@@ -321,14 +321,14 @@
     }
     document.querySelectorAll(selector).forEach(surface => {
       surface.classList.add('liquid-glass')
-      if (resize && !surface.matches('.layout > div:first-child:not(.nc)')) resize.observe(surface)
+      if (resize) resize.observe(surface)
     })
   }
 
   for (const preference of [pointer, reducedTransparency]) {
     preference.addEventListener('change', () => {
       if (resize) document.querySelectorAll('.liquid-glass').forEach(surface => {
-        if (!surface.matches('.layout > div:first-child:not(.nc)')) updateRefraction(surface)
+        updateRefraction(surface)
       })
     })
   }
