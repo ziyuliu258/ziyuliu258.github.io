@@ -20,6 +20,34 @@
   background: rgba(0, 0, 0, 0.54);
 }
 
+/* 玻璃效果参数：日间和夜间分别调整，统一控制下面的卡片与导航。 */
+:root {
+  --glass-tint: rgba(255, 255, 255, 0.56);
+  --glass-reading-tint: rgba(255, 255, 255, 0.82);
+  --glass-solid: rgba(250, 252, 255, 0.96);
+  --glass-blur: 24px;
+  --glass-radius: 20px;
+  --glass-refraction: 28;
+  --glass-border: rgba(255, 255, 255, 0.58);
+  --glass-glow: rgba(255, 255, 255, 0.42);
+  --glass-top-light: rgba(255, 255, 255, 0.82);
+  --glass-bottom-light: rgba(255, 255, 255, 0.24);
+  --glass-shadow: rgba(31, 45, 70, 0.16);
+  --glass-shadow-hover: rgba(31, 45, 70, 0.22);
+}
+
+[data-theme='dark'] {
+  --glass-tint: rgba(20, 25, 35, 0.42);
+  --glass-reading-tint: rgba(20, 25, 35, 0.82);
+  --glass-solid: rgba(22, 26, 34, 0.97);
+  --glass-border: rgba(255, 255, 255, 0.21);
+  --glass-glow: rgba(175, 214, 255, 0.18);
+  --glass-top-light: rgba(235, 247, 255, 0.38);
+  --glass-bottom-light: rgba(175, 214, 255, 0.10);
+  --glass-shadow: rgba(0, 0, 0, 0.26);
+  --glass-shadow-hover: rgba(0, 0, 0, 0.38);
+}
+
 #recent-posts .recent-post-item,
 #recent-posts .home-announcement,
 #aside-content .card-widget,
@@ -29,45 +57,110 @@
 .layout .pagination > *:not(.space),
 #page-header.nav-fixed > #nav,
 #page-header.not-top-img > #nav {
-  /* 透明白底 + 背景模糊 = 磨砂玻璃 */
-  background: rgba(255, 255, 255, 0.66);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: var(--glass-tint);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
   box-shadow:
-    0 8px 32px rgba(31, 38, 135, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.36);
-  -webkit-backdrop-filter: blur(12px) saturate(135%);
-  backdrop-filter: blur(12px) saturate(135%);
+    0 14px 38px -12px var(--glass-shadow),
+    0 3px 10px -4px var(--glass-shadow),
+    inset 0 1px 0 var(--glass-top-light),
+    inset 0 -1px 0 var(--glass-bottom-light);
+  -webkit-backdrop-filter: var(--glass-backdrop, blur(var(--glass-blur)) saturate(160%));
+  backdrop-filter: var(--glass-backdrop, blur(var(--glass-blur)) saturate(160%));
 }
 
 #recent-posts .recent-post-item:hover,
+#recent-posts .home-announcement:hover,
 #aside-content .card-widget:hover,
 .layout > div:first-child:not(.nc):hover,
 #article-container .shuoshuo-item:hover,
 .type-404 .error-content:hover {
   box-shadow:
-    0 12px 36px rgba(31, 38, 135, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.44);
+    0 18px 44px -12px var(--glass-shadow-hover),
+    0 4px 12px -4px var(--glass-shadow),
+    inset 0 1px 0 var(--glass-top-light),
+    inset 0 -1px 0 var(--glass-bottom-light);
 }
 
 #page-header.nav-fixed > #nav,
 #page-header.not-top-img > #nav {
   border-width: 0 0 1px;
-  box-shadow: 0 8px 24px rgba(31, 38, 135, 0.12);
+  border-radius: 0;
+  box-shadow: 0 8px 24px -12px var(--glass-shadow);
 }
 
-/* 深色模式下避免玻璃面板过亮 */
-[data-theme='dark'] #recent-posts .recent-post-item,
-[data-theme='dark'] #recent-posts .home-announcement,
-[data-theme='dark'] #aside-content .card-widget,
-[data-theme='dark'] .layout > div:first-child:not(.nc),
-[data-theme='dark'] #article-container .shuoshuo-item,
-[data-theme='dark'] .type-404 .error-content,
-[data-theme='dark'] .layout .pagination > *:not(.space) {
-  background: rgba(20, 25, 35, 0.62);
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+/* 阅读区域更厚一些，保留长篇正文、公式和代码的清晰度。 */
+.layout > div:first-child:not(.nc) {
+  background: var(--glass-reading-tint);
+}
+
+/* 光泽只覆盖表面，不能截获链接点击或文字选择。 */
+.liquid-glass {
+  position: relative;
+}
+
+.liquid-glass::before,
+.liquid-glass::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.liquid-glass::before {
+  z-index: 1;
+  content: '';
+  background: radial-gradient(
+    420px circle at var(--glass-x, 18%) var(--glass-y, 0%),
+    var(--glass-glow),
+    transparent 72%
+  );
+  opacity: var(--glass-glow-opacity, 0.32);
+  transition: opacity 240ms ease;
+}
+
+/* 中间镂空，仅在玻璃边缘绘制反光，正文不受滤镜影响。 */
+@supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
+  .liquid-glass::after {
+    z-index: 2;
+    content: '';
+    padding: 1.5px;
+    background:
+      radial-gradient(260px circle at var(--glass-x, 18%) var(--glass-y, 0%),
+        var(--glass-top-light), transparent 80%),
+      linear-gradient(135deg, var(--glass-top-light), transparent 38%,
+        var(--glass-bottom-light) 76%, var(--glass-top-light));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+}
+
+/* 顶部大图上的导航维持原有样式，滚动固定后再显示玻璃。 */
+#page-header:not(.nav-fixed):not(.not-top-img) #nav::before,
+#page-header:not(.nav-fixed):not(.not-top-img) #nav::after {
+  content: none;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .liquid-glass {
+    background: var(--glass-solid) !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .liquid-glass {
+    background: var(--glass-solid) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-glass::before {
+    transition: none;
+  }
 }
 
 /* 公告作为首页的独立卡片，内容仍读取主题设置。 */
@@ -78,7 +171,7 @@
   min-height: 96px;
   margin-bottom: 20px;
   padding: 1.2rem 2rem;
-  border-radius: 8px;
+  border-radius: var(--glass-radius);
   color: var(--font-color);
   font-size: 1.05em;
   line-height: 1.6;
@@ -110,26 +203,15 @@
 }
 
 @media (max-width: 768px) {
+  :root {
+    --glass-blur: 18px;
+    --glass-radius: 16px;
+  }
+
   #recent-posts .home-announcement {
     min-height: 84px;
     padding: 1rem 1.25rem;
   }
-}
-
-[data-theme='dark'] #recent-posts .recent-post-item:hover,
-[data-theme='dark'] #aside-content .card-widget:hover,
-[data-theme='dark'] .layout > div:first-child:not(.nc):hover,
-[data-theme='dark'] #article-container .shuoshuo-item:hover,
-[data-theme='dark'] .type-404 .error-content:hover {
-  box-shadow:
-    0 12px 36px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
-}
-
-[data-theme='dark'] #page-header.nav-fixed > #nav,
-[data-theme='dark'] #page-header.not-top-img > #nav {
-  background: rgba(20, 25, 35, 0.55);
-  border-color: rgba(255, 255, 255, 0.16);
 }
 
 /* 首页文章卡片与文章页主标题加粗 */
