@@ -222,6 +222,15 @@
   font-weight: 700;
 }
 
+/* 日间模式下加深首页文章卡片的日期/分类元信息颜色，与半透明磨砂底色拉开对比度 */
+:root {
+  --card-meta: rgba(31, 35, 41, 0.78);
+}
+
+[data-theme='dark'] {
+  --card-meta: rgba(235, 235, 245, 0.72);
+}
+
 /* 保留 Font Awesome 置顶图标自身的实心字重，避免继承标题字重后变形 */
 #recent-posts .article-title > .sticky {
   font-weight: 900;
