@@ -231,6 +231,49 @@
   --card-meta: rgba(235, 235, 245, 0.72);
 }
 
+/* 文章目录：文字使用实色，避免与半透明玻璃中的背景混在一起。 */
+#aside-content #card-toc {
+  --toc-link-color: #172b40;
+  --toc-title-color: #13263b;
+  --toc-hover-color: #103b5b;
+  --toc-hover-bg: rgba(73, 177, 245, 0.16);
+  --toc-active-text: #102a43;
+  --toc-guide-color: rgba(23, 43, 64, 0.30);
+  color: var(--toc-title-color);
+}
+
+[data-theme='dark'] #aside-content #card-toc {
+  --toc-link-color: #eef4fb;
+  --toc-title-color: #f8fafc;
+  --toc-hover-color: #ffffff;
+  --toc-hover-bg: rgba(73, 177, 245, 0.18);
+  --toc-guide-color: rgba(238, 244, 251, 0.35);
+}
+
+#aside-content #card-toc .toc-content .toc-link {
+  font-weight: 500;
+}
+
+#aside-content #card-toc .toc-content .toc-link:not(.active):hover,
+#aside-content #card-toc .toc-content .toc-link:not(.active):focus-visible {
+  color: var(--toc-hover-color);
+  background: var(--toc-hover-bg);
+}
+
+#aside-content #card-toc .toc-content .toc-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+#aside-content #card-toc .toc-content .toc-link.active {
+  color: var(--toc-active-text);
+  font-weight: 700;
+}
+
+#aside-content #card-toc .toc-content > .toc > .toc-item > .toc-child {
+  border-left-color: var(--toc-guide-color);
+}
+
 /* 保留 Font Awesome 置顶图标自身的实心字重，避免继承标题字重后变形 */
 #recent-posts .article-title > .sticky {
   font-weight: 900;
