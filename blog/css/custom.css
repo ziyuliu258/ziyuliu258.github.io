@@ -106,6 +106,25 @@
   background: var(--glass-reading-tint);
 }
 
+/* 单栏宽度：隐藏侧栏时使用完整容器，宽屏上限可在这里调整。 */
+:root {
+  --single-column-width: 90%;
+  --single-column-max-width: 1800px;
+}
+
+@media (min-width: 901px) {
+  html.hide-aside #content-inner.layout,
+  #content-inner.layout.hide-aside {
+    width: var(--single-column-width);
+    max-width: var(--single-column-max-width);
+  }
+
+  html.hide-aside #content-inner.layout > div:first-child,
+  #content-inner.layout.hide-aside > div:first-child {
+    width: 100%;
+  }
+}
+
 /* 静态对角与唇边高光通过 JS 按 shader 公式绘制到 ::after，不截获点击。 */
 .liquid-glass {
   position: relative;
