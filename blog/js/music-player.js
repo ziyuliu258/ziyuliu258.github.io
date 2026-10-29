@@ -28,11 +28,14 @@
         <button type="button" data-action="previous" aria-label="上一首" title="上一首">⏮</button>
         <button class="music-dock-play" type="button" data-action="toggle" aria-label="播放" title="播放">▶</button>
         <button type="button" data-action="next" aria-label="下一首" title="下一首">⏭</button>
-        <button class="music-dock-more" type="button" data-action="details" aria-expanded="false">进度 / 音量</button>
+        <label class="music-dock-volume">音量 <input data-dock-volume type="range" min="0" max="1" step="0.01" value="1" aria-label="音量"></label>
       </div>
-      <div class="music-dock-details" hidden>
-        <audio-player><audio-skin><audio controls preload="none"></audio></audio-skin></audio-player>
+      <div class="music-dock-progress">
+        <span data-dock-elapsed>0:00</span>
+        <input data-dock-seek type="range" min="0" max="1000" value="0" aria-label="播放进度">
+        <span data-dock-duration>0:00</span>
       </div>
+      <audio preload="none"></audio>
       <p class="music-dock-status" data-dock-status role="status"></p>
     </div>`;
   document.body.appendChild(dock);
@@ -41,13 +44,6 @@
   const findPage = (name) => pageRoot && pageRoot.querySelector('[data-music-' + name + ']');
   findDock('track').href = assetRoot + 'music/';
   findDock('track').textContent = '音乐';
-
-  const style = document.createElement('link');
-  style.id = 'music-player-style';
-  style.rel = 'stylesheet';
-  style.href = assetRoot + 'vendor/videojs-10.2.0/audio.css';
-  document.head.appendChild(style);
-  import(assetRoot + 'vendor/videojs-10.2.0/audio.js').then(() => { audio.controls = false; }).catch(() => {});
 
   function cover(img, url) {
     if (!img) return;
@@ -74,6 +70,10 @@
       button.title = playing ? '暂停' : '播放';
     });
     findDock('status').textContent = statusText;
+    findDock('elapsed').textContent = time(audio.currentTime);
+    findDock('duration').textContent = time(audio.duration);
+    findDock('seek').value = Number.isFinite(audio.duration) && audio.duration ? Math.round(audio.currentTime / audio.duration * 1000) : 0;
+    findDock('volume').value = audio.muted ? 0 : audio.volume;
     if (!pageRoot || !pageRoot.isConnected) return;
     const button = pageRoot.querySelector('[data-music-action="toggle"]');
     button.textContent = playing ? '❚❚' : '▶';
@@ -100,7 +100,6 @@
     findDock('track').textContent = track.name;
     findDock('artist').textContent = track.artist;
     cover(findDock('cover'), track.cover);
-    dock.querySelector('audio-player').setAttribute('content-title', track.name);
     if (changed) audio.src = 'https://music.163.com/song/media/outer/url?id=' + encodeURIComponent(track.id) + '.mp3';
     setStatus(track.preview ? '此曲仅提供试听。' : '');
     if (shouldPlay) play();
@@ -123,11 +122,14 @@
     if (!button) return;
     if (button.classList.contains('music-dock-launcher')) dock.classList.remove('is-collapsed');
     else if (button.dataset.action === 'collapse') dock.classList.add('is-collapsed');
-    else if (button.dataset.action === 'details') {
-      const details = dock.querySelector('.music-dock-details');
-      details.hidden = !details.hidden;
-      button.setAttribute('aria-expanded', String(!details.hidden));
-    } else action(button.dataset.action);
+    else action(button.dataset.action);
+  });
+  findDock('seek').addEventListener('input', (event) => {
+    if (Number.isFinite(audio.duration)) audio.currentTime = audio.duration * Number(event.target.value) / 1000;
+  });
+  findDock('volume').addEventListener('input', (event) => {
+    audio.muted = false;
+    audio.volume = Number(event.target.value);
   });
   ['play', 'pause', 'timeupdate', 'durationchange', 'volumechange'].forEach((event) => audio.addEventListener(event, update));
   audio.addEventListener('ended', () => advance(1));

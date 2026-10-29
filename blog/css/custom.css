@@ -501,21 +501,34 @@
   color: #2584c2 !important;
 }
 
-.music-dock-more {
+.music-dock-volume {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   margin-left: auto;
   font-size: 0.8rem;
-  opacity: 0.8;
 }
 
-.music-dock-details {
-  margin-top: 8px;
+.music-dock-volume input {
+  width: 68px;
 }
 
-.music-dock-details audio-player,
-.music-dock-details audio-skin,
-.music-dock-details audio {
-  display: block;
-  width: 100%;
+.music-dock-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.music-dock input[type="range"] {
+  min-width: 0;
+  accent-color: #49b1f5;
+}
+
+.music-dock-progress input {
+  flex: 1;
 }
 
 .music-dock-status {
