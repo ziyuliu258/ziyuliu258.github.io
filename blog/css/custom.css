@@ -22,30 +22,80 @@
 
 /* 玻璃效果参数：日间和夜间分别调整，统一控制下面的卡片与导航。 */
 :root {
-  --glass-tint: rgba(255, 255, 255, 0.56);
+  --glass-tint: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.52) 0%,
+    rgba(255, 255, 255, 0.30) 52%,
+    rgba(245, 250, 255, 0.44) 100%
+  );
   --glass-reading-tint: rgba(255, 255, 255, 0.82);
   --glass-solid: rgba(250, 252, 255, 0.96);
-  --glass-blur: 24px;
-  --glass-radius: 20px;
-  --glass-refraction: 28;
-  --glass-border: rgba(255, 255, 255, 0.58);
-  --glass-glow: rgba(255, 255, 255, 0.42);
-  --glass-top-light: rgba(255, 255, 255, 0.82);
-  --glass-bottom-light: rgba(255, 255, 255, 0.24);
-  --glass-shadow: rgba(31, 45, 70, 0.16);
-  --glass-shadow-hover: rgba(31, 45, 70, 0.22);
+  --glass-blur: 20px;
+  --glass-saturate: 190%;
+  --glass-radius: 22px;
+  --glass-rim-width: 2px;
+  --glass-angle: 132deg;
+  --glass-border: rgba(255, 255, 255, 0.38);
+  --glass-glow: rgba(255, 255, 255, 0.52);
+  --glass-top-light: rgba(255, 255, 255, 0.92);
+  --glass-left-light: rgba(255, 255, 255, 0.68);
+  --glass-bottom-light: rgba(255, 255, 255, 0.34);
+  --glass-inner-glow: rgba(255, 255, 255, 0.22);
+  --glass-caustic-cyan: rgba(56, 226, 255, 0.34);
+  --glass-caustic-pink: rgba(244, 114, 182, 0.28);
+  --glass-prism-spectrum: conic-gradient(
+    from var(--glass-angle, 132deg) at var(--glass-x, 28%) var(--glass-y, 22%),
+    rgba(255, 255, 255, 0.92) 0deg,
+    rgba(56, 226, 255, 0.88) 28deg,
+    rgba(96, 165, 250, 0.82) 54deg,
+    rgba(168, 85, 247, 0.84) 82deg,
+    rgba(244, 114, 182, 0.86) 112deg,
+    rgba(251, 191, 36, 0.82) 142deg,
+    rgba(52, 211, 153, 0.76) 168deg,
+    rgba(255, 255, 255, 0.45) 198deg,
+    rgba(56, 226, 255, 0.78) 236deg,
+    rgba(192, 132, 252, 0.82) 276deg,
+    rgba(251, 113, 133, 0.80) 312deg,
+    rgba(255, 255, 255, 0.92) 360deg
+  );
+  --glass-shadow: rgba(22, 34, 58, 0.16);
+  --glass-shadow-hover: rgba(22, 34, 58, 0.24);
 }
 
 [data-theme='dark'] {
-  --glass-tint: rgba(20, 25, 35, 0.42);
+  --glass-tint: linear-gradient(
+    135deg,
+    rgba(30, 38, 54, 0.52) 0%,
+    rgba(18, 23, 34, 0.34) 54%,
+    rgba(28, 36, 52, 0.46) 100%
+  );
   --glass-reading-tint: rgba(20, 25, 35, 0.82);
   --glass-solid: rgba(22, 26, 34, 0.97);
-  --glass-border: rgba(255, 255, 255, 0.21);
-  --glass-glow: rgba(175, 214, 255, 0.18);
-  --glass-top-light: rgba(235, 247, 255, 0.38);
-  --glass-bottom-light: rgba(175, 214, 255, 0.10);
-  --glass-shadow: rgba(0, 0, 0, 0.26);
-  --glass-shadow-hover: rgba(0, 0, 0, 0.38);
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --glass-glow: rgba(165, 220, 255, 0.24);
+  --glass-top-light: rgba(240, 249, 255, 0.62);
+  --glass-left-light: rgba(215, 238, 255, 0.42);
+  --glass-bottom-light: rgba(165, 215, 255, 0.18);
+  --glass-inner-glow: rgba(140, 200, 255, 0.10);
+  --glass-caustic-cyan: rgba(56, 226, 255, 0.28);
+  --glass-caustic-pink: rgba(232, 121, 249, 0.24);
+  --glass-prism-spectrum: conic-gradient(
+    from var(--glass-angle, 132deg) at var(--glass-x, 28%) var(--glass-y, 22%),
+    rgba(240, 249, 255, 0.72) 0deg,
+    rgba(56, 226, 255, 0.78) 28deg,
+    rgba(96, 165, 250, 0.74) 56deg,
+    rgba(168, 85, 247, 0.76) 86deg,
+    rgba(244, 114, 182, 0.78) 116deg,
+    rgba(251, 191, 36, 0.70) 146deg,
+    rgba(52, 211, 153, 0.66) 174deg,
+    rgba(255, 255, 255, 0.22) 204deg,
+    rgba(56, 226, 255, 0.68) 242deg,
+    rgba(192, 132, 252, 0.72) 282deg,
+    rgba(251, 113, 133, 0.70) 318deg,
+    rgba(240, 249, 255, 0.72) 360deg
+  );
+  --glass-shadow: rgba(0, 0, 0, 0.34);
+  --glass-shadow-hover: rgba(0, 0, 0, 0.48);
 }
 
 #recent-posts .recent-post-item,
@@ -61,12 +111,15 @@
   border: 1px solid var(--glass-border);
   border-radius: var(--glass-radius);
   box-shadow:
-    0 14px 38px -12px var(--glass-shadow),
-    0 3px 10px -4px var(--glass-shadow),
-    inset 0 1px 0 var(--glass-top-light),
-    inset 0 -1px 0 var(--glass-bottom-light);
-  -webkit-backdrop-filter: var(--glass-backdrop, blur(var(--glass-blur)) saturate(160%));
-  backdrop-filter: var(--glass-backdrop, blur(var(--glass-blur)) saturate(160%));
+    0 16px 40px -12px var(--glass-shadow),
+    0 4px 12px -4px var(--glass-shadow),
+    inset 0 1.5px 1px var(--glass-top-light),
+    inset 1.5px 0 1px var(--glass-left-light),
+    inset 0 -1.5px 2.5px var(--glass-caustic-cyan),
+    inset -1.5px 0 2.5px var(--glass-caustic-pink),
+    inset 0 0 20px var(--glass-inner-glow);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) contrast(105%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) contrast(105%);
 }
 
 #recent-posts .recent-post-item:hover,
@@ -76,10 +129,13 @@
 #article-container .shuoshuo-item:hover,
 .type-404 .error-content:hover {
   box-shadow:
-    0 18px 44px -12px var(--glass-shadow-hover),
-    0 4px 12px -4px var(--glass-shadow),
-    inset 0 1px 0 var(--glass-top-light),
-    inset 0 -1px 0 var(--glass-bottom-light);
+    0 20px 48px -12px var(--glass-shadow-hover),
+    0 6px 16px -4px var(--glass-shadow),
+    inset 0 1.5px 1.5px var(--glass-top-light),
+    inset 1.5px 0 1.5px var(--glass-left-light),
+    inset 0 -2px 3.5px var(--glass-caustic-cyan),
+    inset -2px 0 3.5px var(--glass-caustic-pink),
+    inset 0 0 24px var(--glass-inner-glow);
 }
 
 #page-header.nav-fixed > #nav,
@@ -94,46 +150,84 @@
   background: var(--glass-reading-tint);
 }
 
-/* 光泽只覆盖表面，不能截获链接点击或文字选择。 */
-.liquid-glass {
+/* 光泽与棱镜色散只覆盖表面与边缘，不能截获链接点击或文字选择。 */
+.liquid-glass,
+#recent-posts .recent-post-item,
+#recent-posts .home-announcement,
+#aside-content .card-widget {
   position: relative;
 }
 
+#recent-posts .home-announcement {
+  overflow: hidden;
+}
+
 .liquid-glass::before,
-.liquid-glass::after {
+.liquid-glass::after,
+#recent-posts .recent-post-item::before,
+#recent-posts .recent-post-item::after,
+#recent-posts .home-announcement::before,
+#recent-posts .home-announcement::after,
+#aside-content .card-widget::before,
+#aside-content .card-widget::after {
   position: absolute;
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
 }
 
-.liquid-glass::before {
+.liquid-glass::before,
+#recent-posts .recent-post-item::before,
+#recent-posts .home-announcement::before,
+#aside-content .card-widget::before {
   z-index: 1;
   content: '';
-  background: radial-gradient(
-    420px circle at var(--glass-x, 18%) var(--glass-y, 0%),
-    var(--glass-glow),
-    transparent 72%
-  );
-  opacity: var(--glass-glow-opacity, 0.32);
+  background:
+    radial-gradient(
+      420px circle at var(--glass-x, 18%) var(--glass-y, 0%),
+      var(--glass-glow),
+      transparent 70%
+    ),
+    linear-gradient(
+      125deg,
+      rgba(255, 255, 255, 0.24) 0%,
+      transparent 38%,
+      transparent 68%,
+      rgba(56, 226, 255, 0.10) 88%,
+      rgba(244, 114, 182, 0.12) 100%
+    );
+  opacity: var(--glass-glow-opacity, 0.55);
   transition: opacity 240ms ease;
 }
 
-/* 中间镂空，仅在玻璃边缘绘制反光，正文不受滤镜影响。 */
+/* 中间镂空，仅在玻璃边缘绘制双层反光与棱镜彩虹折射，正文不受滤镜影响。 */
 @supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
-  .liquid-glass::after {
+  .liquid-glass::after,
+  #recent-posts .recent-post-item::after,
+  #recent-posts .home-announcement::after,
+  #aside-content .card-widget::after {
     z-index: 2;
     content: '';
-    padding: 1.5px;
+    padding: var(--glass-rim-width);
     background:
-      radial-gradient(260px circle at var(--glass-x, 18%) var(--glass-y, 0%),
-        var(--glass-top-light), transparent 80%),
-      linear-gradient(135deg, var(--glass-top-light), transparent 38%,
-        var(--glass-bottom-light) 76%, var(--glass-top-light));
+      radial-gradient(
+        260px circle at var(--glass-x, 18%) var(--glass-y, 0%),
+        var(--glass-top-light),
+        transparent 76%
+      ),
+      linear-gradient(
+        135deg,
+        var(--glass-top-light) 0%,
+        transparent 34%,
+        transparent 66%,
+        var(--glass-bottom-light) 100%
+      ),
+      var(--glass-prism-spectrum);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
+    filter: saturate(135%);
   }
 }
 
