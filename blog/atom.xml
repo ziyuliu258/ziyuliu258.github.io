@@ -12,7 +12,25 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>日拱一卒，功不唐捐。</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-10-29T16:44:22.525Z</updated>
+  <updated>2026-10-29T17:13:57.350Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="Embodied Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Embodied-Intelligence/"/>
+    <category term="3D Generation" scheme="https://ziyuliu258.cn/blog/tags/3D-Generation/"/>
+    <id>https://ziyuliu258.cn/blog/posts/32a3a35f/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/32a3a35f/"/>
+    <published>2026-10-29T17:03:48.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：Minghan Qin、Yuang Wang、Xiuyu Yang 等人提出 Lucida，从真实室内场景的多视角观测中恢复完整、可独立编辑的物体资产，并将它们放回原来的位置。本文保留“解析、生成、摆放”的三阶段流程，最值得关注的是最后的]]>
+    </summary>
+    <title>论文阅读：Lucida: Parse, Generate, and Place for Composable Real-to-Sim Scene Modeling</title>
+    <updated>2026-10-29T17:13:57.350Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -339,24 +357,5 @@
     </summary>
     <title>在香橙派OrangePi AIPro（8T）上实现基于ACLLite与PyACL的YOLOv10端侧推理</title>
     <updated>2025-10-24T12:08:06.524Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="技术" scheme="https://ziyuliu258.cn/blog/categories/%E6%8A%80%E6%9C%AF/"/>
-    <category term="昇腾开发板" scheme="https://ziyuliu258.cn/blog/tags/%E6%98%87%E8%85%BE%E5%BC%80%E5%8F%91%E6%9D%BF/"/>
-    <id>https://ziyuliu258.cn/blog/posts/6bd52945/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/6bd52945/"/>
-    <published>2025-08-01T16:00:00.000Z</published>
-    <summary>
-      <![CDATA[<h2 id="前言">前言</h2>
-<p>通过在本子网内逐一搜索获得IP来连接开发板这一方法实在效率低下，当开发板在手的时候，设置以太网静态IP可以便捷地通过以太网私有IP地址连接开发板。以下给出具体步骤。</p>
-<h2 id="设置步骤">设置步骤</h2>
-<h3]]>
-    </summary>
-    <title>网线直连情况下的开发板SSH连接指南</title>
-    <updated>2025-09-04T17:13:29.787Z</updated>
   </entry>
 </feed>
