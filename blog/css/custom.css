@@ -106,25 +106,6 @@
   background: var(--glass-reading-tint);
 }
 
-/* 单栏宽度：隐藏侧栏时使用完整容器，宽屏上限可在这里调整。 */
-:root {
-  --single-column-width: 90%;
-  --single-column-max-width: 1800px;
-}
-
-@media (min-width: 901px) {
-  html.hide-aside #content-inner.layout,
-  #content-inner.layout.hide-aside {
-    width: var(--single-column-width);
-    max-width: var(--single-column-max-width);
-  }
-
-  html.hide-aside #content-inner.layout > div:first-child,
-  #content-inner.layout.hide-aside > div:first-child {
-    width: 100%;
-  }
-}
-
 /* 静态对角与唇边高光通过 JS 按 shader 公式绘制到 ::after，不截获点击。 */
 .liquid-glass {
   position: relative;
@@ -188,7 +169,6 @@
 #recent-posts .home-announcement {
   display: flex;
   align-items: center;
-  gap: 1rem;
   min-height: 96px;
   margin-bottom: 20px;
   padding: 1.2rem 2rem;
@@ -198,29 +178,22 @@
   line-height: 1.6;
 }
 
-.home-announcement-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  color: #3976a9;
-  background: rgba(73, 177, 245, 0.12);
+.home-announcement-message {
+  min-width: 0;
+}
+
+.home-announcement-label {
+  font-size: 1.2em;
+  font-weight: 700;
 }
 
 .home-announcement-content {
-  min-width: 0;
+  display: inline;
   font-size: 1.2em;
-  font-weight: 700;
+  font-weight: 400;
+  font-style: italic;
   text-decoration: underline;
   text-underline-offset: 0.2em;
-}
-
-[data-theme='dark'] .home-announcement-icon {
-  color: #9bcdf3;
-  background: rgba(73, 177, 245, 0.16);
 }
 
 @media (max-width: 768px) {
