@@ -20,44 +20,33 @@
   background: rgba(0, 0, 0, 0.54);
 }
 
-/* 玻璃效果参数：日间和夜间分别调整，统一控制下面的卡片与导航。 */
+/* 玻璃效果参数：对齐 liquidglass-kde-widgets (LiquidGlass.qml + liquidglass.frag) 的光学参数 */
 :root {
-  --glass-tint: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.56) 0%,
-    rgba(255, 255, 255, 0.36) 55%,
-    rgba(255, 255, 255, 0.48) 100%
-  );
-  --glass-reading-tint: rgba(255, 255, 255, 0.82);
+  --glass-tint: rgba(255, 255, 255, 0.36);
+  --glass-reading-tint: rgba(255, 255, 255, 0.80);
   --glass-solid: rgba(250, 252, 255, 0.96);
-  --glass-blur: 22px;
-  --glass-saturate: 180%;
-  --glass-radius: 20px;
-  --glass-refraction: 28;
-  --glass-dispersion: 0.28;
-  --glass-border: rgba(255, 255, 255, 0.48);
-  --glass-top-light: rgba(255, 255, 255, 0.86);
-  --glass-left-light: rgba(255, 255, 255, 0.62);
-  --glass-bottom-light: rgba(255, 255, 255, 0.24);
-  --glass-shadow: rgba(31, 45, 70, 0.16);
-  --glass-shadow-hover: rgba(31, 45, 70, 0.22);
+  --glass-blur: 14px;
+  --glass-saturate: 165%;
+  --glass-radius: 26px;
+  --glass-roundness: 5.5;
+  --glass-refract-thickness: 35;
+  --glass-refract-ior: 1.70;
+  --glass-refract-scale: 65;
+  --glass-chroma-strength: 0.35;
+  --glass-spec-strength: 0.70;
+  --glass-shadow: rgba(20, 32, 54, 0.16);
+  --glass-shadow-hover: rgba(20, 32, 54, 0.24);
 }
 
 [data-theme='dark'] {
-  --glass-tint: linear-gradient(
-    145deg,
-    rgba(28, 35, 48, 0.50) 0%,
-    rgba(18, 23, 33, 0.34) 55%,
-    rgba(24, 31, 44, 0.44) 100%
-  );
+  --glass-tint: rgba(16, 20, 28, 0.32);
   --glass-reading-tint: rgba(20, 25, 35, 0.82);
   --glass-solid: rgba(22, 26, 34, 0.97);
-  --glass-border: rgba(255, 255, 255, 0.18);
-  --glass-top-light: rgba(235, 247, 255, 0.42);
-  --glass-left-light: rgba(215, 238, 255, 0.28);
-  --glass-bottom-light: rgba(175, 214, 255, 0.10);
-  --glass-shadow: rgba(0, 0, 0, 0.28);
-  --glass-shadow-hover: rgba(0, 0, 0, 0.40);
+  --glass-blur: 14px;
+  --glass-saturate: 165%;
+  --glass-spec-strength: 0.75;
+  --glass-shadow: rgba(0, 0, 0, 0.32);
+  --glass-shadow-hover: rgba(0, 0, 0, 0.44);
 }
 
 #recent-posts .recent-post-item,
@@ -70,14 +59,11 @@
 #page-header.nav-fixed > #nav,
 #page-header.not-top-img > #nav {
   background: var(--glass-tint);
-  border: 1px solid var(--glass-border);
+  border: none;
   border-radius: var(--glass-radius);
   box-shadow:
-    0 14px 38px -12px var(--glass-shadow),
-    0 3px 10px -4px var(--glass-shadow),
-    inset 0 1px 0 var(--glass-top-light),
-    inset 1px 0 0 var(--glass-left-light),
-    inset 0 -1px 0 var(--glass-bottom-light);
+    0 16px 40px -12px var(--glass-shadow),
+    0 4px 12px -4px var(--glass-shadow);
   -webkit-backdrop-filter: var(--glass-backdrop, blur(var(--glass-blur)) saturate(var(--glass-saturate)));
   backdrop-filter: var(--glass-backdrop, blur(var(--glass-blur)) saturate(var(--glass-saturate)));
 }
@@ -89,16 +75,12 @@
 #article-container .shuoshuo-item:hover,
 .type-404 .error-content:hover {
   box-shadow:
-    0 18px 44px -12px var(--glass-shadow-hover),
-    0 4px 12px -4px var(--glass-shadow),
-    inset 0 1px 0 var(--glass-top-light),
-    inset 1px 0 0 var(--glass-left-light),
-    inset 0 -1px 0 var(--glass-bottom-light);
+    0 20px 46px -12px var(--glass-shadow-hover),
+    0 6px 14px -4px var(--glass-shadow);
 }
 
 #page-header.nav-fixed > #nav,
 #page-header.not-top-img > #nav {
-  border-width: 0 0 1px;
   border-radius: 0;
   box-shadow: 0 8px 24px -12px var(--glass-shadow);
 }
@@ -108,7 +90,7 @@
   background: var(--glass-reading-tint);
 }
 
-/* 静态玻璃边缘反光只覆盖边缘，不能截获链接点击或文字选择。 */
+/* 静态对角与唇边高光通过 JS 按 shader 公式绘制到 ::after，不截获点击。 */
 .liquid-glass {
   position: relative;
 }
@@ -120,22 +102,26 @@
 .liquid-glass::after {
   position: absolute;
   inset: 0;
+  z-index: 2;
+  content: '';
   border-radius: inherit;
   pointer-events: none;
+  background-image: var(--glass-spec-image, none);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }
 
-/* 中间镂空，仅在玻璃边缘绘制纯净的静态白色高光，不加彩色假边框。 */
+/* 非 Chromium 浏览器或長篇阅读卡片的静态对角高光回退 */
 @supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
-  .liquid-glass::after {
-    z-index: 2;
-    content: '';
-    padding: 1.5px;
+  .liquid-glass:not([data-shader-glass="1"])::after {
+    padding: 2px;
     background: linear-gradient(
       135deg,
-      var(--glass-top-light) 0%,
-      transparent 38%,
-      var(--glass-bottom-light) 76%,
-      var(--glass-top-light) 100%
+      rgba(255, 250, 240, 0.65) 0%,
+      rgba(255, 250, 240, 0.12) 28%,
+      rgba(255, 250, 240, 0.04) 50%,
+      rgba(255, 250, 240, 0.10) 72%,
+      rgba(255, 250, 240, 0.42) 100%
     );
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
