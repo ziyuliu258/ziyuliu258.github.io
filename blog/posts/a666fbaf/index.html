@@ -1,0 +1,639 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>论文阅读：OpenVLA: An Open-Source Vision-Language-Action Model | Derrick Liu的个人博客</title><meta name="author" content="Derrick Liu,1209830516abc@gmail.com"><meta name="copyright" content="Derrick Liu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="引：Moo Jin Kim、Karl Pertsch、Siddharth Karamcheti 等人在这篇文章中提出 OpenVLA，将已有的视觉语言模型微调为机器人控制策略。模型接收一张图像和一条指令，将七维机器人动作转换为离散 token，再使用语言模型的 next-token prediction 方式训练。作者在约 97 万条机器人轨迹上训练模型，并开放权重、训练与部署代码，进一步研究新">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文阅读：OpenVLA: An Open-Source Vision-Language-Action Model">
+<meta property="og:url" content="https://ziyuliu258.cn/blog/posts/a666fbaf/index.html">
+<meta property="og:site_name" content="Derrick Liu的个人博客">
+<meta property="og:description" content="引：Moo Jin Kim、Karl Pertsch、Siddharth Karamcheti 等人在这篇文章中提出 OpenVLA，将已有的视觉语言模型微调为机器人控制策略。模型接收一张图像和一条指令，将七维机器人动作转换为离散 token，再使用语言模型的 next-token prediction 方式训练。作者在约 97 万条机器人轨迹上训练模型，并开放权重、训练与部署代码，进一步研究新">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg">
+<meta property="article:published_time" content="2026-10-29T16:35:11.000Z">
+<meta property="article:modified_time" content="2026-10-29T16:44:22.525Z">
+<meta property="article:author" content="Derrick Liu">
+<meta property="article:tag" content="论文阅读笔记">
+<meta property="article:tag" content="Embodied Intelligence">
+<meta property="article:tag" content="VLA">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "论文阅读：OpenVLA: An Open-Source Vision-Language-Action Model",
+  "url": "https://ziyuliu258.cn/blog/posts/a666fbaf/",
+  "image": "https://ziyuliu258.cn/blog/images/avatar.jpg",
+  "datePublished": "2026-10-29T16:35:11.000Z",
+  "dateModified": "2026-10-29T16:44:22.525Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Derrick Liu",
+      "url": "https://ziyuliu258.cn/blog/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/blog/images/avatar.jpg"><link rel="canonical" href="https://ziyuliu258.cn/blog/posts/a666fbaf/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":1,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: false,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '论文阅读：OpenVLA: An Open-Source Vision-Language-Action Model',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="preload" as="image" href="/blog/images/bg2.avif" type="image/avif"><link rel="stylesheet" href="/blog/css/custom.css?v=ee2d3490cac4"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/blog/atom.xml" title="Derrick Liu的个人博客" type="application/atom+xml">
+</head><body><div id="web_bg" style="background-image: url(/blog/images/bg2.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">26</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">20</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/blog/images/bg2.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/blog/"></a><a class="nav-page-title" href="/blog/"><span class="site-name">论文阅读：OpenVLA: An Open-Source Vision-Language-Action Model</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">论文阅读：OpenVLA: An Open-Source Vision-Language-Action Model</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-29T16:35:11.000Z" title="发表于 2026-10-30 00:35:11">2026-10-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-29T16:44:22.525Z" title="更新于 2026-10-30 00:44:22">2026-10-30</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">6.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>22分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>引：Moo Jin Kim、Karl Pertsch、Siddharth Karamcheti 等人在这篇文章中提出 OpenVLA，将已有的视觉语言模型微调为机器人控制策略。模型接收一张图像和一条指令，将七维机器人动作转换为离散 token，再使用语言模型的 next-token prediction 方式训练。作者在约 97 万条机器人轨迹上训练模型，并开放权重、训练与部署代码，进一步研究新任务微调、LoRA 和量化推理。</p>
+</blockquote>
+<h2 id="背景">背景</h2>
+<p>假设我们让机器人“把茄子放进碗里”。这要求机器人看出哪个物体是茄子、碗在哪里，还要根据当前夹爪的位置，决定下一步向哪里移动、怎样调整姿态，以及什么时候闭合夹爪。</p>
+<p>视觉语言模型（Vision-Language Model，VLM）已经从大量图像和文本中学习了物体、语义和一定的空间关系。问题是， <strong>理解图像中的任务，并不会自动得到能够执行的机器人动作</strong>。一个模型即使能准确描述“茄子在碗的左边”，也还没有学会输出机械臂所需的控制量。</p>
+<p>VLA（Vision-Language-Action Model）尝试把这一步接起来：在预训练 VLM 的基础上，用机器人示范训练模型，使它根据图像和语言直接预测动作。这里的训练属于模仿学习，监督来自示范中的实际动作，不需要为每次动作另外设计奖励函数。</p>
+<p>在 OpenVLA 之前，RT-2 等工作已经验证了这种路线。但这些模型的权重、训练细节或适配方法并不充分开放，研究者很难把它们迁移到自己的机器人上。OpenVLA 要解决的问题因此包括两部分：一是训练一个有较好泛化能力的通用机器人策略；二是让这个策略能够被研究者实际部署和微调。</p>
+<h2 id="方法">方法</h2>
+<h3 id="视觉语言模型">视觉语言模型</h3>
+<p>OpenVLA 基于已经完成视觉语言训练的 Prismatic-7B，整体由视觉编码器、projector 和语言模型三部分组成：</p>
+<p><img src="/blog/posts/a666fbaf/openvla-architecture.png" alt="OpenVLA 的视觉编码器、projector 与语言模型"></p>
+<p>图来自原论文 Fig. 2。输入是当前图像和语言指令，输出经动作解码后交给机器人控制器。</p>
+<p>对于图像，作者同时使用 <strong>DINOv2 和 SigLIP</strong>。同一张图像分别经过两个视觉编码器，然后将对应 patch 的特征沿通道维拼接。SigLIP 的图文预训练提供语义信息，加入 DINOv2 的特征则有助于补充空间信息；它们并不是分别只负责“语义”或“位置”，而是共同为后续预测提供视觉表示。</p>
+<p>这里的拼接发生在每个 patch 的特征向量上。比如，同一个 patch 原来分别得到两组特征，现在把它们接成一个更长的向量，而不是把两套 patch 序列首尾相接。随后，两层 MLP 构成的 projector 将这些视觉特征映射到语言模型所需的 embedding 空间。</p>
+<p>语言指令则由 Llama tokenizer 转换为文本 token，再取得相应的 embedding。视觉 embedding 和文本 embedding 一起送入 <strong>Llama 2 7B</strong> 主干，模型根据二者预测输出序列。</p>
+<p>需要区分两种 token：图像 patch 在这里对应连续的特征向量；后面生成的动作 token 则是词表中的离散编号。图像并没有先经过一个 VQ 码本，变成与动作相同的离散符号。</p>
+<p>Prismatic 本身建立在预训练的 SigLIP、DINOv2 和 Llama 2 上，再通过约 100 万条图文及纯文本样本进行视觉语言训练。OpenVLA 接着在这个模型上学习机器人动作，因此并不是从零开始训练视觉和语言能力。</p>
+<h3 id="训练">训练</h3>
+<p>我们先明确模型要预测什么。在本文的单臂控制设定中，一个时间步的动作包含七个维度：</p>
+<ul>
+<li>三个末端位置变化量；</li>
+<li>三个末端姿态变化量；</li>
+<li>一个夹爪控制量。</li>
+</ul>
+<p>前六个量描述机械臂末端应该怎样移动和转动，最后一个量控制夹爪。这里的“七维动作”并不意味着直接预测七个关节角度，底层控制器还需要把末端动作转换为机器人能够执行的控制指令。</p>
+<p>语言模型原本预测的是离散 token，机器人动作却是连续数值。作者因此沿用 RT-2 的思路， <strong>将每个动作维度分别离散为 256 类</strong>，用 token 表示其所处的区间。</p>
+<p>具体地，对每个维度，先统计训练数据中动作的第 1 和第 99 百分位数，再在这个范围内均匀划分。为什么不用最小值和最大值？如果少量异常动作特别大，整个离散范围就会被拉宽，常见动作只能挤在少数几个区间中。使用分位数能够减轻这种影响，让有限的离散类别更多地覆盖常见动作范围。</p>
+<p>例如，假设某个平移维度的有效范围是 −2 cm 到 2 cm，示范要求沿这个方向移动约 1 cm。量化后，我们用覆盖这个数值的区间编号表示该动作分量；其他六个维度做同样的处理。于是，原来的七维连续动作变成七个离散编号，每个编号再对应词表中的一个动作 token。它不是把小数写成字符串，再让模型逐个生成数字和小数点。</p>
+<p>Llama tokenizer 只预留了 100 个特殊 token，不足以容纳 256 种动作符号。因此，作者复用了词表末尾使用频率最低的 256 个 token，将它们作为动作 token。这里复用的是模型的输出词表，动作仍然需要通过专门的解码过程才能恢复为数值。</p>
+<p>动作变成 token 后，就可以使用标准的 next-token 交叉熵训练。训练样本的上下文包含图像、语言和已经出现的真实动作 token，模型学习预测下一个动作 token， <strong>损失只计算动作输出位置</strong>。</p>
+<p>比如，在“把茄子放进碗里”的示范中，相机图像和指令作为条件，示范动作提供七个目标 token。训练时，第一个动作 token 根据图像与指令预测；第二个还可以看到真实的第一个动作 token；后面依次进行。这就是 teacher forcing，配合 causal mask，模型不能提前看到尚未预测的位置。</p>
+<p>这里的七个 token 表示 <strong>同一个控制时间步的七个维度</strong>，并不是未来七个时间步。训练时虽然可以一次计算各个位置的损失，但推理时尚无真实动作可供输入，仍需要把已经生成的 token 逐个送回模型，才能继续预测下一个。</p>
+<h3 id="推理">推理</h3>
+<p>推理时，动作生成与执行可以整理为：</p>
+<ol>
+<li>获取机器人当前的一张第三人称 RGB 图像，并输入任务指令；</li>
+<li>通过视觉编码器和 projector 得到图像 embedding，与文本一起送入语言模型；</li>
+<li>自回归生成当前动作的七个 token；</li>
+<li>将 token 转回离散区间，并用区间中心恢复归一化的动作数值；</li>
+<li>根据目标数据集的动作统计量反归一化，得到控制器所需的动作；</li>
+<li>执行动作，获取新的图像，再预测下一步。</li>
+</ol>
+<p>反归一化不能省略。相同的归一化数值，在不同机器人或数据集的动作尺度下可能对应不同的实际运动量。官方推理接口因此需要选择相应的数据集统计量，不能直接把 token 编号或者归一化后的数值当作真实控制量使用。</p>
+<p>这个过程中，模型每次只预测一个控制步；机器人执行之后，再通过新的观测修正后续动作，形成闭环。原始 OpenVLA 没有一次输出未来一整段 action chunk，也没有使用扩散过程生成动作。</p>
+<h3 id="数据">数据</h3>
+<p>OpenVLA 的机器人训练数据来自 <strong>Open X-Embodiment（OpenX）</strong>。在论文写作时，完整 OpenX 汇集了 70 多个数据集、超过 200 万条机器人轨迹；OpenVLA 从中筛选并组合出约 <strong>97 万条轨迹</strong>。这里的数量是完整的示范轨迹，不是 97 万张图像或 97 万个动作。</p>
+<p>不同机器人的传感器和控制方式并不一致。为了得到可共同训练的输入输出空间，作者筛选出至少包含一个第三人称相机、采用单臂末端控制的数据集。这样，不同机器人仍然可以共用“图像与语言输入、末端动作输出”的形式。</p>
+<p>数据量大也不意味着可以简单混在一起等概率采样。有些数据集轨迹很多，但任务和场景相对重复，可能淹没较小却更加多样的数据集。作者参考 Octo 的混合权重，降低部分低多样性数据的权重，提高任务和场景更丰富的数据的权重。</p>
+<p>作者还尝试加入后来新增的 DROID 数据，最初给予 10% 的混合权重。但训练中 DROID 的动作 token 准确率持续较低，说明当时的模型与采样配置尚未充分拟合这部分数据。因此，最终训练的后三分之一移除了 DROID。</p>
+<h3 id="设计选择">设计选择</h3>
+<p>在完整 OpenX 训练之前，作者先在较小的 BridgeData V2 上迭代模型。主要选择包括：</p>
+<ul>
+<li><strong>VLM 主干</strong>：比较 IDEFICS-1、LLaVA 和 Prismatic。不同主干在多物体场景中的语言指令理解能力存在明显差异，最终选择效果更好、代码也便于扩展的 Prismatic。</li>
+<li><strong>图像分辨率</strong>：比较 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>224</mn><mo>×</mo><mn>224</mn></mrow><annotation encoding="application/x-tex">224\times224</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">224</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">224</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>384</mn><mo>×</mo><mn>384</mn></mrow><annotation encoding="application/x-tex">384\times384</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">384</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">384</span></span></span></span>。在这些实验中，较高分辨率没有带来明显的机器人性能收益，却需要约三倍训练时间，因此最终使用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>224</mn><mo>×</mo><mn>224</mn></mrow><annotation encoding="application/x-tex">224\times224</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">224</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">224</span></span></span></span>。</li>
+<li><strong>视觉编码器</strong>：在机器人动作训练中更新视觉编码器。冻结视觉特征会损害控制表现，作者推测，机器人操作需要比一般图文任务更加精细的空间信息。</li>
+<li><strong>训练轮数</strong>：最终完成 27 个 epoch。机器人表现随着训练继续改善，直到训练动作 token 准确率超过 95%。这个 95% 是 token 预测准确率，不能当作任务成功率。</li>
+<li><strong>学习率</strong>：最终使用固定的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>5</mn></mrow></msup></mrow><annotation encoding="application/x-tex">2\times10^{-5}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">5</span></span></span></span></span></span></span></span></span></span></span></span>，没有观察到 learning rate warmup 的收益。</li>
+</ul>
+<h3 id="训练与部署">训练与部署</h3>
+<p>最终模型使用 64 张 A100 训练 14 天，约合 21,500 A100 GPU 小时，batch size 为 2048。</p>
+<p>部署时，论文报告完整模型以 bfloat16 加载约需 15 GB 显存，在单张 RTX 4090 上约为 6 Hz，尚未使用编译或其他推理加速。这里的频率是每秒生成完整控制动作的次数。对于低频桌面操作，这样的速度可以使用；对于需要几十 Hz 控制的双臂或灵巧操作，逐 token 解码就会成为限制。</p>
+<p>作者也提供远程推理服务，使机器人能够向外部 GPU 服务器发送观测并接收动作，不必在机器人本地配置能够运行整个模型的显卡。</p>
+<h2 id="代码">代码</h2>
+<p>OpenVLA 同时开放模型权重，以及机器人训练、微调和部署代码。代码基于 PyTorch，支持混合精度、FlashAttention 和 FSDP，既能在多机 GPU 上训练，也支持通过 Hugging Face 接口加载，以及后面的 LoRA 微调和量化推理。</p>
+<p>这部分开放的是建立在预训练组件之上的 OpenVLA 工作流程。SigLIP、DINOv2 和 Llama 2 提供了可用权重，但它们各自的全部预训练数据和训练代码并没有随 OpenVLA 一起开放。</p>
+<h2 id="实验">实验</h2>
+<h3 id="直接评估">直接评估</h3>
+<p>作者首先评估，预训练模型不经过目标任务微调，能否在 WidowX 和 Google Robot 上完成操作。这两类机器人及相应数据域已经包含在训练混合中，测试主要考察新的物体、布局、背景和指令组合，并不意味着模型能够直接控制任意从未见过的机器人。</p>
+<p>WidowX 使用 BridgeData V2 环境，共 17 个任务，每个任务测试 10 次；Google Robot 共 12 个任务，每个任务测试 5 次。各方法尽量使用相同的起始场景和物体位置。对比包括 RT-1-X、Octo，以及 55B 参数的 RT-2-X。</p>
+<p><img src="/blog/posts/a666fbaf/openvla-bridge-results.png" alt="BridgeData V2 上的泛化能力与语言条件控制"></p>
+<p>图来自原论文 Fig. 3。不同组分别改变背景、物体位置、物体形状，或要求模型理解新的语义与语言指令。</p>
+<p>下面分别列出两套环境的结果，数值为论文报告的 success rate。部分真实机器人任务允许按完成阶段计部分分数，因而这些数值不都等于“完整任务成功次数除以试验次数”；<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>±</mo></mrow><annotation encoding="application/x-tex">\pm</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord">±</span></span></span></span> 后为标准误。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th style="text-align:right">WidowX / BridgeData V2</th>
+<th style="text-align:right">Google Robot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RT-1-X</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>18.5</mn><mo>±</mo><mn>2.7</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">18.5\pm2.7\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">18.5</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">2.7%</span></span></span></span></td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>33.3</mn><mo>±</mo><mn>6.1</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">33.3\pm6.1\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">33.3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">6.1%</span></span></span></span></td>
+</tr>
+<tr>
+<td>Octo</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>20.0</mn><mo>±</mo><mn>2.6</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">20.0\pm2.6\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">20.0</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">2.6%</span></span></span></span></td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>26.7</mn><mo>±</mo><mn>5.8</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">26.7\pm5.8\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">26.7</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">5.8%</span></span></span></span></td>
+</tr>
+<tr>
+<td>RT-2-X</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>50.6</mn><mo>±</mo><mn>3.5</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">50.6\pm3.5\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">50.6</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">3.5%</span></span></span></span></td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>78.3</mn><mo>±</mo><mn>5.4</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">78.3\pm5.4\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">78.3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">5.4%</span></span></span></span></td>
+</tr>
+<tr>
+<td>OpenVLA</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>70.6</mn><mo>±</mo><mn>3.2</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">70.6\pm3.2\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">70.6</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">3.2%</span></span></span></span></td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>85.0</mn><mo>±</mo><mn>4.6</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">85.0\pm4.6\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">85.0</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4.6%</span></span></span></span></td>
+</tr>
+</tbody>
+</table>
+<p>结果来自附录 Table 4 和 Table 6。OpenVLA 在 Bridge 环境中比 RT-2-X 高 20 个百分点；Google Robot 上也取得更高的均值，但两者误差范围有重叠。论文摘要中的总体提升约 16.5 个百分点，对应这两套环境共 230 次试验的汇总，不能理解为每类任务都提高这么多。</p>
+<p>从具体类别看，OpenVLA 在视觉变化、运动变化和物体形状变化下表现较好，但 <strong>语义泛化并没有全面超过 RT-2-X</strong>。作者认为，RT-2-X 使用更多互联网预训练数据，并在机器人训练中继续混合视觉语言数据，可能更有利于保留这方面的能力；OpenVLA 的机器人训练阶段则只训练动作预测。</p>
+<p>比较时还需要注意，两个模型的机器人数据规模、视觉编码器和数据清理方式不同。OpenVLA 对 Bridge 数据开头的无效动作做了额外处理，这也是其 Bridge 表现改善的可能来源，不能将全部提升归因于更换模型主干。</p>
+<h3 id="新任务适配">新任务适配</h3>
+<p>直接评估之外，作者进一步研究：给定少量新环境的示范，OpenVLA 能否有效适配？</p>
+<p>这里使用 Franka-Tabletop 和 Franka-DROID 两套环境，包含放置物体、倒玉米、翻锅、按语言选择物体，以及清扫桌面等七个任务。每个任务提供 10 到 150 条示范，分别涉及 5 Hz 和 15 Hz 的控制设定。</p>
+<p><img src="/blog/posts/a666fbaf/openvla-franka-tasks.png" alt="Franka 桌面环境中的单指令任务与多指令任务"></p>
+<p>图来自原论文 Fig. 10，展示 Franka-Tabletop 的任务与测试变化；清扫桌面任务使用另一套 Franka-DROID 环境。</p>
+<p>主要对比有：从头训练的 Diffusion Policy、微调后的 Octo，以及没有经过 OpenX 机器人预训练、直接从 Prismatic 开始训练动作的 OpenVLA（scratch）。最后这一项很重要，它可以检查收益是否只是因为使用了 VLM，而不是机器人预训练。</p>
+<p>Diffusion Policy 还区分原始版本与 matched 版本。原始版本使用观测历史、机器人自身状态和 action chunk，预测绝对笛卡尔动作；matched 版本则与 OpenVLA 一样，只接收当前单张图像、不使用自身状态，并预测单步相对动作。因此，既需要看相近输入输出设定下的结果，也需要看更完整的 Diffusion Policy 能做到什么。</p>
+<p>下表摘自附录 Table 7，分别统计两个环境；每种方法共进行 99 次 Tabletop 试验和 30 次 DROID 试验。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th style="text-align:right">Franka-Tabletop</th>
+<th style="text-align:right">Franka-DROID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Diffusion Policy</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>48.5</mn><mo>±</mo><mn>4.9</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">48.5\pm4.9\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">48.5</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4.9%</span></span></span></span></td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>35.0</mn><mo>±</mo><mn>8.0</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">35.0\pm8.0\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">35.0</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">8.0%</span></span></span></span></td>
+</tr>
+<tr>
+<td>Diffusion Policy（matched）</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>43.4</mn><mo>±</mo><mn>4.7</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">43.4\pm4.7\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">43.4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4.7%</span></span></span></span></td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>26.7</mn><mo>±</mo><mn>7.5</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">26.7\pm7.5\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">26.7</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">7.5%</span></span></span></span></td>
+</tr>
+<tr>
+<td>Octo</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>43.4</mn><mo>±</mo><mn>4.4</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">43.4\pm4.4\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">43.4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4.4%</span></span></span></span></td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>38.3</mn><mo>±</mo><mn>8.5</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">38.3\pm8.5\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">38.3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">8.5%</span></span></span></span></td>
+</tr>
+<tr>
+<td>OpenVLA（scratch）</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>43.4</mn><mo>±</mo><mn>4.6</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">43.4\pm4.6\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">43.4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4.6%</span></span></span></span></td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>21.7</mn><mo>±</mo><mn>6.6</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">21.7\pm6.6\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">21.7</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">6.6%</span></span></span></span></td>
+</tr>
+<tr>
+<td>OpenVLA</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>67.2</mn><mo>±</mo><mn>4.0</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">67.2\pm4.0\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">67.2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4.0%</span></span></span></span></td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>58.3</mn><mo>±</mo><mn>7.2</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">58.3\pm7.2\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">58.3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">7.2%</span></span></span></span></td>
+</tr>
+</tbody>
+</table>
+<p>经过机器人预训练再微调的 OpenVLA 获得最高的平均表现，尤其擅长需要根据语言在多个物体和操作之间做选择的任务。与 scratch 的差距也表明， <strong>大规模机器人数据预训练提供了额外收益，不能仅靠 VLM 本身替代</strong>。</p>
+<p>但 Diffusion Policy 在部分固定任务中仍然更强。例如，在分布内的“把胡萝卜放进碗里”和“把玉米倒进锅里”任务中，它分别达到 90% 和 100%，OpenVLA 则为 70% 和 50%。作者也观察到 Diffusion Policy 的动作通常更加平滑和精确。因此，这些实验支持 OpenVLA 在多任务与语言条件控制中的优势，不能推出 VLA 在所有精细操作中都优于扩散策略。</p>
+<h3 id="LoRA">LoRA</h3>
+<p>前面的新任务实验采用全参数微调，每个任务使用 8 张 A100 训练约 5 到 15 小时。作者接着研究，能否保留适配效果，同时降低微调的资源需求。</p>
+<p>这里需要先区分实验模型： <strong>LoRA 和后面的量化实验，使用较小的机器人数据混合，以及仅含 SigLIP 的视觉编码器</strong>，与前面最终 OpenVLA 的 DINOv2 + SigLIP 结构有所不同。</p>
+<p>LoRA 的做法是保留原来的大矩阵权重，用两个较小矩阵表示可训练的低秩增量。这样，仍然可以调整模型的计算结果，但不必为所有原始权重计算并保存梯度。本文把 LoRA 加在模型的线性层上，而不是只修改最后的动作输出层。</p>
+<p>作者还比较了只训练最后一层、冻结视觉编码器，以及 sandwich 微调。最后一种方法仅更新视觉编码器、token embedding 和最后的 Transformer 层。下表来自 Table 1，使用两个代表性桌面任务及其分布外变化，共 33 次试验；显存统计的 batch size 为 16。</p>
+<table>
+<thead>
+<tr>
+<th>微调方式</th>
+<th style="text-align:right">success rate</th>
+<th style="text-align:right">可训练参数</th>
+<th style="text-align:right">训练显存</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全参数微调</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>69.7</mn><mo>±</mo><mn>7.2</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">69.7\pm7.2\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">69.7</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">7.2%</span></span></span></span></td>
+<td style="text-align:right">7,188.1 M</td>
+<td style="text-align:right">163.3 GB</td>
+</tr>
+<tr>
+<td>仅最后一层与 token embedding</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>30.3</mn><mo>±</mo><mn>6.1</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">30.3\pm6.1\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">30.3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">6.1%</span></span></span></span></td>
+<td style="text-align:right">465.1 M</td>
+<td style="text-align:right">51.4 GB</td>
+</tr>
+<tr>
+<td>冻结视觉编码器</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>47.0</mn><mo>±</mo><mn>6.9</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">47.0\pm6.9\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">47.0</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">6.9%</span></span></span></span></td>
+<td style="text-align:right">6,760.4 M</td>
+<td style="text-align:right">156.2 GB</td>
+</tr>
+<tr>
+<td>Sandwich</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>62.1</mn><mo>±</mo><mn>7.9</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">62.1\pm7.9\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">62.1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">7.9%</span></span></span></span></td>
+<td style="text-align:right">914.2 M</td>
+<td style="text-align:right">64.0 GB</td>
+</tr>
+<tr>
+<td>LoRA，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>32</mn></mrow><annotation encoding="application/x-tex">r=32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span></td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>68.2</mn><mo>±</mo><mn>7.5</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">68.2\pm7.5\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">68.2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">7.5%</span></span></span></span></td>
+<td style="text-align:right">97.6 M</td>
+<td style="text-align:right">59.7 GB</td>
+</tr>
+<tr>
+<td>LoRA，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">r=64</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">64</span></span></span></span></td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>68.2</mn><mo>±</mo><mn>7.8</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">68.2\pm7.8\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">68.2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">7.8%</span></span></span></span></td>
+<td style="text-align:right">195.2 M</td>
+<td style="text-align:right">60.5 GB</td>
+</tr>
+</tbody>
+</table>
+<p>其中，全参数微调和冻结视觉编码器的显存是 FSDP 分片到两张 GPU 后的总量。LoRA 在这组实验中与全参数微调的表现接近，而 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>32</mn></mrow><annotation encoding="application/x-tex">r=32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span> 只需训练约 1.4% 的参数。将 rank 增大到 64 没有带来明显改善，因此作者推荐默认使用 32。</p>
+<p>这也能解释为什么“只改最后一层”并不够：新环境的适配涉及视觉表示和整个动作预测过程。冻结原始权重、但为视觉相关线性层加入可训练增量的 LoRA，仍然允许视觉特征随任务调整，与完全冻结视觉编码器不是一回事。</p>
+<p>论文报告，LoRA 可以在单张 A100 上用约 10 到 15 小时完成新任务微调。不过，可训练参数减少，并不意味着整个模型的权重和中间激活都不再占显存；表中仍需约 60 GB，不能把“训练 1.4% 参数”理解为任意小显卡都能微调。</p>
+<h3 id="量化推理">量化推理</h3>
+<p>微调占用之外，模型部署时还要保存权重并反复执行前向计算。作者因此比较 bfloat16、int8 和 int4 推理，检查降低权重精度能否节省显存而不损害机器人表现。</p>
+<p>下表为 Table 2，在 8 个代表性 Bridge 任务上、每种精度共 80 次试验的结果，模型采用前面说明的 SigLIP 单编码器版本。</p>
+<table>
+<thead>
+<tr>
+<th>推理精度</th>
+<th style="text-align:right">success rate</th>
+<th style="text-align:right">显存</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bfloat16</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>71.3</mn><mo>±</mo><mn>4.8</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">71.3\pm4.8\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">71.3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4.8%</span></span></span></span></td>
+<td style="text-align:right">16.8 GB</td>
+</tr>
+<tr>
+<td>int8</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>58.1</mn><mo>±</mo><mn>5.1</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">58.1\pm5.1\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">58.1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">5.1%</span></span></span></span></td>
+<td style="text-align:right">10.2 GB</td>
+</tr>
+<tr>
+<td>int4</td>
+<td style="text-align:right"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>71.9</mn><mo>±</mo><mn>4.7</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">71.9\pm4.7\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">71.9</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4.7%</span></span></span></span></td>
+<td style="text-align:right">7.0 GB</td>
+</tr>
+</tbody>
+</table>
+<p>int4 在这些任务中保持了与 bfloat16 接近的表现，显存则降到一半以下。但这里出现了一个看似奇怪的结果：为什么 int8 反而比精度更低的 int4 差？</p>
+<p>原因不能只从数值精度理解。量化也会改变推理速度，新增的量化计算可能带来额外开销。在用于评估的 A5000 上，int8 只能达到约 1.2 Hz，而 int4 约为 3 Hz。Bridge 的数据采集使用 5 Hz 非阻塞控制，推理速度变慢会改变动作更新的时间间隔，进而改变实际控制过程。</p>
+<p>作者又在阻塞控制下补做实验，即等待当前动作完成后再继续下一个动作。此时，bfloat16、int8 和 int4 的平均表现分别为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>70.0</mn><mo>±</mo><mn>5.1</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">70.0\pm5.1\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">70.0</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">5.1%</span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>74.4</mn><mo>±</mo><mn>4.9</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">74.4\pm4.9\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">74.4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4.9%</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>68.8</mn><mo>±</mo><mn>5.2</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">68.8\pm5.2\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">68.8</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">5.2%</span></span></span></span>，误差范围重叠。这支持了控制时序对前面结果的影响，而不是说明“4 bit 天然比 8 bit 更准确”。</p>
+<p>对机器人策略而言，部署速度会直接改变策略与环境的交互。只检查离线动作预测误差，不能完整说明量化后的真实控制效果。</p>
+<h3 id="消融">消融</h3>
+<p>附录还在 8 个 Bridge 任务、每种方法 80 次试验上比较数据与视觉编码器：</p>
+<ul>
+<li>完整 OpenX 训练、双视觉编码器：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>76.3</mn><mo>±</mo><mn>4.8</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">76.3\pm4.8\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">76.3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4.8%</span></span></span></span>；</li>
+<li>只用 BridgeData V2 训练、保留双编码器：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>45.6</mn><mo>±</mo><mn>5.6</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">45.6\pm5.6\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">45.6</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">5.6%</span></span></span></span>；</li>
+<li>只用 BridgeData V2 训练、只保留 SigLIP：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>40.6</mn><mo>±</mo><mn>5.5</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">40.6\pm5.5\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">40.6</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">5.5%</span></span></span></span>。</li>
+</ul>
+<p>这组比较中，去掉 OpenX 训练的影响明显大于去掉 DINOv2。双视觉编码器能够提供帮助，但不能忽略机器人数据多样性本身的作用；而且后两个结果误差范围有重叠，不能把五个百分点的均值差距理解为已经在所有任务上验证的稳定收益。</p>
+<h3 id="LIBERO">LIBERO</h3>
+<p>除了真实机器人，作者还在 LIBERO 仿真环境中微调模型。它包含 Spatial、Object、Goal 和 Long 四组任务，分别侧重空间关系、物体变化、任务目标和长程操作。</p>
+<p>每组原本包含 10 个任务、每任务 50 条示范。作者重新渲染高分辨率图像，清除无效动作和回放失败的示范，再用于训练。各方法都只使用第三人称相机，每组任务独立训练；OpenVLA 使用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>32</mn></mrow><annotation encoding="application/x-tex">r=32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span> 的 LoRA。每组进行 500 次评估，并对三个随机种子取平均，因此每项结果对应共 1,500 次试验。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th style="text-align:right">Spatial</th>
+<th style="text-align:right">Object</th>
+<th style="text-align:right">Goal</th>
+<th style="text-align:right">Long</th>
+<th style="text-align:right">平均</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Diffusion Policy</td>
+<td style="text-align:right">78.3%</td>
+<td style="text-align:right">92.5%</td>
+<td style="text-align:right">68.3%</td>
+<td style="text-align:right">50.5%</td>
+<td style="text-align:right">72.4%</td>
+</tr>
+<tr>
+<td>Octo</td>
+<td style="text-align:right">78.9%</td>
+<td style="text-align:right">85.7%</td>
+<td style="text-align:right">84.6%</td>
+<td style="text-align:right">51.1%</td>
+<td style="text-align:right">75.1%</td>
+</tr>
+<tr>
+<td>OpenVLA</td>
+<td style="text-align:right">84.7%</td>
+<td style="text-align:right">88.4%</td>
+<td style="text-align:right">79.2%</td>
+<td style="text-align:right">53.7%</td>
+<td style="text-align:right">76.5%</td>
+</tr>
+</tbody>
+</table>
+<p>表中摘出 Table 12 的均值。OpenVLA 平均最好，但优势小于真实机器人适配实验，而且并非每组都领先：Object 上 Diffusion Policy 更好，Goal 上则是 Octo 更好。Long 任务的表现也说明，模型距离可靠地完成复杂长程操作还有明显差距。</p>
+<p>作者认为，OpenVLA 的机器人预训练数据全部来自真实环境，真实与仿真之间的差异可能限制了预训练收益。这是对结果的解释，论文并没有通过加入仿真预训练数据的对照实验单独验证这一原因。</p>
+<h2 id="核心点和不足">核心点和不足</h2>
+<p>OpenVLA 的核心价值，是把 <strong>预训练 VLM、跨机器人示范数据、动作 token 训练，以及可实际使用的微调和部署工具</strong> 连成一套开放流程。动作离散化和自回归预测并非它首次提出，论文更重要的贡献在于模型、数据配方和适配经验能够被后续研究使用与检验。</p>
+<p>但它仍有几个明显限制：</p>
+<ul>
+<li><strong>输入有限</strong>：原始模型每次只接收一张图像，没有结合多视角、机器人自身状态和观测历史。相同的当前画面可能对应不同运动状态，仅靠单帧不总能判断。</li>
+<li><strong>推理频率有限</strong>：每步七个 token 的串行生成增加延迟，也没有利用 action chunk 一次规划多个未来动作，不适合直接承担几十 Hz 的复杂双臂控制。</li>
+<li><strong>动作精度与可靠性有限</strong>：离散输出带来量化误差，部分固定精细任务仍不及 Diffusion Policy；许多测试任务的成功率也低于 90%。</li>
+<li><strong>泛化有数据边界</strong>：已有机器人上的新场景表现，不能等同于新机器人完全免微调。新的控制方式、相机配置或任务域通常还需要示范与适配。</li>
+</ul>
+<p>此外，模型大小、视觉特征选择，以及是否在机器人训练中继续混合互联网图文数据，都还没有得到充分研究。</p>
+<h2 id="总结">总结</h2>
+<p>理解 OpenVLA，可以沿着一个具体过程来看：先用预训练 VLM 读懂当前图像和指令，再把机器人示范中的连续动作转换成 token，用 next-token prediction 学习；部署时生成当前动作的全部 token，恢复控制量并执行，之后根据新的观测继续预测。</p>
+<p>这也解释了后续工作的改进方向：如果语言模型已经能提供有用的视觉与语言表示，那么动作一定要继续逐 token、自回归、离散地输出吗？后来的 <a href="/blog/posts/ab786ad6/">OpenVLA-OFT 笔记</a> 正是围绕并行解码、action chunking 和连续动作回归展开，可以接着对照阅读。</p>
+<h2 id="参考">参考</h2>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2406.09246v3">OpenVLA: An Open-Source Vision-Language-Action Model</a>，本文依据 arXiv v3，2024-09-05。</li>
+<li><a target="_blank" rel="noopener" href="https://openvla.github.io/">项目主页</a> 与 <a target="_blank" rel="noopener" href="https://github.com/openvla/openvla">官方代码</a>。</li>
+<li><a target="_blank" rel="noopener" href="https://huggingface.co/openvla/openvla-7b">OpenVLA-7B 模型说明</a>、<a target="_blank" rel="noopener" href="https://github.com/openvla/openvla/blob/main/prismatic/vla/action_tokenizer.py">动作 tokenizer</a> 与 <a target="_blank" rel="noopener" href="https://github.com/openvla/openvla/blob/main/prismatic/models/vlas/openvla.py">动作解码实现</a>。代码链接用于补充实现细节，仓库后续扩展不等同于本篇论文的原始设定。</li>
+</ul>
+<p>配图来自 Moo Jin Kim 等人的原论文 Fig. 2、Fig. 3 与 Fig. 10，原论文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> 许可。本文由 AI 协助生成初稿，尚待个人阅读修改。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://ziyuliu258.cn/blog">Derrick Liu</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://ziyuliu258.cn/blog/posts/a666fbaf/">https://ziyuliu258.cn/blog/posts/a666fbaf/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://ziyuliu258.cn/blog" target="_blank">Derrick Liu的个人博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">论文阅读笔记</a><a class="post-meta__tags" href="/blog/tags/Embodied-Intelligence/">Embodied Intelligence</a><a class="post-meta__tags" href="/blog/tags/VLA/">VLA</a></div><div class="post-share"><div class="social-share" data-image="/blog/images/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/blog/posts/ab786ad6/" title="论文阅读：Fine-Tuning Vision-Language-Action Models - Optimizing Speed and Success"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;ab786ad6&#x2F;oft-architecture.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-10-28</div><div class="info-item-2">论文阅读：Fine-Tuning Vision-Language-Action Models - Optimizing Speed and Success</div></div><div class="info-2"><div class="info-item-1"> 引：Moo Jin Kim、Chelsea Finn 和 Percy Liang 在这篇文章中研究，怎样更有效地将已有的 Vision-Language-Action 模型微调到新机器人和新任务。作者以 OpenVLA 为基础，组合并行动作解码、action chunking、连续动作和 L1 回归，提出 OpenVLA-OFT；在双臂实验中又加入 FiLM，增强语言对视觉特征的影响。    图为双臂 ALOHA 实验所用的 OpenVLA-OFT+：模型接收三路图像、机器人状态和语言，输出 25 个时间步的动作。图来自原论文 Fig. 1。  背景 VLA 可以理解为将视觉、语言与机器人动作接在一起的策略模型。例如，输入一张桌面图像和“把茄子放进锅里”，模型要根据当前场景产生机械臂动作；执行之后再观察环境，并继续决定后面的动作。 已有 VLA 在大规模机器人数据上预训练，能够理解一定的视觉和语言信息。但遇到新的机器人、新的动作空间或更快的控制频率时，通常仍需要用新任务的示范数据微调。论文研究的问题是：是否必须沿用预训练时的动作输出方式，才能有效利用预训练模型？ 作者以...</div></div></div></a><a class="pagination-related" href="/blog/posts/fab21ae1/" title="论文阅读：PatchTST"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;fab21ae1&#x2F;Pasted%20image%2020260123175115.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-03</div><div class="info-item-2">论文阅读：PatchTST</div></div><div class="info-2"><div class="info-item-1">引言 时间序列预测在许多实际应用中具有重要意义，如能源预测、交通流量预测、气象预测等。随着深度学习技术的进步，基于Transformer的模型在时间序列预测中表现出了强大的能力。然而，传统Transformer模型存在计算复杂度高、内存消耗大等问题，尤其在长序列预测中效果不佳。PatchTST模型通过创新性的设计，解决了这些问题，提出了分块（Patching）和通道独立性（Channel-independence）的解决方案，显著提高了时间序列预测的效率和精度。 模型  Tip表示学习（Representation Learning），也常被称为特征学习（Feature Learning），是指让模型自动地从原始数据中发现和提取“特征”或“表示”的技术，而不是依靠人工手动设计规则 。 可以暂且认为，表示学习可分为以下三种：  有监督表示学习：在学习特征的同时，利用标签（如未来的真实值）来纠正模型，让特征直接服务于特定目标 。 自监督表示学习：不利用标签，通过数据自身的结构（如掩码 Patch）来学习特征 。这是本文的核心亮点。 迁移学习（Transfer...</div></div></div></a><a class="pagination-related no-cover" href="/blog/posts/df0c4c42/" title="论文阅读笔记更新计划"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-04</div><div class="info-item-2">论文阅读笔记更新计划</div></div><div class="info-2"><div class="info-item-1">由于笔者的大三生涯马上结束，也真正上手科研有了接近一年的时间，所以突发奇想，想要将自己以往和未来的论文阅读笔记在博客上同步一下。这也可以算是监督自己的一种方式，避免偷懒和懈怠。 此前我使用Obsidian管理个人笔记已有一段时间，所以我vibe coding了一个插件（工具）来实现从Obsidian到hexo博客的一键迁移，后续我也会更新这个工具的使用方法。 过去的接近一年时间里，我一直在做关于时间序列预测的工作，虽然说也是三天打鱼两天晒网，但是磨洋工一年下来，总归还是有点收获。当然我的论文阅读范围并不局限于这一方向，基本是想读什么就读什么。或许读者能从我的笔记中获得一些帮助，那就是极好的事情。 </div></div></div></a><a class="pagination-related" href="/blog/posts/a96313f0/" title="论文阅读：Denoising Diffusion Probabilistic Models"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;a96313f0&#x2F;ddpm-process.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-10-26</div><div class="info-item-2">论文阅读：Denoising Diffusion Probabilistic Models</div></div><div class="info-2"><div class="info-item-1"> 引：DDPM 是 Jonathan Ho、Ajay Jain 和 Pieter Abbeel 在 2020 年提出的工作。它用一个固定的加噪过程构造不同难度的去噪任务，再学习反向过程，从纯高斯噪声逐步生成图像。本文最关键的部分是：怎样将反向分布的学习转化为噪声预测，以及为什么最终可以用一个简单的均方误差训练生成模型。 理解这条推导，也就能理解后来 DiT 等工作中噪声预测目标的来源。  背景 我们可以先想象一张清晰图像：如果不断往其中加入少量随机噪声，图像的细节会逐渐消失，最后几乎只剩噪声。这个破坏过程很容易实现，因为每次加入什么噪声、加入多少，都可以由我们自己决定。 DDPM 要做的是学习与之对应的生成过程：给模型一张噪声图，让它逐步得到噪声更少的状态，最终产生一张自然图像。这里学习的是数据的分布，模型需要知道什么样的图像结构是合理的，以及在当前噪声水平下应该怎样更新输入。 扩散概率模型在本文之前已经被提出。DDPM 的贡献在于，通过一套具体的参数化和训练目标，让这类模型得到了很好的图像生成效果，并说明了它与 Denoising Score Matching 和...</div></div></div></a><a class="pagination-related" href="/blog/posts/81cd8b0a/" title="论文阅读：Neural Discrete Representation Learning"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;81cd8b0a&#x2F;vq-vae-architecture.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-10-28</div><div class="info-item-2">论文阅读：Neural Discrete Representation Learning</div></div><div class="info-2"><div class="info-item-1"> 引：这篇由 Aaron van den Oord、Oriol Vinyals 和 Koray Kavukcuoglu 提出的工作，提出了 VQ-VAE（Vector Quantised Variational AutoEncoder）。它把 Encoder 输出的连续特征映射到一个可学习的离散码本，再用 Decoder 重建输入。关键问题是：离散选择不可导时，Encoder 和码本分别怎样学习？  背景 我们在 DDPM 和 DiT 中遇到过 latent：将图像映射到更紧凑的表示，再让模型在这个表示上工作。在常见的连续 VAE 中，latent 通常由高斯分布采样；而自然语言中的词、语音中的音素等对象，本身又有明显的离散结构。那么，可不可以让模型自己学习一组离散的表示？ 一种直接的办法是让 Encoder 输出一个编号，再由 Decoder 根据编号恢复输入。但编号的选择是离散操作：Encoder 的输出发生很小变化时，选中的编号可能不变，也可能突然跳到另一个值。梯度怎样穿过这样的选择，成为训练时的主要障碍。 另一个问题是 posterior collapse：当...</div></div></div></a><a class="pagination-related" href="/blog/posts/50ab24e6/" title="论文阅读：Nexus"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;50ab24e6&#x2F;image-20260913233526576.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-12</div><div class="info-item-2">论文阅读：Nexus</div></div><div class="info-2"><div class="info-item-1"> 引：本文作者大多为VAST的科研人员，最大的亮点是提出了一种新的拓扑表示方式，从而避免了此前的方式——将Mesh表示为一串离散Token，并使用Transformer自回归生成——引入的自回归过程累计误差以及Mesh本身并不具备的顺序性质。   背景 现有艺术 mesh 生成方法通常把 mesh 表示成一串离散 token，然后用自回归 Transformer 一个 token 一个 token 地预测。很多研究重点放在：怎么把 mesh 压缩成更短的序列，从而让训练和推理更容易。 虽然这些方法效果不错，但有三个核心问题：  第一，mesh 越复杂，序列越长，生成一个 mesh 需要很多步自回归预测，所以推理可能很慢。 第二，自回归过程容易误差累积：前面某些 token 一旦错了，后面的 mesh 序列可能就全乱了。 此外，mesh 本身其实没有天然顺序，不应该被强行当作一个线性序列；它更像图像、点云一样，应该作为整体来建模。  已有一些基于 diffusion 的方法尝试直接处理三角面或...</div></div></div></a></div></div><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Derrick Liu</div><div class="author-info-description">An undergraduate majoring in CS.</div><div class="site-data"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">26</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">20</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ziyuliu258"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/ziyuliu258" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1209830516abc@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%86%E8%A7%89%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.1.</span> <span class="toc-text">视觉语言模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83"><span class="toc-number">2.2.</span> <span class="toc-text">训练</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E7%90%86"><span class="toc-number">2.3.</span> <span class="toc-text">推理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE"><span class="toc-number">2.4.</span> <span class="toc-text">数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E8%AE%A1%E9%80%89%E6%8B%A9"><span class="toc-number">2.5.</span> <span class="toc-text">设计选择</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E4%B8%8E%E9%83%A8%E7%BD%B2"><span class="toc-number">2.6.</span> <span class="toc-text">训练与部署</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81"><span class="toc-number">3.</span> <span class="toc-text">代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C"><span class="toc-number">4.</span> <span class="toc-text">实验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B4%E6%8E%A5%E8%AF%84%E4%BC%B0"><span class="toc-number">4.1.</span> <span class="toc-text">直接评估</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B0%E4%BB%BB%E5%8A%A1%E9%80%82%E9%85%8D"><span class="toc-number">4.2.</span> <span class="toc-text">新任务适配</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LoRA"><span class="toc-number">4.3.</span> <span class="toc-text">LoRA</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8F%E5%8C%96%E6%8E%A8%E7%90%86"><span class="toc-number">4.4.</span> <span class="toc-text">量化推理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E8%9E%8D"><span class="toc-number">4.5.</span> <span class="toc-text">消融</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LIBERO"><span class="toc-number">4.6.</span> <span class="toc-text">LIBERO</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E7%82%B9%E5%92%8C%E4%B8%8D%E8%B6%B3"><span class="toc-number">5.</span> <span class="toc-text">核心点和不足</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">7.</span> <span class="toc-text">参考</span></a></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url(/blog/images/bg2.jpg);"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Derrick Liu</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js"></script><script defer src="/blog/js/liquid-glass.js?v=73ea3c53b9d0"></script><script src="/blog/js/tw_cn.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-category":"Announcements","data-mapping":"pathname","data-strict":"1","data-lang":"zh-CN","data-input-position":"top","data-reactions-enabled":"1","data-emit-metadata":"0"}
+  const siteRoot = "/blog/"
+
+  // Keep existing Discussion keys regardless of the configured blog root.
+  const pathname = location.pathname.startsWith(siteRoot)
+    ? '/' + location.pathname.slice(siteRoot.length)
+    : location.pathname
+  const pathnameTerm = pathname.length < 2 ? 'index' : pathname.slice(1).replace(/\.\w+$/, '')
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'noborder_dark' : 'noborder_light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : (!option || !option['data-mapping'] || option['data-mapping'] === 'pathname')
+        ? { 'data-mapping': 'specific', 'data-term': pathnameTerm }
+        : { 'data-mapping': option['data-mapping'] }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'ziyuliu258/ziyuliu258.github.io',
+      'data-repo-id': 'R_kgDONzQxiw',
+      'data-category-id': 'DIC_kwDONzQxi84DJPXY',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !true) {
+    if (true) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script>(() => {
+  const destroyAplayer = () => {
+    if (window.aplayers) {
+      for (let i = 0; i < window.aplayers.length; i++) {
+        if (!window.aplayers[i].options.fixed) {
+          window.aplayers[i].destroy()
+        }
+      }
+    }
+  }
+
+  const runMetingJS = () => {
+    typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+  }
+
+  btf.addGlobalFn('pjaxSend', destroyAplayer, 'destroyAplayer')
+  btf.addGlobalFn('pjaxComplete', loadMeting, 'runMetingJS')
+})()</script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"]):not([href="https://ziyuliu258.cn/profile/"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      pjax.loadUrl('/blog/404.html')
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

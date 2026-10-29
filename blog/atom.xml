@@ -12,14 +12,32 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>日拱一卒，功不唐捐。</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-10-27T19:24:26.621Z</updated>
+  <updated>2026-10-29T16:44:22.525Z</updated>
   <entry>
     <author>
       <name>Derrick Liu</name>
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="生成模型" scheme="https://ziyuliu258.cn/blog/tags/%E7%94%9F%E6%88%90%E6%A8%A1%E5%9E%8B/"/>
+    <category term="Embodied Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Embodied-Intelligence/"/>
+    <category term="VLA" scheme="https://ziyuliu258.cn/blog/tags/VLA/"/>
+    <id>https://ziyuliu258.cn/blog/posts/a666fbaf/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/a666fbaf/"/>
+    <published>2026-10-29T16:35:11.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：Moo Jin Kim、Karl Pertsch、Siddharth Karamcheti 等人在这篇文章中提出 OpenVLA，将已有的视觉语言模型微调为机器人控制策略。模型接收一张图像和一条指令，将七维机器人动作转换为离散]]>
+    </summary>
+    <title>论文阅读：OpenVLA: An Open-Source Vision-Language-Action Model</title>
+    <updated>2026-10-29T16:44:22.525Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="VQ-VAE" scheme="https://ziyuliu258.cn/blog/tags/VQ-VAE/"/>
     <category term="VAE" scheme="https://ziyuliu258.cn/blog/tags/VAE/"/>
     <id>https://ziyuliu258.cn/blog/posts/81cd8b0a/</id>
     <link href="https://ziyuliu258.cn/blog/posts/81cd8b0a/"/>
@@ -29,7 +47,7 @@
 <p>引：这篇由 Aaron van den Oord、Oriol Vinyals 和 Koray Kavukcuoglu 提出的工作，提出了 <strong>VQ-VAE（Vector Quantised Variational]]>
     </summary>
     <title>论文阅读：Neural Discrete Representation Learning</title>
-    <updated>2026-10-27T19:24:26.621Z</updated>
+    <updated>2026-10-29T15:15:15.130Z</updated>
   </entry>
   <entry>
     <author>
@@ -37,7 +55,7 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="机器人" scheme="https://ziyuliu258.cn/blog/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/"/>
+    <category term="Embodied Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Embodied-Intelligence/"/>
     <category term="VLA" scheme="https://ziyuliu258.cn/blog/tags/VLA/"/>
     <id>https://ziyuliu258.cn/blog/posts/ab786ad6/</id>
     <link href="https://ziyuliu258.cn/blog/posts/ab786ad6/"/>
@@ -47,7 +65,7 @@
 <p>引：Moo Jin Kim、Chelsea Finn 和 Percy Liang 在这篇文章中研究，怎样更有效地将已有的 Vision-Language-Action 模型微调到新机器人和新任务。作者以 OpenVLA]]>
     </summary>
     <title>论文阅读：Fine-Tuning Vision-Language-Action Models - Optimizing Speed and Success</title>
-    <updated>2026-10-27T19:23:18.262Z</updated>
+    <updated>2026-10-29T15:14:38.604Z</updated>
   </entry>
   <entry>
     <author>
@@ -55,7 +73,7 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="扩散模型" scheme="https://ziyuliu258.cn/blog/tags/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B/"/>
+    <category term="Diffusion Models" scheme="https://ziyuliu258.cn/blog/tags/Diffusion-Models/"/>
     <category term="论文精读" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E7%B2%BE%E8%AF%BB/"/>
     <id>https://ziyuliu258.cn/blog/posts/a96313f0/</id>
     <link href="https://ziyuliu258.cn/blog/posts/a96313f0/"/>
@@ -65,7 +83,7 @@
 <p>引：DDPM 是 Jonathan Ho、Ajay Jain 和 Pieter Abbeel 在 2020]]>
     </summary>
     <title>论文阅读：Denoising Diffusion Probabilistic Models</title>
-    <updated>2026-10-28T10:27:58.635Z</updated>
+    <updated>2026-10-29T15:14:51.608Z</updated>
   </entry>
   <entry>
     <author>
@@ -73,7 +91,7 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="扩散模型" scheme="https://ziyuliu258.cn/blog/tags/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B/"/>
+    <category term="Diffusion Models" scheme="https://ziyuliu258.cn/blog/tags/Diffusion-Models/"/>
     <category term="Transformer" scheme="https://ziyuliu258.cn/blog/tags/Transformer/"/>
     <id>https://ziyuliu258.cn/blog/posts/f097c2bc/</id>
     <link href="https://ziyuliu258.cn/blog/posts/f097c2bc/"/>
@@ -83,7 +101,7 @@
 <p>引：这篇由 William Peebles 和 Saining Xie 提出的工作，将 latent diffusion 中常用的 U-Net 去噪主干替换成了 Transformer，形成 <strong>Diffusion]]>
     </summary>
     <title>论文阅读：Scalable Diffusion Models with Transformers</title>
-    <updated>2026-10-27T03:12:36.032Z</updated>
+    <updated>2026-10-29T15:15:46.359Z</updated>
   </entry>
   <entry>
     <author>
@@ -108,7 +126,7 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="3D生成" scheme="https://ziyuliu258.cn/blog/tags/3D%E7%94%9F%E6%88%90/"/>
+    <category term="3D Generation" scheme="https://ziyuliu258.cn/blog/tags/3D-Generation/"/>
     <id>https://ziyuliu258.cn/blog/posts/50ab24e6/</id>
     <link href="https://ziyuliu258.cn/blog/posts/50ab24e6/"/>
     <published>2026-09-12T04:16:28.000Z</published>
@@ -117,7 +135,7 @@
 <p>引：本文作者大多为VAST的科研人员，最大的亮点是提出了一种新的拓扑表示方式，从而避免了此前的方式——将Mesh表示为一串离散Token，并使用Transformer自回归生成——引入的<strong>自回归过程累计误差</strong>以及<st]]>
     </summary>
     <title>论文阅读：Nexus</title>
-    <updated>2026-10-28T10:27:58.635Z</updated>
+    <updated>2026-10-29T15:15:33.462Z</updated>
   </entry>
   <entry>
     <author>
@@ -340,24 +358,5 @@
     </summary>
     <title>网线直连情况下的开发板SSH连接指南</title>
     <updated>2025-09-04T17:13:29.787Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="技术" scheme="https://ziyuliu258.cn/blog/categories/%E6%8A%80%E6%9C%AF/"/>
-    <category term="昇腾开发板" scheme="https://ziyuliu258.cn/blog/tags/%E6%98%87%E8%85%BE%E5%BC%80%E5%8F%91%E6%9D%BF/"/>
-    <id>https://ziyuliu258.cn/blog/posts/fa9d3431/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/fa9d3431/"/>
-    <published>2025-07-31T16:00:00.000Z</published>
-    <summary>
-      <![CDATA[<h2 id="基本介绍">基本介绍</h2>
-<blockquote>
-<p>以下视频对于ZeroTier的介绍很好，推荐观看：</p>
-<p><a]]>
-    </summary>
-    <title>ZeroTier使用指导</title>
-    <updated>2025-09-04T17:07:38.361Z</updated>
   </entry>
 </feed>
