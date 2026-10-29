@@ -310,6 +310,129 @@
   color: var(--font-color);
 }
 
+/* 音乐页：歌单和播放器共用博客的浅蓝色。 */
+#article-container .music-library-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+#article-container .music-library h2,
+#article-container .music-library h3 {
+  margin: 0;
+  padding: 0;
+}
+
+#article-container .music-library h2::before,
+#article-container .music-library h3::before {
+  content: none;
+}
+
+.music-library-kicker {
+  color: #3987bc;
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+#article-container .music-library p {
+  margin: 0.4rem 0;
+}
+
+.music-player-panel {
+  padding: 1.5rem;
+  border: 1px solid rgba(73, 177, 245, 0.25);
+  border-radius: 16px;
+  background: rgba(73, 177, 245, 0.08);
+}
+
+.music-now-playing {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.music-cover {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  color: #3976a9;
+  background: rgba(73, 177, 245, 0.18);
+  font-size: 2rem;
+}
+
+.music-library audio-player,
+.music-library audio-skin {
+  display: block;
+  width: 100%;
+}
+
+.music-status {
+  font-size: 0.9em;
+}
+
+#article-container .music-tracks {
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.music-tracks li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 0.6rem;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.music-tracks li.is-current {
+  border-radius: 8px;
+  background: rgba(73, 177, 245, 0.12);
+}
+
+.music-track-number {
+  color: #3987bc;
+  font-variant-numeric: tabular-nums;
+}
+
+.music-track-info {
+  flex: 1;
+  min-width: 0;
+  color: var(--font-color);
+  text-align: left;
+}
+
+.music-track-info span,
+.music-track-info small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.music-track-info small {
+  opacity: 0.75;
+}
+
+.music-tracks a {
+  flex: none;
+  font-size: 0.85em;
+}
+
+@media (max-width: 600px) {
+  #article-container .music-library-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+  .music-tracks li {
+    gap: 0.6rem;
+  }
+}
+
 #article-container .series-reading-list li {
   padding: 0.5rem 0;
 }
