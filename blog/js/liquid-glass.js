@@ -5,8 +5,8 @@
  * - Static cornerSpecular (TL primary + BR antipodal at 65% with exponential taper) + directional edgeSpec lip
  * - Performance: shared filter + texture cache by card geometry ( identical-sized post cards share 1 SVG filter & 1 Canvas pass )
  * - Sidebar widgets always get the effect.
- * - Homepage cards and the series directory get it only when those lists
- *   carry .nc, which _config.butterfly.yml index_column_glass: true adds.
+ * - Homepage and series cards get it unless the list has .no-card-glass
+ *   (index_column_glass: false in _config.butterfly.yml).
  */
 (() => {
   'use strict'
@@ -15,8 +15,8 @@
   window.__blogLiquidGlass = true
 
   const selector = [
-    '#recent-posts.nc .recent-post-item',
-    '#recent-posts.nc .home-announcement',
+    '#recent-posts.nc:not(.no-card-glass) .recent-post-item',
+    '#recent-posts.nc:not(.no-card-glass) .home-announcement',
     '#aside-content .card-widget'
   ].join(', ')
 
