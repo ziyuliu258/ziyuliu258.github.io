@@ -217,18 +217,31 @@
   let playlist = null;
   document.addEventListener('pjax:complete', initPage);
   initPage();
-  fetch(assetRoot + 'music/playlist.json', { cache: 'no-store' })
-    .then((response) => { if (!response.ok) throw new Error('playlist unavailable'); return response.json(); })
-    .then((data) => {
+  let refreshInFlight = false;
+  async function refreshPlaylist() {
+    if (refreshInFlight) return;
+    refreshInFlight = true;
+    try {
+      const response = await fetch(assetRoot + 'music/playlist.json', { cache: 'no-store' });
+      if (!response.ok) throw new Error('playlist unavailable');
+      const data = await response.json();
       if (!Array.isArray(data.tracks)) throw new Error('invalid playlist');
+      const changed = !playlist || JSON.stringify(data) !== JSON.stringify(playlist);
       playlist = data;
       tracks = data.tracks;
-      renderPage(data);
-      const first = tracks.find((track) => track.available);
-      if (first) select(first, false);
-      else setStatus('当前歌单暂无可直接播放的歌曲，请在网易云收听。');
-    })
-    .catch(() => {
-      setStatus('歌单加载失败，请稍后刷新页面重试。');
-    });
+      if (changed) renderPage(data);
+      if (!current) {
+        const first = tracks.find((track) => track.available);
+        if (first) select(first, false);
+        else setStatus('当前歌单暂无可直接播放的歌曲，请在网易云收听。');
+      }
+    } catch (_) {
+      if (!playlist) setStatus('歌单加载失败，请稍后刷新页面重试。');
+    } finally {
+      refreshInFlight = false;
+    }
+  }
+  refreshPlaylist();
+  setInterval(() => { if (!document.hidden) refreshPlaylist(); }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshPlaylist(); });
 })();
