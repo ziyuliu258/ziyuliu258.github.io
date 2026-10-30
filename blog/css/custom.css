@@ -889,15 +889,15 @@
   background: rgba(255, 157, 187, 0.14);
 } */
 
-/* 单双栏：主题用 transition: all（含 -webkit-transition）去动画主栏宽度。
-   公式、正文和毛玻璃会逐帧重排，切换就像掉帧。宽度改为瞬间确定；侧栏只过渡透明度和位移。 */
+/* 平时不动画主栏宽度，避免滚动和悬停把整页重排进去。
+   只有双栏收成单栏时，主栏用 0.3s 从 74% 变到 100%，正文随宽度折行。 */
 .layout > div:first-child {
   -webkit-transition: box-shadow 0.3s ease !important;
   transition: box-shadow 0.3s ease !important;
 }
 
 @media screen and (min-width: 900px) {
-  html.aside-motion .layout > div:first-child,
+  html.aside-motion:not(.aside-hiding) .layout > div:first-child,
   html.aside-glass-pause .layout > div:first-child {
     -webkit-transition: none !important;
     transition: none !important;
@@ -907,33 +907,46 @@
     display: block;
   }
 
-  html.hide-aside.aside-motion .layout > div:first-child {
+  html.hide-aside.aside-motion:not(.aside-hiding) .layout > div:first-child {
     width: 74%;
   }
 
   /* 侧栏本身不能做透明度或位移：祖先一旦分组，子卡片的 backdrop-filter 会失效，
-     白天只剩下一层白底。磨砂从第一帧就在，只让卡片里的文字浮现或隐去。 */
+     白天只剩下一层白底。出现时磨砂先在，只让卡片里的文字浮现。 */
   html.aside-showing .layout > .aside-content .card-widget > * {
     animation: aside-ink-in 0.32s ease both;
   }
 
-  html.aside-hiding .layout > .aside-content {
-    pointer-events: none;
+  html.aside-hiding .layout > div:first-child {
+    width: 100%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    -webkit-transition: width 0.3s ease !important;
+    transition: width 0.3s ease !important;
   }
 
-  html.aside-hiding .layout > .aside-content .card-widget > * {
-    animation: aside-ink-out 0.22s ease forwards;
+  html.aside-hiding .layout > .aside-content {
+    width: 0 !important;
+    min-width: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+    overflow: hidden;
+    pointer-events: none;
+    -webkit-transition: width 0.3s ease, padding-left 0.3s ease, padding-right 0.3s ease;
+    transition: width 0.3s ease, padding-left 0.3s ease, padding-right 0.3s ease;
+  }
+
+  html.aside-hiding .layout > .aside-content > * {
+    width: var(--aside-freeze);
+    max-width: none;
   }
 }
 
 @keyframes aside-ink-in {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-
-@keyframes aside-ink-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
 }
 
 @media screen and (min-width: 900px) and (prefers-reduced-motion: reduce) {

@@ -1,4 +1,4 @@
-/* 单双栏切换时给侧栏补一层透明度/位移动画，并躲开逐帧改宽度。 */
+/* 单双栏：侧栏出现时只让文字浮现；收成单栏时主栏变宽，正文随宽度折行。 */
 (() => {
   if (window.__blogAsideMotion) return
   window.__blogAsideMotion = true
@@ -14,6 +14,7 @@
     clearTimeout(timer)
     root.classList.add('aside-glass-pause')
     root.classList.remove('aside-motion', 'aside-showing', 'aside-hiding')
+    document.querySelector('.layout > .aside-content')?.style.removeProperty('--aside-freeze')
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         root.classList.remove('aside-glass-pause')
@@ -33,16 +34,28 @@
       const aside = document.querySelector('.layout > .aside-content')
       if (!aside) return
       const showing = root.classList.contains('hide-aside')
+      if (!showing) {
+        const style = getComputedStyle(aside)
+        const inner = aside.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0)
+        aside.style.setProperty('--aside-freeze', `${Math.round(inner)}px`)
+      }
       root.classList.remove('aside-showing', 'aside-hiding')
       root.classList.add('aside-motion', showing ? 'aside-showing' : 'aside-hiding')
       void aside.offsetWidth
       clearTimeout(timer)
-      timer = setTimeout(settle, 420)
+      timer = setTimeout(settle, 520)
     }, true)
 
     document.addEventListener('animationend', event => {
-      if (!root.classList.contains('aside-motion')) return
-      if (event.animationName !== 'aside-ink-in' && event.animationName !== 'aside-ink-out') return
+      if (!root.classList.contains('aside-showing')) return
+      if (event.animationName !== 'aside-ink-in') return
+      settle()
+    })
+
+    document.addEventListener('transitionend', event => {
+      if (!root.classList.contains('aside-hiding')) return
+      if (event.propertyName !== 'width') return
+      if (!(event.target instanceof Element) || !event.target.matches('.layout > div:first-child')) return
       settle()
     })
   }
