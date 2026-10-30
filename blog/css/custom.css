@@ -37,6 +37,31 @@
   --glass-border: rgba(255, 255, 255, 0.45);
   --glass-shadow: rgba(20, 32, 54, 0.16);
   --glass-shadow-hover: rgba(20, 32, 54, 0.24);
+  /* 下面每一处单独调，改一个不会带动另一个。 */
+  --home-bg: rgba(255, 255, 255, 0.80);
+  --home-blur: 14px;
+  --home-saturate: 165%;
+  --series-bg: rgba(255, 255, 255, 0.80);
+  --series-blur: 14px;
+  --series-saturate: 165%;
+  --post-bg: rgba(255, 255, 255, 0.80);
+  --post-blur: 14px;
+  --post-saturate: 165%;
+  --archive-bg: rgba(255, 255, 255, 0.80);
+  --archive-blur: 14px;
+  --archive-saturate: 165%;
+  --tag-bg: rgba(255, 255, 255, 0.80);
+  --tag-blur: 14px;
+  --tag-saturate: 165%;
+  --category-bg: rgba(255, 255, 255, 0.80);
+  --category-blur: 14px;
+  --category-saturate: 165%;
+  --page-bg: rgba(255, 255, 255, 0.80);
+  --page-blur: 14px;
+  --page-saturate: 165%;
+  --aside-bg: rgba(255, 255, 255, 0.36);
+  --aside-blur: 14px;
+  --aside-saturate: 165%;
 }
 
 [data-theme='dark'] {
@@ -49,12 +74,16 @@
   --glass-border: rgba(255, 255, 255, 0.18);
   --glass-shadow: rgba(0, 0, 0, 0.32);
   --glass-shadow-hover: rgba(0, 0, 0, 0.44);
+  --home-bg: rgba(20, 25, 35, 0.82);
+  --series-bg: rgba(20, 25, 35, 0.82);
+  --post-bg: rgba(20, 25, 35, 0.82);
+  --archive-bg: rgba(20, 25, 35, 0.82);
+  --tag-bg: rgba(20, 25, 35, 0.82);
+  --category-bg: rgba(20, 25, 35, 0.82);
+  --page-bg: rgba(20, 25, 35, 0.82);
+  --aside-bg: rgba(16, 20, 28, 0.32);
 }
 
-#recent-posts .recent-post-item,
-#recent-posts .home-announcement,
-#aside-content .card-widget,
-.layout > div:first-child:not(.nc),
 #article-container .shuoshuo-item,
 .type-404 .error-content,
 .layout .pagination > *:not(.space),
@@ -68,6 +97,103 @@
     0 4px 12px -4px var(--glass-shadow);
   -webkit-backdrop-filter: var(--glass-backdrop, blur(var(--glass-blur)) saturate(var(--glass-saturate)));
   backdrop-filter: var(--glass-backdrop, blur(var(--glass-blur)) saturate(var(--glass-saturate)));
+}
+
+/* 首页卡片。不含专栏总览。 */
+#recent-posts:not(.series-directory) .recent-post-item,
+#recent-posts:not(.series-directory) .home-announcement {
+  background: var(--home-bg);
+  border: none;
+  border-radius: var(--glass-radius);
+  box-shadow:
+    0 16px 40px -12px var(--glass-shadow),
+    0 4px 12px -4px var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--home-blur)) saturate(var(--home-saturate));
+  backdrop-filter: blur(var(--home-blur)) saturate(var(--home-saturate));
+}
+
+/* 专栏总览的每一块。 */
+#recent-posts.series-directory .recent-post-item {
+  background: var(--series-bg);
+  border: none;
+  border-radius: var(--glass-radius);
+  box-shadow:
+    0 16px 40px -12px var(--glass-shadow),
+    0 4px 12px -4px var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--series-blur)) saturate(var(--series-saturate));
+  backdrop-filter: blur(var(--series-blur)) saturate(var(--series-saturate));
+}
+
+/* 正文。 */
+#post {
+  background: var(--post-bg);
+  border: none;
+  border-radius: var(--glass-radius);
+  box-shadow:
+    0 16px 40px -12px var(--glass-shadow),
+    0 4px 12px -4px var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--post-blur)) saturate(var(--post-saturate));
+  backdrop-filter: blur(var(--post-blur)) saturate(var(--post-saturate));
+}
+
+/* 归档。 */
+#archive {
+  background: var(--archive-bg);
+  border: none;
+  border-radius: var(--glass-radius);
+  box-shadow:
+    0 16px 40px -12px var(--glass-shadow),
+    0 4px 12px -4px var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--archive-blur)) saturate(var(--archive-saturate));
+  backdrop-filter: blur(var(--archive-blur)) saturate(var(--archive-saturate));
+}
+
+/* 标签。 */
+#tag {
+  background: var(--tag-bg);
+  border: none;
+  border-radius: var(--glass-radius);
+  box-shadow:
+    0 16px 40px -12px var(--glass-shadow),
+    0 4px 12px -4px var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--tag-blur)) saturate(var(--tag-saturate));
+  backdrop-filter: blur(var(--tag-blur)) saturate(var(--tag-saturate));
+}
+
+/* 分类。 */
+#category {
+  background: var(--category-bg);
+  border: none;
+  border-radius: var(--glass-radius);
+  box-shadow:
+    0 16px 40px -12px var(--glass-shadow),
+    0 4px 12px -4px var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--category-blur)) saturate(var(--category-saturate));
+  backdrop-filter: blur(var(--category-blur)) saturate(var(--category-saturate));
+}
+
+/* 音乐、友链，以及点进某一专栏后的文章列表。 */
+#page {
+  background: var(--page-bg);
+  border: none;
+  border-radius: var(--glass-radius);
+  box-shadow:
+    0 16px 40px -12px var(--glass-shadow),
+    0 4px 12px -4px var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--page-blur)) saturate(var(--page-saturate));
+  backdrop-filter: blur(var(--page-blur)) saturate(var(--page-saturate));
+}
+
+/* 侧栏。折射高光仍由 liquid-glass.js 写到 --glass-backdrop。 */
+#aside-content .card-widget {
+  background: var(--aside-bg);
+  border: none;
+  border-radius: var(--glass-radius);
+  box-shadow:
+    0 16px 40px -12px var(--glass-shadow),
+    0 4px 12px -4px var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-backdrop, blur(var(--aside-blur)) saturate(var(--aside-saturate)));
+  backdrop-filter: var(--glass-backdrop, blur(var(--aside-blur)) saturate(var(--aside-saturate)));
 }
 
 /* 彻底裁剪掉圆角矩形外的 backdrop-filter 溢出残影，保证边缘绝对锐利干净 */
@@ -108,11 +234,6 @@
   box-shadow: 0 8px 24px -12px var(--glass-shadow);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-}
-
-/* 阅读区域更厚一些，保留长篇正文、公式和代码的清晰度。 */
-.layout > div:first-child:not(.nc) {
-  background: var(--glass-reading-tint);
 }
 
 /* 静态对角与唇边高光通过 JS 按 shader 公式绘制到 ::after，不截获点击。 */
@@ -892,12 +1013,6 @@
   color: var(--font-color);
   opacity: 0.65;
   font-size: 0.85em;
-}
-
-/* index_column_glass 为 false 时，首页和专栏卡片仍各自独立，背景与正文栏相同。 */
-#recent-posts.no-card-glass .recent-post-item,
-#recent-posts.no-card-glass .home-announcement {
-  background: var(--glass-reading-tint);
 }
 
 #recent-posts.series-directory .series-directory-item {
