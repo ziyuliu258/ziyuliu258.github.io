@@ -13,7 +13,7 @@
     if (!root.classList.contains('aside-motion')) return
     clearTimeout(timer)
     root.classList.add('aside-glass-pause')
-    root.classList.remove('aside-motion')
+    root.classList.remove('aside-motion', 'aside-showing', 'aside-hiding')
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         root.classList.remove('aside-glass-pause')
@@ -32,16 +32,17 @@
       if (motionQuery.matches || !desktopQuery.matches) return
       const aside = document.querySelector('.layout > .aside-content')
       if (!aside) return
-      root.classList.add('aside-motion')
+      const showing = root.classList.contains('hide-aside')
+      root.classList.remove('aside-showing', 'aside-hiding')
+      root.classList.add('aside-motion', showing ? 'aside-showing' : 'aside-hiding')
       void aside.offsetWidth
       clearTimeout(timer)
       timer = setTimeout(settle, 420)
     }, true)
 
-    document.addEventListener('transitionend', event => {
+    document.addEventListener('animationend', event => {
       if (!root.classList.contains('aside-motion')) return
-      if (!(event.target instanceof Element) || !event.target.matches('.layout > .aside-content')) return
-      if (event.propertyName !== 'opacity') return
+      if (event.animationName !== 'aside-ink-in' && event.animationName !== 'aside-ink-out') return
       settle()
     })
   }
