@@ -190,12 +190,7 @@
       const artist = document.createElement('small');
       artist.textContent = track.artist;
       info.append(name, artist);
-      const link = document.createElement('a');
-      link.href = 'https://music.163.com/song?id=' + encodeURIComponent(track.id);
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.textContent = track.available ? '网易云 ↗' : '网易云收听 ↗';
-      li.append(number, info, link);
+      li.append(number, info);
       list.append(li);
     });
     update();

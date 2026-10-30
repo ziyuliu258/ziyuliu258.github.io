@@ -606,11 +606,6 @@
   opacity: 0.75;
 }
 
-.music-tracks a {
-  flex: none;
-  font-size: 0.85em;
-}
-
 @media (max-width: 600px) {
   #article-container .music-library-heading {
     align-items: start;
