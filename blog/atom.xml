@@ -12,7 +12,24 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-10-29T17:13:57.350Z</updated>
+  <updated>2026-10-30T19:24:39.850Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="LLM" scheme="https://ziyuliu258.cn/blog/tags/LLM/"/>
+    <id>https://ziyuliu258.cn/blog/posts/daada0d9/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/daada0d9/"/>
+    <published>2026-10-30T19:17:46.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：Edward Hu、Yelong Shen 等人在这篇文章中提出 LoRA。全量微调会为每个下游任务保存一整份与预训练模型同样大的参数；LoRA 改为冻结预训练权重，只训练插在权重旁边的低秩分解。以 GPT-3 175B]]>
+    </summary>
+    <title>论文阅读：LoRA: Low-Rank Adaptation of Large Language Models</title>
+    <updated>2026-10-30T19:24:39.850Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -339,23 +356,5 @@
     </summary>
     <title>维护日志</title>
     <updated>2026-10-23T19:07:02.599Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="技术" scheme="https://ziyuliu258.cn/blog/categories/%E6%8A%80%E6%9C%AF/"/>
-    <category term="昇腾开发板" scheme="https://ziyuliu258.cn/blog/tags/%E6%98%87%E8%85%BE%E5%BC%80%E5%8F%91%E6%9D%BF/"/>
-    <id>https://ziyuliu258.cn/blog/posts/e4e5df54/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/e4e5df54/"/>
-    <published>2025-08-26T16:00:00.000Z</published>
-    <summary>
-      <![CDATA[<h2 id="一、基本准备工作">一、基本准备工作</h2>
-<h3 id="1-烧录系统">1. 烧录系统</h3>
-<p>详情参见官方教程。可以使用昇腾官方的制卡工具<code>Ascend devkit]]>
-    </summary>
-    <title>在香橙派OrangePi AIPro（8T）上实现基于ACLLite与PyACL的YOLOv10端侧推理</title>
-    <updated>2025-10-24T12:08:06.524Z</updated>
   </entry>
 </feed>
