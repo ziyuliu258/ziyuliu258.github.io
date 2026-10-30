@@ -910,6 +910,22 @@
   margin-top: 40px;
 }
 
+.giscus-load-message {
+  padding: 0.75rem 0;
+  color: var(--font-color);
+  font-size: 0.9rem;
+}
+
+.giscus-load-message button {
+  margin-left: 0.6rem;
+  padding: 0.2rem 0.7rem;
+  border: 0;
+  border-radius: 0.35rem;
+  color: #fff;
+  background: #2584c2;
+  cursor: pointer;
+}
+
 /* 无图的推荐卡片：在文章底色上叠一层中性灰，文字沿用正文颜色。 */
 .relatedPosts .pagination-related.no-cover {
   background: rgba(128, 128, 128, 0.12);
