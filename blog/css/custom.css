@@ -741,6 +741,71 @@
   display: none;
 }
 
+@media (max-width: 560px) {
+  .music-page-controls {
+    flex-wrap: wrap;
+  }
+
+  .music-page-volume {
+    flex: 1 0 100%;
+  }
+
+  .music-page-volume input {
+    flex: 1;
+    width: auto;
+    max-width: 9rem;
+  }
+
+  .music-lyrics-view {
+    height: min(13.5rem, 36vh);
+    padding: 4.2rem 0.15rem;
+  }
+
+  #article-container .music-lyric-line {
+    padding: 0.48rem 0.35rem;
+    font-size: 0.98rem;
+    line-height: 1.55;
+  }
+
+  #article-container .music-lyric-line.is-active {
+    font-size: 1.08rem;
+  }
+
+  .music-dock:not(.is-collapsed) {
+    left: max(10px, env(safe-area-inset-left));
+    width: calc(100vw - max(10px, env(safe-area-inset-left)) - 62px - env(safe-area-inset-right, 0px));
+  }
+
+  .music-dock-controls {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  .music-dock-volume {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .music-dock-volume input {
+    width: auto;
+    min-width: 3rem;
+    max-width: 5.5rem;
+    flex: 1 1 3rem;
+  }
+
+  .music-dock-lyric span,
+  .music-dock-lyric small {
+    display: -webkit-box;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  html.music-dock-open #body-wrap {
+    padding-bottom: var(--music-dock-lift, 11rem);
+  }
+}
+
 .music-status {
   font-size: 0.9em;
 }

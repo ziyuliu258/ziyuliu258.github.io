@@ -62,6 +62,19 @@
       <ol data-dock-list></ol>
     </div>`;
   document.body.appendChild(dock);
+  const dockLiftQuery = window.matchMedia('(max-width: 560px)');
+  function placeDock() {
+    const open = dockLiftQuery.matches && !dock.classList.contains('is-collapsed');
+    document.documentElement.classList.toggle('music-dock-open', open);
+    if (!open) {
+      document.documentElement.style.removeProperty('--music-dock-lift');
+      return;
+    }
+    const bottom = parseFloat(getComputedStyle(dock).bottom) || 0;
+    document.documentElement.style.setProperty('--music-dock-lift', Math.ceil(dock.offsetHeight + bottom + 16) + 'px');
+  }
+  if (window.ResizeObserver) new ResizeObserver(placeDock).observe(dock);
+  dockLiftQuery.addEventListener('change', placeDock);
   const audio = dock.querySelector('audio');
   const findDock = (name) => dock.querySelector('[data-dock-' + name + ']');
   const findPage = (name) => pageRoot && pageRoot.querySelector('[data-music-' + name + ']');
