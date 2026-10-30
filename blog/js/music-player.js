@@ -9,6 +9,23 @@
   let statusText = '正在加载歌单…';
   let pageRoot = null;
 
+  const icons = {
+    previous: '<path d="M5 5h2v14H5zM18 5v14L8 12z"/>',
+    next: '<path d="M17 5h2v14h-2zM6 5v14l10-7z"/>',
+    play: '<path d="M7 4.5v15L19 12z"/>',
+    pause: '<path d="M6.5 5h4v14h-4zM13.5 5h4v14h-4z"/>'
+  };
+  function setIcon(button, name) {
+    if (button.dataset.icon === name) return;
+    button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + icons[name] + '</svg>';
+    button.dataset.icon = name;
+  }
+  function setTransportIcons(root, attribute) {
+    for (const name of ['previous', 'next']) {
+      setIcon(root.querySelector('[' + attribute + '="' + name + '"]'), name);
+    }
+  }
+
   const dock = document.createElement('aside');
   dock.id = 'music-dock';
   dock.className = 'music-dock';
@@ -42,6 +59,7 @@
   const audio = dock.querySelector('audio');
   const findDock = (name) => dock.querySelector('[data-dock-' + name + ']');
   const findPage = (name) => pageRoot && pageRoot.querySelector('[data-music-' + name + ']');
+  setTransportIcons(dock, 'data-action');
   findDock('track').href = assetRoot + 'music/';
   findDock('track').textContent = '音乐';
 
@@ -65,7 +83,7 @@
   function update() {
     const playing = !audio.paused;
     dock.querySelectorAll('[data-action="toggle"]').forEach((button) => {
-      button.textContent = playing ? '❚❚' : '▶';
+      setIcon(button, playing ? 'pause' : 'play');
       button.setAttribute('aria-label', playing ? '暂停' : '播放');
       button.title = playing ? '暂停' : '播放';
     });
@@ -76,7 +94,7 @@
     findDock('volume').value = audio.muted ? 0 : audio.volume;
     if (!pageRoot || !pageRoot.isConnected) return;
     const button = pageRoot.querySelector('[data-music-action="toggle"]');
-    button.textContent = playing ? '❚❚' : '▶';
+    setIcon(button, playing ? 'pause' : 'play');
     button.setAttribute('aria-label', playing ? '暂停' : '播放');
     findPage('track').textContent = current ? current.name : '请选择歌曲';
     findPage('artist').textContent = current ? current.artist : '';
@@ -140,6 +158,7 @@
     if (!pageRoot || pageRoot.dataset.initialized) return;
     pageRoot.dataset.initialized = 'true';
     const root = pageRoot;
+    setTransportIcons(root, 'data-music-action');
     const pageCover = document.createElement('img');
     pageCover.setAttribute('data-music-cover', '');
     pageCover.alt = '';

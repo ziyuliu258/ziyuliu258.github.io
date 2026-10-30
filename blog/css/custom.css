@@ -80,6 +80,15 @@
   clip-path: inset(0 round var(--glass-radius));
 }
 
+/* 分页玻璃底上的页码和箭头需要更清晰的对比。 */
+.layout #pagination .pagination > a:not(:hover) {
+  color: #075d95;
+}
+
+[data-theme="dark"] .layout #pagination .pagination > a:not(:hover) {
+  color: #e3f3ff;
+}
+
 #recent-posts .recent-post-item:hover,
 #recent-posts .home-announcement:hover,
 #aside-content .card-widget:hover,
@@ -398,8 +407,24 @@
   background: transparent;
 }
 
-.music-page-controls button {
-  padding: 0.35rem;
+.music-page-buttons button,
+.music-dock-controls button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+.music-page-buttons button svg,
+.music-dock-controls button svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
 }
 
 .music-page-controls input[type="range"] {
@@ -491,10 +516,6 @@
 
 .music-dock-controls {
   margin-top: 8px;
-}
-
-.music-dock-controls button {
-  padding: 3px 6px;
 }
 
 .music-dock-play {
