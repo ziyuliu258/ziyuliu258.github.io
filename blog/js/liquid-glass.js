@@ -310,6 +310,8 @@
   }
 
   function updateRefraction(surface) {
+    const rootClass = document.documentElement.classList
+    if (rootClass.contains('aside-motion') || rootClass.contains('aside-glass-pause')) return
     if (!pointer.matches || reducedTransparency.matches) {
       surface.style.removeProperty('--glass-backdrop')
       surface.style.removeProperty('--glass-spec-image')
@@ -364,6 +366,10 @@
       })
     })
   }
+  document.addEventListener('blog:aside-motion-end', () => {
+    if (!resize) return
+    document.querySelectorAll('.liquid-glass').forEach(surface => updateRefraction(surface))
+  })
   document.addEventListener('pjax:complete', initialize)
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialize, { once: true })
   else initialize()

@@ -888,3 +888,42 @@
   color: #ff9dbb;
   background: rgba(255, 157, 187, 0.14);
 } */
+
+/* 单双栏：主题用 transition: all（含 -webkit-transition）去动画主栏宽度。
+   公式、正文和毛玻璃会逐帧重排，切换就像掉帧。宽度改为瞬间确定；侧栏只过渡透明度和位移。 */
+.layout > div:first-child {
+  -webkit-transition: box-shadow 0.3s ease !important;
+  transition: box-shadow 0.3s ease !important;
+}
+
+@media screen and (min-width: 900px) {
+  html.aside-motion .layout > div:first-child,
+  html.aside-glass-pause .layout > div:first-child {
+    -webkit-transition: none !important;
+    transition: none !important;
+  }
+
+  html.aside-motion .layout > .aside-content.aside-content {
+    display: block;
+    -webkit-transition: opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1), transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1), transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+
+  html.hide-aside.aside-motion .layout > div:first-child {
+    width: 74%;
+  }
+
+  html.hide-aside.aside-motion .layout > .aside-content {
+    opacity: 0;
+    pointer-events: none;
+    -webkit-transform: translate3d(16px, 0, 0);
+    transform: translate3d(16px, 0, 0);
+  }
+}
+
+@media screen and (min-width: 900px) and (prefers-reduced-motion: reduce) {
+  html.aside-motion .layout > .aside-content.aside-content {
+    transition: none;
+  }
+}
