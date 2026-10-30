@@ -446,13 +446,53 @@
   width: 65px;
 }
 
+.music-lyrics {
+  margin-top: 1.1rem;
+}
+
+.music-lyrics-view {
+  height: 20rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 7.5rem 0.25rem;
+  scroll-behavior: smooth;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 84%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 84%, transparent);
+}
+
+#article-container .music-lyric-line {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.42rem 0.75rem;
+  border: 0;
+  background: transparent;
+  color: var(--font-color);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  text-align: center;
+  opacity: 0.38;
+  cursor: pointer;
+}
+
+#article-container .music-lyric-line.is-past {
+  opacity: 0.62;
+}
+
+#article-container .music-lyric-line.is-active {
+  color: #2584c2;
+  font-size: 1.22rem;
+  font-weight: 700;
+  opacity: 1;
+}
+
 /* 在 PJAX 替换区域之外保留播放器，切换页面时继续播放。 */
 .music-dock {
   position: fixed;
   z-index: 90;
   left: max(16px, env(safe-area-inset-left));
   bottom: max(16px, env(safe-area-inset-bottom));
-  width: min(310px, calc(100vw - 32px));
+  width: min(480px, calc(100vw - 32px));
   color: #273847;
   border: 1px solid rgba(255, 255, 255, 0.65);
   border-radius: 18px;
@@ -514,6 +554,34 @@
   font-size: 1.2rem;
 }
 
+.music-dock-lyric {
+  margin: 8px 2px 0;
+  min-height: 2.8em;
+  overflow: hidden;
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.music-dock-lyric[hidden] {
+  display: none !important;
+}
+
+.music-dock-lyric span,
+.music-dock-lyric small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.music-dock-lyric span.is-upcoming,
+.music-dock-lyric small {
+  font-weight: 400;
+  opacity: 0.55;
+  font-size: 0.82rem;
+}
+
 .music-dock-controls {
   margin-top: 8px;
 }
@@ -550,6 +618,97 @@
 
 .music-dock-progress input {
   flex: 1;
+}
+
+.music-dock-list {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+.music-dock-list svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.music-dock.is-playlist-open .music-dock-list {
+  color: #2584c2;
+}
+
+.music-dock-playlist {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: calc(100% + 8px);
+  left: 0;
+  max-height: min(320px, 48vh);
+  overflow: auto;
+  padding: 6px;
+  color: #273847;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 16px;
+  background: rgba(244, 248, 252, 0.96);
+  box-shadow: 0 8px 28px rgba(24, 42, 56, 0.18);
+}
+
+[data-theme="dark"] .music-dock-playlist {
+  color: #e7eef5;
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(30, 37, 46, 0.96);
+}
+
+.music-dock-playlist ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.music-dock-playlist button {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.music-dock-playlist button span {
+  color: #3987bc;
+  font-variant-numeric: tabular-nums;
+}
+
+.music-dock-playlist button strong {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.music-dock-playlist button small {
+  max-width: 42%;
+  overflow: hidden;
+  opacity: 0.65;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.music-dock-playlist button.is-current {
+  color: #2584c2;
+  background: rgba(73, 177, 245, 0.16);
+}
+
+.music-dock-playlist button:disabled {
+  cursor: default;
+  opacity: 0.45;
 }
 
 .music-dock-status {
