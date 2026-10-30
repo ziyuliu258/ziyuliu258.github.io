@@ -433,6 +433,9 @@
       playlist = data;
       tracks = data.tracks;
       if (changed) {
+        // Refresh the selected track's metadata without replacing the audio source.
+        // Otherwise new lyrics for the playing song remain invisible until it is reselected.
+        if (current) current = tracks.find((track) => String(track.id) === String(current.id)) || current;
         lyricLines.clear();
         renderedLyricId = null;
         lyricIndex = -1;
