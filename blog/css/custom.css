@@ -894,12 +894,10 @@
   font-size: 0.85em;
 }
 
-/* index_column_glass 为 false 时，首页和专栏总览仍是一块一块的卡片，只去掉磨砂和透明。 */
+/* index_column_glass 为 false 时，首页和专栏卡片仍各自独立，背景与正文栏相同。 */
 #recent-posts.no-card-glass .recent-post-item,
 #recent-posts.no-card-glass .home-announcement {
-  background: var(--glass-solid) !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
+  background: var(--glass-reading-tint);
 }
 
 #recent-posts.series-directory .series-directory-item {
