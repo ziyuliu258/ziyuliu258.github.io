@@ -894,10 +894,44 @@
   font-size: 0.85em;
 }
 
-/* 专栏总览复用首页文章卡片，每个专栏独立一格 */
+/* index_column_glass 为 false 时，首页和专栏总览没有 .nc，整栏用归档页的实底。 */
+.layout > #recent-posts:not(.nc) .recent-post-item,
+.layout > #recent-posts:not(.nc) .home-announcement {
+  background: transparent !important;
+  border-radius: 0;
+  box-shadow: none !important;
+  clip-path: none;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.layout > #recent-posts:not(.nc) .home-announcement {
+  display: block;
+  min-height: 0;
+  margin-bottom: 8px;
+  padding: 0 0 1rem;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.22);
+}
+
+.layout > #recent-posts:not(.nc) .liquid-glass::after {
+  content: none;
+}
+
 #recent-posts.series-directory .series-directory-item {
   display: block;
   color: var(--font-color);
+}
+
+#recent-posts.series-directory:not(.nc) .series-directory-item {
+  margin-bottom: 0;
+}
+
+#recent-posts.series-directory:not(.nc) .series-directory-item + .series-directory-item {
+  border-top: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+#recent-posts.series-directory:not(.nc) .recent-post-item > .recent-post-info {
+  padding: 1.05rem 0;
 }
 
 #recent-posts.series-directory .recent-post-item > .recent-post-info > .series-directory-name,

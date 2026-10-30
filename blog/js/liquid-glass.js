@@ -4,7 +4,9 @@
  * - RGB chromatic dispersion along -ndir inside the edge band
  * - Static cornerSpecular (TL primary + BR antipodal at 65% with exponential taper) + directional edgeSpec lip
  * - Performance: shared filter + texture cache by card geometry ( identical-sized post cards share 1 SVG filter & 1 Canvas pass )
- * - Applied ONLY to announcement, post cards, and sidebar widgets (NOT #nav menu bar)
+ * - Sidebar widgets always get the effect.
+ * - Homepage cards and the series directory get it only when those lists
+ *   carry .nc, which _config.butterfly.yml index_column_glass: true adds.
  */
 (() => {
   'use strict'
@@ -13,8 +15,8 @@
   window.__blogLiquidGlass = true
 
   const selector = [
-    '#recent-posts .recent-post-item',
-    '#recent-posts .home-announcement',
+    '#recent-posts.nc .recent-post-item',
+    '#recent-posts.nc .home-announcement',
     '#aside-content .card-widget'
   ].join(', ')
 
