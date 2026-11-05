@@ -12,7 +12,100 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-10-30T19:24:39.850Z</updated>
+  <updated>2026-11-05T15:57:30.342Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="Imitation Learning" scheme="https://ziyuliu258.cn/blog/tags/Imitation-Learning/"/>
+    <category term="Embodied Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Embodied-Intelligence/"/>
+    <category term="Multimodal Learning" scheme="https://ziyuliu258.cn/blog/tags/Multimodal-Learning/"/>
+    <id>https://ziyuliu258.cn/blog/posts/bfa59942/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/bfa59942/"/>
+    <published>2026-11-05T15:14:01.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：VIMA 把“按语言操作”“达到目标图像”“观看一次示范”“根据图片学习新概念”等任务，统一为 <strong>文字与图像交错的 multimodal prompt</strong>。模型再将画面拆成 object tokens，用]]>
+    </summary>
+    <title>论文阅读：VIMA - General Robot Manipulation with Multimodal Prompts</title>
+    <updated>2026-11-05T15:57:30.342Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="Embodied Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Embodied-Intelligence/"/>
+    <category term="VLA" scheme="https://ziyuliu258.cn/blog/tags/VLA/"/>
+    <category term="Flow Matching" scheme="https://ziyuliu258.cn/blog/tags/Flow-Matching/"/>
+    <id>https://ziyuliu258.cn/blog/posts/1f2c5742/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/1f2c5742/"/>
+    <published>2026-11-05T15:14:00.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：<span class="katex"><span class="katex-mathml"><math]]>
+    </summary>
+    <title>论文阅读：$\pi_0$ - A Vision-Language-Action Flow Model for General Robot Control</title>
+    <updated>2026-11-05T19:29:00.956Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="Imitation Learning" scheme="https://ziyuliu258.cn/blog/tags/Imitation-Learning/"/>
+    <category term="Online Learning" scheme="https://ziyuliu258.cn/blog/tags/Online-Learning/"/>
+    <id>https://ziyuliu258.cn/blog/posts/f585d098/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/f585d098/"/>
+    <published>2026-11-05T15:13:59.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：DAgger 研究的问题很直接： <strong>策略做出的动作会改变下一次看到的输入，那么只在专家走过的状态上训练，为什么能保证策略独立执行时也表现良好？</strong>]]>
+    </summary>
+    <title>论文阅读：DAgger - A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning</title>
+    <updated>2026-11-05T15:57:30.342Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="GUI Agent" scheme="https://ziyuliu258.cn/blog/tags/GUI-Agent/"/>
+    <category term="Vision-Language Models" scheme="https://ziyuliu258.cn/blog/tags/Vision-Language-Models/"/>
+    <category term="SFT" scheme="https://ziyuliu258.cn/blog/tags/SFT/"/>
+    <id>https://ziyuliu258.cn/blog/posts/2e949ae7/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/2e949ae7/"/>
+    <published>2026-11-05T15:13:58.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：UI-TARS 将 GUI agent 中的感知、动作选择和部分工作流程，放进一个接收截图、生成操作的 VLM。本文最值得关注的是它怎样构造训练数据：从界面元素理解到多步轨迹，再到模型亲自执行后产生的错误与纠正。尤其是]]>
+    </summary>
+    <title>论文阅读：UI-TARS - Pioneering Automated GUI Interaction with Native Agents</title>
+    <updated>2026-11-05T15:57:30.342Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="Vision-Language Models" scheme="https://ziyuliu258.cn/blog/tags/Vision-Language-Models/"/>
+    <category term="SFT" scheme="https://ziyuliu258.cn/blog/tags/SFT/"/>
+    <id>https://ziyuliu258.cn/blog/posts/beaebfcb/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/beaebfcb/"/>
+    <published>2026-11-05T15:13:57.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：Idefics2 最值得读的地方，是作者把构建 VLM 时经常一起变化的选择拆开比较：预训练主干怎样选，图像怎样进入语言模型，哪些参数需要适配，以及视觉 token 应该保留多少。最后得到的 8B]]>
+    </summary>
+    <title>论文阅读：What matters when building vision-language models?（Idefics2）</title>
+    <updated>2026-11-05T15:57:30.342Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -28,7 +121,7 @@
 <p>引：Edward Hu、Yelong Shen 等人在这篇文章中提出 LoRA。全量微调会为每个下游任务保存一整份与预训练模型同样大的参数；LoRA 改为冻结预训练权重，只训练插在权重旁边的低秩分解。以 GPT-3 175B]]>
     </summary>
     <title>论文阅读：LoRA: Low-Rank Adaptation of Large Language Models</title>
-    <updated>2026-10-30T19:24:39.850Z</updated>
+    <updated>2026-10-30T19:24:51.836Z</updated>
   </entry>
   <entry>
     <author>
@@ -268,93 +361,5 @@
     </summary>
     <title>论文阅读：PatchTST</title>
     <updated>2026-09-12T04:15:15.776Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="技术" scheme="https://ziyuliu258.cn/blog/tags/%E6%8A%80%E6%9C%AF/"/>
-    <id>https://ziyuliu258.cn/blog/posts/38bfdd33/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/38bfdd33/"/>
-    <published>2026-02-24T16:39:16.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>本文由<code>Gemini 3.1 Pro</code>根据对话记录总结生成，适用于不同发行版的Linux。</p>
-</blockquote>
-<h3 id="📌-问题现象">📌 问题现象</h3>
-<p>使用腹灵 FL980 V2]]>
-    </summary>
-    <title>Linux下修复三模客制化机械键盘F系列键的失灵</title>
-    <updated>2026-02-28T08:15:39.929Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="技术" scheme="https://ziyuliu258.cn/blog/categories/%E6%8A%80%E6%9C%AF/"/>
-    <category term="技术" scheme="https://ziyuliu258.cn/blog/tags/%E6%8A%80%E6%9C%AF/"/>
-    <id>https://ziyuliu258.cn/blog/posts/d94c72e4/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/d94c72e4/"/>
-    <published>2026-02-24T16:17:36.000Z</published>
-    <summary>
-      <![CDATA[<div class="markdown-alert markdown-alert-note"><p class="markdown-alert-title"><svg class="octicon octicon-info mr-2" viewbox="0 0 16 16"]]>
-    </summary>
-    <title>Git分支操作：利用新分支备份状态，实现多分支版本管理</title>
-    <updated>2026-02-24T16:33:08.226Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="ICS实验" scheme="https://ziyuliu258.cn/blog/tags/ICS%E5%AE%9E%E9%AA%8C/"/>
-    <id>https://ziyuliu258.cn/blog/posts/8eada4ef/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/8eada4ef/"/>
-    <published>2026-02-18T08:54:45.000Z</published>
-    <summary>
-      <![CDATA[<h2 id="前言">前言</h2>
-<p><code>Bomb Lab</code>是课程的第二个实验，它给出了一个“炸弹”文件，要求学习者从可执行文件反汇编得到汇编代码，然后通过<code>GDB（GNU]]>
-    </summary>
-    <title>XJTU-ICS Lab 2: Bomb Lab</title>
-    <updated>2026-10-28T10:27:58.636Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="ICS实验" scheme="https://ziyuliu258.cn/blog/tags/ICS%E5%AE%9E%E9%AA%8C/"/>
-    <id>https://ziyuliu258.cn/blog/posts/e26699b7/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/e26699b7/"/>
-    <published>2026-01-14T12:48:52.000Z</published>
-    <summary>
-      <![CDATA[<h2 id="前言">前言</h2>
-<h3 id="实验文档与代码框架">实验文档与代码框架</h3>
-<p>本文档是参照笔者在sp25所选的西安交通大学计算机系统导论课程与配套实验内容而写成的，参考教材就是大名鼎鼎的<code>CSAPP</code>。至今<a]]>
-    </summary>
-    <title>XJTU-ICS Lab 1: Data Lab</title>
-    <updated>2026-06-29T05:24:18.861Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="其他" scheme="https://ziyuliu258.cn/blog/tags/%E5%85%B6%E4%BB%96/"/>
-    <id>https://ziyuliu258.cn/blog/posts/ffcd24f1/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/ffcd24f1/"/>
-    <published>2026-01-14T12:24:41.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>此处记录本博客重要的维护更新动态。</p>
-</blockquote>
-<ul>
-<li><code>2026-10-23</code>：原域名根路径增设个人主页，博客入口改为子路径<code>/blog</code>。</li>
-<li><cod]]>
-    </summary>
-    <title>维护日志</title>
-    <updated>2026-10-23T19:07:02.599Z</updated>
   </entry>
 </feed>

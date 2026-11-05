@@ -1,0 +1,579 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>论文阅读：UI-TARS - Pioneering Automated GUI Interaction with Native Agents | Derrick Liu的个人博客</title><meta name="author" content="Derrick Liu,1209830516abc@gmail.com"><meta name="copyright" content="Derrick Liu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="引：UI-TARS 将 GUI agent 中的感知、动作选择和部分工作流程，放进一个接收截图、生成操作的 VLM。本文最值得关注的是它怎样构造训练数据：从界面元素理解到多步轨迹，再到模型亲自执行后产生的错误与纠正。尤其是 在失败之后的状态上训练恢复动作，直接关系到为什么离线 SFT 表现良好，仍可能无法完成真实交互任务。  背景 让模型操作电脑，至少要把三个问题接起来：看懂当前页面，确定下一步">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文阅读：UI-TARS - Pioneering Automated GUI Interaction with Native Agents">
+<meta property="og:url" content="https://ziyuliu258.cn/blog/posts/2e949ae7/index.html">
+<meta property="og:site_name" content="Derrick Liu的个人博客">
+<meta property="og:description" content="引：UI-TARS 将 GUI agent 中的感知、动作选择和部分工作流程，放进一个接收截图、生成操作的 VLM。本文最值得关注的是它怎样构造训练数据：从界面元素理解到多步轨迹，再到模型亲自执行后产生的错误与纠正。尤其是 在失败之后的状态上训练恢复动作，直接关系到为什么离线 SFT 表现良好，仍可能无法完成真实交互任务。  背景 让模型操作电脑，至少要把三个问题接起来：看懂当前页面，确定下一步">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg">
+<meta property="article:published_time" content="2026-11-05T15:13:58.000Z">
+<meta property="article:modified_time" content="2026-11-05T15:57:30.342Z">
+<meta property="article:author" content="Derrick Liu">
+<meta property="article:tag" content="论文阅读笔记">
+<meta property="article:tag" content="GUI Agent">
+<meta property="article:tag" content="Vision-Language Models">
+<meta property="article:tag" content="SFT">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "论文阅读：UI-TARS - Pioneering Automated GUI Interaction with Native Agents",
+  "url": "https://ziyuliu258.cn/blog/posts/2e949ae7/",
+  "image": "https://ziyuliu258.cn/blog/images/avatar.jpg",
+  "datePublished": "2026-11-05T15:13:58.000Z",
+  "dateModified": "2026-11-05T15:57:30.342Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Derrick Liu",
+      "url": "https://ziyuliu258.cn/blog/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/blog/images/avatar.jpg"><link rel="canonical" href="https://ziyuliu258.cn/blog/posts/2e949ae7/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="https://bsz.iirose.cn" crossorigin=""/><link rel="preconnect" href="https://giscus.app" crossorigin=""/><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":1,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: false,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '论文阅读：UI-TARS - Pioneering Automated GUI Interaction with Native Agents',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="preload" as="image" href="/blog/images/bg2.avif" type="image/avif"><link rel="stylesheet" href="/blog/css/custom.css?v=011a5338db2c"><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/blog/atom.xml" title="Derrick Liu的个人博客" type="application/atom+xml">
+</head><body><div id="web_bg" style="background-image: url(/blog/images/bg2.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">33</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/blog/images/bg2.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/blog/"></a><a class="nav-page-title" href="/blog/"><span class="site-name">论文阅读：UI-TARS - Pioneering Automated GUI Interaction with Native Agents</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">论文阅读：UI-TARS - Pioneering Automated GUI Interaction with Native Agents</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-05T15:13:58.000Z" title="发表于 2026-11-05 23:13:58">2026-11-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-05T15:57:30.342Z" title="更新于 2026-11-05 23:57:30">2026-11-05</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">4.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>15分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv" title="新统计服务从启用时开始计数" aria-live="polite">—</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>引：UI-TARS 将 GUI agent 中的感知、动作选择和部分工作流程，放进一个接收截图、生成操作的 VLM。本文最值得关注的是它怎样构造训练数据：从界面元素理解到多步轨迹，再到模型亲自执行后产生的错误与纠正。尤其是 <strong>在失败之后的状态上训练恢复动作</strong>，直接关系到为什么离线 SFT 表现良好，仍可能无法完成真实交互任务。</p>
+</blockquote>
+<h2 id="背景">背景</h2>
+<p>让模型操作电脑，至少要把三个问题接起来：看懂当前页面，确定下一步做什么，再把这个意图落到具体控件的坐标和动作上。例如“将文件另存为 PDF”，既涉及菜单与对话框的操作顺序，也涉及找到“文件”“导出”等按钮。</p>
+<p>早期系统可以用规则描述每一步；后来常见的 agent framework 则用通用大模型，加上提示词、解析器、记忆和规划等模块来组织过程。UI-TARS 希望把更多任务经验通过训练写入模型参数，使同一个模型直接根据截图和历史产生动作。</p>
+<p>这里的 <strong>native agent model</strong> 是作者对模型化 agent 的定位。它仍然需要动作执行器、运行环境和训练数据管线，并不意味着模型权重可以独自完成全部系统工作。论文关于主动终身学习的讨论也是后续方向；本文实际采用的在线数据迭代，仍包含规则、其他模型和人工审核。</p>
+<h2 id="核心能力">核心能力</h2>
+<p>作者先将 GUI agent 的能力分为感知、动作、推理和记忆。它们对应不同层面的训练与评估：</p>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>具体对象</th>
+<th>典型检查方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>感知</td>
+<td>文字、图标、布局和状态变化</td>
+<td>截图问答、界面描述</td>
+</tr>
+<tr>
+<td>Grounding</td>
+<td>指令所指元素在屏幕中的位置</td>
+<td>预测点是否落在目标框内</td>
+</tr>
+<tr>
+<td>动作与推理</td>
+<td>根据任务和历史选择下一步操作</td>
+<td>静态轨迹的单步动作匹配、实际任务执行</td>
+</tr>
+<tr>
+<td>记忆</td>
+<td>当前任务历史与此前学到的操作经验</td>
+<td>长任务中能否利用已有信息、避免重复错误</td>
+</tr>
+</tbody>
+</table>
+<p>尤其需要区分 <strong>离线动作评估</strong> 和 <strong>在线任务评估</strong>。前者把固定截图与历史给模型，检查下一步输出；后者真的执行动作，让模型面对由自己此前操作产生的新页面。离线评估没有完整检验一次误点后接下来会发生什么。</p>
+<h2 id="UI-TARS">UI-TARS</h2>
+<h3 id="整体结构">整体结构</h3>
+<p><img src="/blog/posts/2e949ae7/ui-tars-overview.png" alt="UI-TARS 整体结构"></p>
+<p><em>原论文 Fig. 4。上部是截图、思考和操作构成的交互过程，下部是各项能力对应的训练数据。</em></p>
+<p>UI-TARS 基于 Qwen2-VL。给定任务指令，第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 步读取截图 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>o</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">o_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，先产生文本形式的 thought <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">t_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，再生成动作 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">a_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。一次完整交互可以写成：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo stretchy="false">(</mo><mtext>instruction</mtext><mo separator="true">,</mo><mo stretchy="false">(</mo><msub><mi>o</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>t</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>1</mn></msub><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><msub><mi>o</mi><mn>2</mn></msub><mo separator="true">,</mo><msub><mi>t</mi><mn>2</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>2</mn></msub><mo stretchy="false">)</mo><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><msub><mi>o</mi><mi>n</mi></msub><mo separator="true">,</mo><msub><mi>t</mi><mi>n</mi></msub><mo separator="true">,</mo><msub><mi>a</mi><mi>n</mi></msub><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">(\text{instruction},(o_1,t_1,a_1),(o_2,t_2,a_2),\ldots,(o_n,t_n,a_n)).
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord text"><span class="mord">instruction</span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">))</span><span class="mord">.</span></span></span></span></span></p>
+<p>例如，模型看到导出对话框，可以先记录“保存类型还不是 PDF，需要展开类型菜单”，再输出点击位置。执行器把动作送入系统，取得下一张真实截图，模型再决定后续步骤。截图来自环境，不是模型自己预测出的下一帧。</p>
+<p>作者保留历史动作和 thoughts 作为任务上下文，而高开销的截图只保留最近若干张，以适应约 32k 的上下文预算。这里的短期记忆是输入中的交互记录；长期经验则主要通过后续训练进入参数，不是另加一个检索数据库。</p>
+<h3 id="界面感知">界面感知</h3>
+<p>GUI 截图有一个特点：信息密度很高，关键目标可能只是高分辨率屏幕上的一个小图标。只训练“这是一张网页”的粗粒度描述，无法提供足够的定位和操作信息。</p>
+<p>作者在收集截图时，同步利用解析工具取得元素类型、边界框、文字、层次等 metadata，再将它们转换为训练任务：</p>
+<ul>
+<li><strong>元素描述</strong>：描述按钮、文本框等元素的外观、位置和功能；</li>
+<li><strong>密集描述</strong>：把单个元素整合成保留界面布局的整体说明；</li>
+<li><strong>状态变化描述</strong>：比较前后截图，识别点击、输入或非交互变化造成的差异；</li>
+<li><strong>界面问答</strong>：根据截图回答内容与操作相关的问题；</li>
+<li><strong>Set-of-Mark</strong>：结合带标记的元素学习识别与定位。</li>
+</ul>
+<p>这里要区分数据构造与模型使用： <strong>训练数据可以借助结构化 metadata 生成监督，部署时模型仍以截图作为视觉观察</strong>。如果看到数据管线用了边界框或解析器，不能据此判断策略推理时也必须取得 DOM 或可访问性树。</p>
+<p>状态变化描述尤其贴近交互。按钮被点击后，页面可能只出现一个小勾选标记；也可能因动画发生变化，却没有完成目标。通过前后截图监督，模型学习关注的是“动作之后发生了什么”，而不只是当前画面上有哪些控件。</p>
+<h3 id="动作与-grounding">动作与 grounding</h3>
+<p>作者将不同平台语义接近的动作统一表示，并保留平台专用操作。共用动作包括点击、拖动、滚动、输入、等待、结束与请求用户介入；桌面额外包含快捷键、双击、右键，移动端额外包含长按、返回和主页等。</p>
+<p>例如，论文中的动作接口包含 <code>Click(x, y)</code>、<code>Type(content)</code>、<code>Finished()</code> 和 <code>CallUser()</code>。同一种“选中目标”意图在电脑和手机上可以共享部分监督，但不能把所有平台差异都压成同一种操作。</p>
+<p>对于需要坐标的动作，作者用元素描述与截图组成输入，以边界框中心作为点标签，并将坐标按屏幕尺寸归一化。模型要学会把“右上角写着 Submit 的红色按钮”对应到屏幕位置。输出归一化坐标后，执行侧再结合当前尺寸转换为实际位置。</p>
+<p>多步行为则来自人工录制轨迹与已有 GUI 数据集。作者把不同数据集中的动作格式统一，再训练模型根据任务、历史和当前截图选择动作。Grounding 提供“在哪里”的监督，多步轨迹提供“现在应该操作什么”的监督；只提高前者，不足以解决顺序规划错误。</p>
+<h3 id="推理数据">推理数据</h3>
+<p>作者用两类来源补充推理能力。</p>
+<p>第一类是图文交错的软件教程。从 MINT 与 OmniCorpus 中先用 fastText 粗筛，再用 LLM 细筛、去重和清理，整理出约 600 万篇 GUI 教程，平均约 510 个文本 token、3.3 张图片。它们提供了操作知识与步骤组织，但与真实设备上的逐步动作轨迹仍是不同数据。</p>
+<p>第二类是给已有动作轨迹补充 thought。作者希望这些文本包含任务分解、目标保持、里程碑识别、尝试和反思等模式，让“为什么此时执行这个动作”也成为模型可学习的序列。</p>
+<p><strong>ActRe</strong> 在标注第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 步 thought 时，会把目标动作 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">a_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 也提供给标注 VLM。可以把它理解为：动作标签已经知道，让模型结合前文为这一步补充说明。这个动作是数据构造时的额外信息，真实推理时不能提前取得。</p>
+<p>这也会产生一个问题：解释可能只是对已知动作的事后合理化。于是作者进一步做 <strong>thought bootstrapping</strong>：让早期 UI-TARS 在不知道目标动作的情况下采样多组 thought-action，再保留预测动作与标签一致的候选。这样减少了提前泄露动作对标注过程的影响，但“动作匹配正确”本身仍不能证明每一句 thought 都是正确的因果解释。</p>
+<p>训练数据既包含带 thought 的轨迹，也包含直接输出动作的轨迹。因此，模型并不是只能用一种固定长度的推理格式行动。</p>
+<h3 id="在线轨迹">在线轨迹</h3>
+<p>只有离线专家轨迹，还没有覆盖模型自己误操作后的页面。作者因此让当前模型在数百个虚拟 PC 上实际执行任务，再筛选产生的新轨迹。</p>
+<p><img src="/blog/posts/2e949ae7/ui-tars-bootstrapping.png" alt="在线轨迹迭代"></p>
+<p><em>原论文 Fig. 7。模型执行任务后，轨迹经过规则、人工与 VLM 过滤，再用于更新模型与任务集合。</em></p>
+<p>设第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 轮模型是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>M</mi><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">M_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，任务集合是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="script">I</mi><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">\mathcal{I}_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathcal" style="margin-right:0.0738em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0738em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。执行后得到原始轨迹 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="script">T</mi><mrow><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">w</mi></mrow><mo separator="true">,</mo><mi>n</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\mathcal{T}_{\mathrm{raw},n}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathcal" style="margin-right:0.2542em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.2542em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight" style="margin-right:0.0139em;">raw</span></span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>，筛选为：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo stretchy="false">(</mo><msub><mi mathvariant="script">T</mi><mrow><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">w</mi></mrow><mo separator="true">,</mo><mi>n</mi></mrow></msub><mo separator="true">,</mo><msub><mi mathvariant="script">I</mi><mi>n</mi></msub><mo stretchy="false">)</mo><mo>=</mo><msub><mi mathvariant="script">T</mi><mrow><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">d</mi></mrow><mo separator="true">,</mo><mi>n</mi></mrow></msub><mo separator="true">,</mo></mrow><annotation encoding="application/x-tex">\mathrm{Filter}(\mathcal{T}_{\mathrm{raw},n},\mathcal{I}_n)
+=\mathcal{T}_{\mathrm{filtered},n},
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathrm">Filter</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathcal" style="margin-right:0.2542em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.2542em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight" style="margin-right:0.0139em;">raw</span></span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathcal" style="margin-right:0.0738em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0738em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathcal" style="margin-right:0.2542em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.2542em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">filtered</span></span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mpunct">,</span></span></span></span></span></p>
+<p>再用它微调：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>M</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">T</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi></mrow><mo stretchy="false">(</mo><msub><mi>M</mi><mi>n</mi></msub><mo separator="true">,</mo><msub><mi mathvariant="script">T</mi><mrow><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">d</mi></mrow><mo separator="true">,</mo><mi>n</mi></mrow></msub><mo stretchy="false">)</mo><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">M_{n+1}=\mathrm{FineTune}(M_n,\mathcal{T}_{\mathrm{filtered},n}).
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8917em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathrm">FineTune</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathcal" style="margin-right:0.2542em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.2542em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">filtered</span></span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mord">.</span></span></span></span></span></p>
+<p>筛选包括规则剔除明显异常，例如反复无效操作；VLM 对轨迹评分；以及人工检查部分轨迹，找到错误位置、保留有效前缀。每轮还会由人工完善与扩充任务集合，再开始下一轮采集。</p>
+<p>这个过程的关键是新数据来自 <strong>当前模型与真实交互环境共同产生的状态</strong>，并经过质量判断后才进入训练。这里的 online 描述数据采集来自交互，并不表示产品运行时每做一步就立即更新参数，也不表示所有模型输出都能直接作为正确标签。</p>
+<h3 id="反思训练">反思训练</h3>
+<p>单纯保留成功轨迹和有效前缀，可以学习正确操作，却可能继续缺少恢复样本。UI-TARS 因此在错误位置构造两类配对数据。</p>
+<p>第一类是 <strong>错误纠正</strong>。假设第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>τ</mi></mrow><annotation encoding="application/x-tex">\tau</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span></span></span></span> 步的 thought-action 为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>t</mi><mi>τ</mi></msub><mo separator="true">,</mo><msub><mi>a</mi><mi>τ</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(t_\tau,a_\tau)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>，人工标出更合适的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><msubsup><mi>t</mi><mi>τ</mi><mo>∗</mo></msubsup><mo separator="true">,</mo><msubsup><mi>a</mi><mi>τ</mi><mo>∗</mo></msubsup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(t^*_\tau,a^*_\tau)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6887em;"><span style="top:-2.453em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6887em;"><span style="top:-2.453em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>。正负样本拥有相同的前缀与当前观察，只在这一步的输出不同。它教模型在错误发生之前选对。</p>
+<p>第二类是 <strong>错误发生后的恢复</strong>。保留第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>τ</mi></mrow><annotation encoding="application/x-tex">\tau</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span></span></span></span> 步已经执行的错误，以及它产生的新截图 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>o</mi><mrow><mi>τ</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">o_{\tau+1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span>，再标出下一步正确的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><msubsup><mi>t</mi><mrow><mi>τ</mi><mo>+</mo><mn>1</mn></mrow><mo>∗</mo></msubsup><mo separator="true">,</mo><msubsup><mi>a</mi><mrow><mi>τ</mi><mo>+</mo><mn>1</mn></mrow><mo>∗</mo></msubsup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(t^*_{\tau+1},a^*_{\tau+1})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0564em;vertical-align:-0.3064em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6887em;"><span style="top:-2.4519em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3064em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6887em;"><span style="top:-2.4519em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3064em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>。它教模型在已经偏离原计划时继续行动。</p>
+<p>举个例子，本来要收藏网页，却误点关闭标签页。第一类样本教模型在原页面正确点击收藏；第二类样本的输入已经是标签页关闭后的页面，标签应该是恢复刚关闭的标签页，再继续任务。两者不能互相替代，因为面对的环境状态不同。</p>
+<p>在 SFT 中，作者使用正样本， <strong>只对人工纠正的步骤计算损失</strong>。历史里的错误动作可以作为理解当前状态的上下文，但不作为需要模仿的目标。否则同一条样本一边解释“这是错误”，一边又用交叉熵奖励模型复现它，监督就发生了冲突。</p>
+<h3 id="Agent-DPO">Agent DPO</h3>
+<p>纠正训练只使用正输出，而在线采集还留下了对应的负输出。作者进一步用 DPO，让模型在相同状态上下文下偏好纠正动作。</p>
+<p>用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>s</mi><mi>τ</mi></msub></mrow><annotation encoding="application/x-tex">s_\tau</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 概括当时的任务与交互上下文，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>τ</mi></msub></mrow><annotation encoding="application/x-tex">a_\tau</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 为原错误动作，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>a</mi><mi>τ</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup></mrow><annotation encoding="application/x-tex">a&#x27;_\tau</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9989em;vertical-align:-0.247em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-2.453em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span></span></span></span> 为偏好的纠正动作。论文使用的目标为：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><msub><mi mathvariant="script">L</mi><mrow><mi mathvariant="normal">D</mi><mi mathvariant="normal">P</mi><mi mathvariant="normal">O</mi></mrow></msub><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo><mo>=</mo><mo>−</mo><msub><mi mathvariant="double-struck">E</mi><mi>τ</mi></msub><mo fence="false" stretchy="true" minsize="3em" maxsize="3em">[</mo><mi>log</mi><mo>⁡</mo><mi>σ</mi><mo fence="false" stretchy="true" minsize="3em" maxsize="3em">(</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mi>β</mi><mi>log</mi><mo>⁡</mo><mfrac><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msubsup><mi>a</mi><mi>τ</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup><mo>∣</mo><msub><mi>s</mi><mi>τ</mi></msub><mo stretchy="false">)</mo></mrow><mrow><msub><mi>π</mi><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">F</mi><mi mathvariant="normal">T</mi></mrow></msub><mo stretchy="false">(</mo><msubsup><mi>a</mi><mi>τ</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup><mo>∣</mo><msub><mi>s</mi><mi>τ</mi></msub><mo stretchy="false">)</mo></mrow></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mo lspace="0em" rspace="0em">−</mo></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mi>β</mi><mi>log</mi><mo>⁡</mo><mfrac><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>a</mi><mi>τ</mi></msub><mo>∣</mo><msub><mi>s</mi><mi>τ</mi></msub><mo stretchy="false">)</mo></mrow><mrow><msub><mi>π</mi><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">F</mi><mi mathvariant="normal">T</mi></mrow></msub><mo stretchy="false">(</mo><msub><mi>a</mi><mi>τ</mi></msub><mo>∣</mo><msub><mi>s</mi><mi>τ</mi></msub><mo stretchy="false">)</mo></mrow></mfrac><mo fence="false" stretchy="true" minsize="3em" maxsize="3em">)</mo><mo fence="false" stretchy="true" minsize="3em" maxsize="3em">]</mo><mi mathvariant="normal">.</mi></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\mathcal{L}_{\mathrm{DPO}}(\theta)
+=-\mathbb{E}_{\tau}\Bigg[\log\sigma\Bigg(
+&amp;\beta\log\frac{\pi_\theta(a&#x27;_\tau\mid s_\tau)}
+{\pi_{\mathrm{SFT}}(a&#x27;_\tau\mid s_\tau)}\\
+-&amp;\beta\log\frac{\pi_\theta(a_\tau\mid s_\tau)}
+{\pi_{\mathrm{SFT}}(a_\tau\mid s_\tau)}
+\Bigg)\Bigg].
+\end{aligned}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:6.3001em;vertical-align:-2.9em;"></span><span class="mord"><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.4em;"><span style="top:-5.4em;"><span class="pstrut" style="height:3.75em;"></span><span class="mord"><span class="mord"><span class="mord mathcal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">DPO</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord">−</span><span class="mord"><span class="mord mathbb">E</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="delimsizing size4">[</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">σ</span><span class="mord"><span class="delimsizing size4">(</span></span></span></span><span style="top:-2.1em;"><span class="pstrut" style="height:3.75em;"></span><span class="mord"><span class="mord">−</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.9em;"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.4em;"><span style="top:-5.4em;"><span class="pstrut" style="height:3.75em;"></span><span class="mord"><span class="mord"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.4289em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">SFT</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6779em;"><span style="top:-2.453em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span><span style="top:-2.989em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-2.453em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span><span style="top:-2.1em;"><span class="pstrut" style="height:3.75em;"></span><span class="mord"><span class="mord"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">SFT</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mord"><span class="delimsizing size4">)</span></span><span class="mord"><span class="delimsizing size4">]</span></span><span class="mord">.</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.9em;"><span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p>其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">F</mi><mi mathvariant="normal">T</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\pi_{\mathrm{SFT}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">SFT</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 是固定的 SFT 参考模型，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub></mrow><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 是正在优化的模型，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi></mrow><annotation encoding="application/x-tex">\sigma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">σ</span></span></span></span> 是 sigmoid，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span></span></span></span> 控制相对参考策略的约束强度。比较的是两个输出相对参考模型的概率比，希望纠正动作获得更大的相对优势。</p>
+<p>这与“再多做一次正样本 SFT”有区别：目标里显式出现同一上下文中的负动作。DPO 直接优化偏好对，不需要在这一步额外训练一个独立奖励网络，也不等同于运行 PPO 之类的在线策略梯度算法。收益仍然依赖正负样本确实对应可比较的状态，以及纠正标签是否可靠。</p>
+<h3 id="训练阶段">训练阶段</h3>
+<p>整体训练使用约 50B token，分为三个阶段：</p>
+<ol>
+<li><strong>Continual pre-training</strong>：使用感知、grounding、教程和动作轨迹等数据，先学习广泛的 GUI 知识；这一阶段不加入 reflection tuning 数据。</li>
+<li><strong>Annealing</strong>：选择更高质量的数据子集，并加入反思纠正样本，得到 UI-TARS-SFT。</li>
+<li><strong>DPO</strong>：使用在线反思过程得到的偏好对，得到 UI-TARS-DPO。</li>
+</ol>
+<p>因此，论文中的 SFT 和 DPO 结果需要分别标注。不能把不同阶段、不同规模、不同平台上的最好数值拼成一个模型的统一成绩。</p>
+<h2 id="实验">实验</h2>
+<h3 id="感知与定位">感知与定位</h3>
+<p>感知评估包括 VisualWebBench、WebSRC 与 ScreenQA-short，分别覆盖网页理解、结构语义和手机截图问答。Table 3 中，UI-TARS-72B 的 VisualWebBench 为 82.8，7B 的 WebSRC 为 93.6；不同任务上并非都是参数最多的版本最好。</p>
+<p>Grounding 的指标主要是预测位置是否落在目标元素框内，越高越好。下面摘出 Table 4–6 的平均成绩：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th style="text-align:right">ScreenSpot ↑</th>
+<th style="text-align:right">ScreenSpot v2 ↑</th>
+<th style="text-align:right">ScreenSpot Pro ↑</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UI-TARS-2B</td>
+<td style="text-align:right">82.3</td>
+<td style="text-align:right">84.7</td>
+<td style="text-align:right">27.7</td>
+</tr>
+<tr>
+<td>UI-TARS-7B</td>
+<td style="text-align:right">89.5</td>
+<td style="text-align:right">91.6</td>
+<td style="text-align:right">35.7</td>
+</tr>
+<tr>
+<td>UI-TARS-72B</td>
+<td style="text-align:right">88.4</td>
+<td style="text-align:right">90.3</td>
+<td style="text-align:right">38.1</td>
+</tr>
+</tbody>
+</table>
+<p>普通 ScreenSpot 上，72B 没有超过 7B；更复杂、分辨率更高的专业软件场景中，72B 的 Pro 成绩更高。但 Pro 仍明显低于普通任务，说明小目标和专业界面定位并未解决。定位准确率也不能直接当成完整任务成功率。</p>
+<h3 id="离线-agent">离线 agent</h3>
+<p>Multimodal Mind2Web 给出固定历史，检查模型的下一步元素、操作与参数；UI-TARS-72B 在跨任务、跨网站、跨领域划分上的 Step SR 分别为 68.6、63.5、62.1，见 Table 7。AndroidControl 与 GUI Odyssey 则覆盖手机任务和跨应用操作。</p>
+<p>这些结果说明模型能够在已给定的状态上较好地选择下一步。实际执行时，前面的错误会改变此后的输入，因此不能把这些单步比例直接外推成完成十几步任务的成功率，也不能假定每步错误相互独立后简单相乘。</p>
+<h3 id="在线-agent">在线 agent</h3>
+<p>OSWorld 在真实软件环境里执行任务，本文使用 screenshot-only 设置；AndroidWorld 使用可交互的 Android 环境。这里检查的是最终任务结果，以下数值来自 Table 9，OSWorld 结果取三次运行平均：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th style="text-align:right">OSWorld，15 步 ↑</th>
+<th style="text-align:right">OSWorld，50 步 ↑</th>
+<th style="text-align:right">AndroidWorld ↑</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Computer Use，论文所用版本</td>
+<td style="text-align:right">14.9</td>
+<td style="text-align:right">22.0</td>
+<td style="text-align:right">27.9</td>
+</tr>
+<tr>
+<td>UI-TARS-7B-SFT</td>
+<td style="text-align:right">17.7</td>
+<td style="text-align:right">—</td>
+<td style="text-align:right">33.0</td>
+</tr>
+<tr>
+<td>UI-TARS-7B-DPO</td>
+<td style="text-align:right">18.7</td>
+<td style="text-align:right">—</td>
+<td style="text-align:right">—</td>
+</tr>
+<tr>
+<td>UI-TARS-72B-SFT</td>
+<td style="text-align:right">18.8</td>
+<td style="text-align:right">—</td>
+<td style="text-align:right">46.6</td>
+</tr>
+<tr>
+<td>UI-TARS-72B-DPO</td>
+<td style="text-align:right">22.7</td>
+<td style="text-align:right">24.6</td>
+<td style="text-align:right">—</td>
+</tr>
+</tbody>
+</table>
+<p>在相同 15 步预算下，72B 从 SFT 的 18.8 增加到 DPO 的 22.7，支持偏好训练对本文在线任务的帮助。将 DPO 模型的预算从 15 步提高到 50 步，又得到 24.6；这一步同时改变了允许交互的次数，不能算作单纯训练方法的改进。</p>
+<p>AndroidWorld 的 46.6 来自 <strong>72B-SFT</strong>，表中没有给出它的 DPO 对应结果。这些也是论文发表时的特定模型与评测版本，不能作为当前各系统能力的排行榜。</p>
+<h3 id="显式推理">显式推理</h3>
+<p>作者还让同一个 7B 模型在推理时选择带 thought 或直接输出动作。在域内离线任务上，只采样一次时，带 thought 的结果反而略差；作者观察到额外推理可能引入错误信息或不合适的步骤。</p>
+<p>在允许多候选采样的实验及域外 AndroidWorld 上，显式推理表现出不同收益。这里要把任务分布、采样次数与候选选择方式一起考虑。论文没有支持“每步都写得越长越好”，更不能只根据推理文字是否流畅来判断动作是否可靠。</p>
+<h2 id="核心点和不足">核心点和不足</h2>
+<p>UI-TARS 的核心是一套从界面知识到交互经验的训练链：感知数据教模型看什么，grounding 数据教模型在哪里操作，多步轨迹教模型按什么顺序操作，反思样本再教模型怎样处理自己的错误。DPO 则利用同一状态下的正负输出，进一步表达动作偏好。</p>
+<p>其中对闭环训练最有启发的，是 <strong>失败轨迹要拆开使用</strong>。有效前缀、错误位置的替代动作、错误之后的恢复动作，以及偏好负例，承担不同监督角色。把整条失败轨迹全部当作坏数据丢弃，或全部当作示范回灌，都可能浪费或污染监督。</p>
+<p>它的局限也很具体：在线任务成功率仍有限；数据筛选和错误纠正需要人工与模型判断；原文没有用完整的逐项消融分离每种数据构造方法的贡献。参数中学到的长期经验也不能自动替代对任意长历史的精确记忆。它展示了一条可操作的数据迭代路线，但距离低成本、完全自主的终身学习仍有差距。</p>
+<h2 id="总结">总结</h2>
+<p>UI-TARS 将截图、任务与历史送入同一个模型，生成 thought 和标准化动作，再根据执行后的新截图继续决策。训练上先建立感知与动作能力，再收集实际交互轨迹，通过纠正、恢复监督和偏好训练利用这些经验。</p>
+<p>读完这篇文章，再回看 DAgger，会看到共同的问题意识：训练需要覆盖策略自己访问到的状态。UI-TARS 进一步面对 GUI 数据里的质量判断与失败利用问题，也说明“形成闭环”具体要落实到状态、标签、loss mask 和评测方式上。</p>
+<h2 id="参考">参考</h2>
+<ul>
+<li>Yujia Qin 等：<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2501.12326v1">UI-TARS: Pioneering Automated GUI Interaction with Native Agents</a>，依据 arXiv v1，2025-01-21。</li>
+<li>方法与公式见原文 Sec. 4；感知、定位、离线与在线结果分别见 Sec. 5、Table 3–9，推理比较见 Fig. 8。</li>
+<li>配图来自原论文 Fig. 4 与 Fig. 7。本文由 AI 协助生成初稿，尚待个人阅读修改。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://ziyuliu258.cn/blog">Derrick Liu</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://ziyuliu258.cn/blog/posts/2e949ae7/">https://ziyuliu258.cn/blog/posts/2e949ae7/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://ziyuliu258.cn/blog" target="_blank">Derrick Liu的个人博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">论文阅读笔记</a><a class="post-meta__tags" href="/blog/tags/GUI-Agent/">GUI Agent</a><a class="post-meta__tags" href="/blog/tags/Vision-Language-Models/">Vision-Language Models</a><a class="post-meta__tags" href="/blog/tags/SFT/">SFT</a></div><div class="post-share"><div class="social-share" data-image="/blog/images/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/blog/posts/beaebfcb/" title="论文阅读：What matters when building vision-language models?（Idefics2）"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;beaebfcb&#x2F;idefics2-architecture.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-05</div><div class="info-item-2">论文阅读：What matters when building vision-language models?（Idefics2）</div></div><div class="info-2"><div class="info-item-1"> 引：Idefics2 最值得读的地方，是作者把构建 VLM 时经常一起变化的选择拆开比较：预训练主干怎样选，图像怎样进入语言模型，哪些参数需要适配，以及视觉 token 应该保留多少。最后得到的 8B 模型固然重要，但对自己训练模型更有帮助的是这些选择之间的联系，尤其是 架构、可训练参数和训练稳定性需要一起考虑。  背景 我们可以先把 VLM 想成三个部分：视觉编码器从图像提取特征，语言模型处理文本并生成回答，中间再放一组连接两个模态的参数。看起来只要选一个 ViT、一个 LLM，再接上 projector 就能开始训练，但每一步其实都有不同做法。 例如，图像特征可以作为独立信息源，让文本在若干层中通过 cross-attention 读取；也可以直接变成一串视觉 token，与文本拼在一起交给语言模型。两种方案新增的参数、占用的序列长度，以及对预训练主干的适配需求都不同。如果只比较最终模型，很难知道性能究竟来自架构还是训练配方。 作者因此先研究设计空间，再用实验中得到的选择训练...</div></div></div></a><a class="pagination-related" href="/blog/posts/fab21ae1/" title="论文阅读：PatchTST"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;fab21ae1&#x2F;Pasted%20image%2020260123175115.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-03</div><div class="info-item-2">论文阅读：PatchTST</div></div><div class="info-2"><div class="info-item-1">引言 时间序列预测在许多实际应用中具有重要意义，如能源预测、交通流量预测、气象预测等。随着深度学习技术的进步，基于Transformer的模型在时间序列预测中表现出了强大的能力。然而，传统Transformer模型存在计算复杂度高、内存消耗大等问题，尤其在长序列预测中效果不佳。PatchTST模型通过创新性的设计，解决了这些问题，提出了分块（Patching）和通道独立性（Channel-independence）的解决方案，显著提高了时间序列预测的效率和精度。 模型  Tip表示学习（Representation Learning），也常被称为特征学习（Feature Learning），是指让模型自动地从原始数据中发现和提取“特征”或“表示”的技术，而不是依靠人工手动设计规则 。 可以暂且认为，表示学习可分为以下三种：  有监督表示学习：在学习特征的同时，利用标签（如未来的真实值）来纠正模型，让特征直接服务于特定目标 。 自监督表示学习：不利用标签，通过数据自身的结构（如掩码 Patch）来学习特征 。这是本文的核心亮点。 迁移学习（Transfer...</div></div></div></a><a class="pagination-related no-cover" href="/blog/posts/df0c4c42/" title="论文阅读笔记更新计划"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-04</div><div class="info-item-2">论文阅读笔记更新计划</div></div><div class="info-2"><div class="info-item-1">由于笔者的大三生涯马上结束，也真正上手科研有了接近一年的时间，所以突发奇想，想要将自己以往和未来的论文阅读笔记在博客上同步一下。这也可以算是监督自己的一种方式，避免偷懒和懈怠。 此前我使用Obsidian管理个人笔记已有一段时间，所以我vibe coding了一个插件（工具）来实现从Obsidian到hexo博客的一键迁移，后续我也会更新这个工具的使用方法。 过去的接近一年时间里，我一直在做关于时间序列预测的工作，虽然说也是三天打鱼两天晒网，但是磨洋工一年下来，总归还是有点收获。当然我的论文阅读范围并不局限于这一方向，基本是想读什么就读什么。或许读者能从我的笔记中获得一些帮助，那就是极好的事情。 </div></div></div></a><a class="pagination-related" href="/blog/posts/f585d098/" title="论文阅读：DAgger - A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;f585d098&#x2F;dagger-algorithm.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-05</div><div class="info-item-2">论文阅读：DAgger - A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning</div></div><div class="info-2"><div class="info-item-1"> 引：DAgger 研究的问题很直接： 策略做出的动作会改变下一次看到的输入，那么只在专家走过的状态上训练，为什么能保证策略独立执行时也表现良好？ 作者让当前策略参与收集状态，再由专家为这些状态提供动作标签，把模仿学习转成一系列可以复用监督学习器的训练问题。它改变的首先是训练数据怎样获得，而不是网络结构。  背景 普通的 behavior cloning，可以理解为从示范中学习一个“观测到动作”的映射。比如专家沿赛道驾驶，我们记录每张画面和对应的方向盘值，再训练模型预测方向盘。 这个训练过程本身没有问题，但部署后的输入分布会变。模型可能在一个弯道上转得稍晚，车向赛道边缘偏了一点；接下来看到的画面就不同于专家正常过弯时的画面。如果专家示范里没有这样的状态，模型也就没有学过此时应该怎样把车拉回来。 于是一次动作误差不只影响当前输出，还会影响后续的输入。继续增加几圈非常相似的完美驾驶示范，未必能够补上这个缺口。这个问题与模型容量过大造成的过拟合有关联，但二者并不相同：即使模型很好地拟合了专家分布，它也可能没有见过自己偏离之后的状态。 DAgger 的全称是 Dataset...</div></div></div></a><a class="pagination-related" href="/blog/posts/ab786ad6/" title="论文阅读：Fine-Tuning Vision-Language-Action Models - Optimizing Speed and Success"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;ab786ad6&#x2F;oft-architecture.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-10-28</div><div class="info-item-2">论文阅读：Fine-Tuning Vision-Language-Action Models - Optimizing Speed and Success</div></div><div class="info-2"><div class="info-item-1"> 引：Moo Jin Kim、Chelsea Finn 和 Percy Liang 在这篇文章中研究，怎样更有效地将已有的 Vision-Language-Action 模型微调到新机器人和新任务。作者以 OpenVLA 为基础，组合并行动作解码、action chunking、连续动作和 L1 回归，提出 OpenVLA-OFT；在双臂实验中又加入 FiLM，增强语言对视觉特征的影响。    图为双臂 ALOHA 实验所用的 OpenVLA-OFT+：模型接收三路图像、机器人状态和语言，输出 25 个时间步的动作。图来自原论文 Fig. 1。  背景 VLA 可以理解为将视觉、语言与机器人动作接在一起的策略模型。例如，输入一张桌面图像和“把茄子放进锅里”，模型要根据当前场景产生机械臂动作；执行之后再观察环境，并继续决定后面的动作。 已有 VLA 在大规模机器人数据上预训练，能够理解一定的视觉和语言信息。但遇到新的机器人、新的动作空间或更快的控制频率时，通常仍需要用新任务的示范数据微调。论文研究的问题是：是否必须沿用预训练时的动作输出方式，才能有效利用预训练模型？ 作者以...</div></div></div></a><a class="pagination-related" href="/blog/posts/a96313f0/" title="论文阅读：Denoising Diffusion Probabilistic Models"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;a96313f0&#x2F;ddpm-process.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-10-26</div><div class="info-item-2">论文阅读：Denoising Diffusion Probabilistic Models</div></div><div class="info-2"><div class="info-item-1"> 引：DDPM 是 Jonathan Ho、Ajay Jain 和 Pieter Abbeel 在 2020 年提出的工作。它用一个固定的加噪过程构造不同难度的去噪任务，再学习反向过程，从纯高斯噪声逐步生成图像。本文最关键的部分是：怎样将反向分布的学习转化为噪声预测，以及为什么最终可以用一个简单的均方误差训练生成模型。 理解这条推导，也就能理解后来 DiT 等工作中噪声预测目标的来源。  背景 我们可以先想象一张清晰图像：如果不断往其中加入少量随机噪声，图像的细节会逐渐消失，最后几乎只剩噪声。这个破坏过程很容易实现，因为每次加入什么噪声、加入多少，都可以由我们自己决定。 DDPM 要做的是学习与之对应的生成过程：给模型一张噪声图，让它逐步得到噪声更少的状态，最终产生一张自然图像。这里学习的是数据的分布，模型需要知道什么样的图像结构是合理的，以及在当前噪声水平下应该怎样更新输入。 扩散概率模型在本文之前已经被提出。DDPM 的贡献在于，通过一套具体的参数化和训练目标，让这类模型得到了很好的图像生成效果，并说明了它与 Denoising Score Matching 和...</div></div></div></a></div></div><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Derrick Liu</div><div class="author-info-description">An undergraduate majoring in CS.</div><div class="site-data"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">33</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ziyuliu258"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/ziyuliu258" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1209830516abc@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B"><span class="toc-number">2.</span> <span class="toc-text">核心能力</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#UI-TARS"><span class="toc-number">3.</span> <span class="toc-text">UI-TARS</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E7%BB%93%E6%9E%84"><span class="toc-number">3.1.</span> <span class="toc-text">整体结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%95%8C%E9%9D%A2%E6%84%9F%E7%9F%A5"><span class="toc-number">3.2.</span> <span class="toc-text">界面感知</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A8%E4%BD%9C%E4%B8%8E-grounding"><span class="toc-number">3.3.</span> <span class="toc-text">动作与 grounding</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E7%90%86%E6%95%B0%E6%8D%AE"><span class="toc-number">3.4.</span> <span class="toc-text">推理数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8%E7%BA%BF%E8%BD%A8%E8%BF%B9"><span class="toc-number">3.5.</span> <span class="toc-text">在线轨迹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%8D%E6%80%9D%E8%AE%AD%E7%BB%83"><span class="toc-number">3.6.</span> <span class="toc-text">反思训练</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Agent-DPO"><span class="toc-number">3.7.</span> <span class="toc-text">Agent DPO</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E9%98%B6%E6%AE%B5"><span class="toc-number">3.8.</span> <span class="toc-text">训练阶段</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C"><span class="toc-number">4.</span> <span class="toc-text">实验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%84%9F%E7%9F%A5%E4%B8%8E%E5%AE%9A%E4%BD%8D"><span class="toc-number">4.1.</span> <span class="toc-text">感知与定位</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A6%BB%E7%BA%BF-agent"><span class="toc-number">4.2.</span> <span class="toc-text">离线 agent</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8%E7%BA%BF-agent"><span class="toc-number">4.3.</span> <span class="toc-text">在线 agent</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%98%BE%E5%BC%8F%E6%8E%A8%E7%90%86"><span class="toc-number">4.4.</span> <span class="toc-text">显式推理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E7%82%B9%E5%92%8C%E4%B8%8D%E8%B6%B3"><span class="toc-number">5.</span> <span class="toc-text">核心点和不足</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">7.</span> <span class="toc-text">参考</span></a></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url(/blog/images/bg2.jpg);"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Derrick Liu</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js"></script><script defer src="/blog/js/liquid-glass.js?v=9ba77a3aa919"></script><script defer src="/blog/js/aside-motion.js?v=bc00aa983ae7"></script><script src="/blog/js/tw_cn.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-category":"Announcements","data-mapping":"pathname","data-strict":"1","data-lang":"zh-CN","data-input-position":"top","data-reactions-enabled":"1","data-emit-metadata":"0"}
+  const siteRoot = "/blog/"
+
+  // PJAX can execute this script before location.pathname changes. The new
+  // page's canonical link has already been swapped at that point.
+  const getPathnameTerm = () => {
+    const canonical = document.querySelector('link[rel="canonical"]')
+    const url = canonical ? new URL(canonical.href, location.href) : new URL(location.href)
+    const pathname = (url.origin === location.origin ? url.pathname : location.pathname).replace(/\/index\.html$/, '/')
+    const relative = pathname.startsWith(siteRoot) ? '/' + pathname.slice(siteRoot.length) : pathname
+    return relative.length < 2 ? 'index' : relative.slice(1).replace(/\.\w+$/, '')
+  }
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'noborder_dark' : 'noborder_light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : (!option || !option['data-mapping'] || option['data-mapping'] === 'pathname')
+        ? { 'data-mapping': 'specific', 'data-term': getPathnameTerm() }
+        : { 'data-mapping': option['data-mapping'] }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'ziyuliu258/ziyuliu258.github.io',
+      'data-repo-id': 'R_kgDONzQxiw',
+      'data-category-id': 'DIC_kwDONzQxi84DJPXY',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const wrap = el.querySelector('#giscus-wrap')
+    if (!wrap || wrap.dataset.giscusStarted === 'true') return
+    wrap.dataset.giscusStarted = 'true'
+    let attempts = 0
+    let timer
+    const message = document.createElement('div')
+    message.className = 'giscus-load-message'
+    message.setAttribute('role', 'status')
+    message.textContent = '评论区加载中…'
+    wrap.appendChild(message)
+
+    const retry = () => {
+      if (!wrap.isConnected) return
+      clearTimeout(timer)
+      wrap.querySelectorAll('script, .giscus').forEach(node => node.remove())
+      message.replaceChildren(document.createTextNode('评论区暂时无法加载。'))
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.textContent = '重试'
+      button.addEventListener('click', () => { attempts = 0; start() })
+      message.appendChild(button)
+    }
+    const start = () => {
+      if (!wrap.isConnected) return
+      clearTimeout(timer)
+      wrap.querySelectorAll('script, .giscus').forEach(node => node.remove())
+      attempts++
+      message.textContent = '评论区加载中…'
+      const scriptElement = createScriptElement(giscusConfig)
+      scriptElement.onerror = () => {
+        clearTimeout(timer)
+        if (attempts < 2) timer = setTimeout(start, 1500)
+        else retry()
+      }
+      wrap.appendChild(scriptElement)
+      timer = setTimeout(() => {
+        if (!wrap.isConnected) return
+        const frame = wrap.querySelector('iframe.giscus-frame')
+        if (frame && !frame.classList.contains('giscus-frame--loading')) {
+          message.remove()
+        } else if (attempts < 2) {
+          start()
+        } else {
+          retry()
+        }
+      }, 20000)
+      scriptElement.onload = () => {
+        const frame = wrap.querySelector('iframe.giscus-frame')
+        if (frame) frame.addEventListener('load', () => { clearTimeout(timer); message.remove() }, { once: true })
+      }
+    }
+    start()
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else setTimeout(loadGiscus, 0)
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"]):not([href="https://ziyuliu258.cn/profile/"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      pjax.loadUrl('/blog/404.html')
+    }
+  })
+})()</script><script defer src="/blog/js/site-statistics.js?v=9eea0014980d" data-api="https://bsz.iirose.cn/api"></script><script defer src="/blog/js/music-player.js?v=d162f546b719"></script></div></body></html>
