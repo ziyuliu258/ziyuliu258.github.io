@@ -4,8 +4,14 @@
   if (window.siteStatisticsLoaded) return;
   window.siteStatisticsLoaded = true;
   const script = document.currentScript;
-  const api = script && script.dataset.api;
-  if (!api) return;
+  const liquidSite = (window.GLOBAL_CONFIG_SITE && GLOBAL_CONFIG_SITE.liquid) || {};
+  const stats = liquidSite.stats || {};
+  const api = stats.api || (script && script.dataset.api) || '';
+  if (!api || stats.enable === false) return;
+  const note = stats.note || 'Counting starts when the new statistics service was enabled';
+  const localNote = stats.local || 'Local previews are not counted';
+  const loadingNote = stats.loading || 'Loading statistics';
+  const errorNote = stats.error || 'Statistics are temporarily unavailable. Refresh the page to retry';
   let previousPath = '';
   let cached = null;
   let pending = false;
@@ -16,7 +22,7 @@
       const el = document.getElementById('busuanzi_value_' + key);
       if (!el) return;
       el.textContent = values ? Number(values[key]).toLocaleString() : '—';
-      el.title = message || '新统计服务从启用时开始计数';
+      el.title = message || note;
     });
   };
 
@@ -32,10 +38,10 @@
     cached = null;
     const serial = ++sequence;
     if (['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) {
-      display(null, '本地预览不计入访问统计');
+      display(null, localNote);
       return;
     }
-    display(null, '正在获取统计数据');
+    display(null, loadingNote);
     pending = true;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 8000);
@@ -61,7 +67,7 @@
       cached = result.data;
       display(cached);
     } catch (_) {
-      if (serial === sequence) display(null, '统计暂时不可用，刷新页面后重试');
+      if (serial === sequence) display(null, errorNote);
     } finally {
       clearTimeout(timer);
       if (serial === sequence) pending = false;

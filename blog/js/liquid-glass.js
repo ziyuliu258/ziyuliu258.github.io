@@ -18,8 +18,10 @@
   const pointer = matchMedia('(hover: hover) and (pointer: fine)')
   const reducedTransparency = matchMedia('(prefers-reduced-transparency: reduce)')
 
+  const liquidSite = (window.GLOBAL_CONFIG_SITE && GLOBAL_CONFIG_SITE.liquid) || {}
+  const glassConfig = liquidSite.glass || {}
   const chromium = /Chrome\/|Chromium\//.test(navigator.userAgent)
-  const refracting = chromium && CSS.supports('backdrop-filter', 'url("#glass")') && 'ResizeObserver' in window
+  const refracting = glassConfig.refraction !== false && chromium && CSS.supports('backdrop-filter', 'url("#glass")') && 'ResizeObserver' in window
   // Cache shared SVG filters and specular overlays by geometry signature so 10 post cards only build 1 filter!
   const sharedFilters = new Map()
   const surfaceSignature = new WeakMap()

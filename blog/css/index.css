@@ -209,6 +209,7 @@ template {
 }
 .fontawesomeIcon,
 .custom-hr:before,
+#post .post-copyright:before,
 #post #post-outdate-notice:before,
 .note:not(.no-icon)::before,
 .search-dialog hr:before {
@@ -2234,6 +2235,14 @@ figure.highlight pre .javascript .function {
     width: 100% !important;
   }
 }
+.layout.hide-aside {
+  max-width: 1000px;
+}
+@media screen and (min-width: 2000px) {
+  .layout.hide-aside {
+    max-width: 1300px;
+  }
+}
 .layout.hide-aside > div {
   width: 100% !important;
 }
@@ -3087,7 +3096,7 @@ figure.highlight pre .javascript .function {
     display: none;
   }
   html.hide-aside .layout > div:first-child {
-    width: 100%;
+    width: 80%;
   }
 }
 .page .sticky_layout {
@@ -4141,6 +4150,14 @@ figure.highlight pre .javascript .function {
   -ms-transition: box-shadow 0.3s ease-in-out;
   transition: box-shadow 0.3s ease-in-out;
   border-radius: 6px;
+}
+#post .post-copyright:before {
+  position: absolute;
+  top: 2px;
+  right: 12px;
+  color: #49b1f5;
+  content: '\f1f9';
+  font-size: 1.3em;
 }
 #post .post-copyright:hover {
   -webkit-box-shadow: 0 0 8px 0 rgba(232,237,250,0.6), 0 2px 4px 0 rgba(232,237,250,0.5);
@@ -5929,7 +5946,7 @@ blockquote.pullquote.right {
   margin-top: -20px;
 }
 [data-theme='dark'] {
-  --global-bg: #2c2c2c;
+  --global-bg: #0d0d0d;
   --font-color: rgba(255,255,255,0.7);
   --hr-border: rgba(255,255,255,0.4);
   --hr-before-color: rgba(255,255,255,0.7);
@@ -5943,12 +5960,12 @@ blockquote.pullquote.right {
   --tab-botton-color: rgba(255,255,255,0.7);
   --tab-button-hover-bg: #383838;
   --tab-button-active-bg: #121212;
-  --card-bg: #383838;
-  --sidebar-bg: #3e3e3e;
+  --card-bg: #121212;
+  --sidebar-bg: #121212;
   --sidebar-menu-bg: #1f1f1f;
-  --btn-hover-color: #aeaeae;
+  --btn-hover-color: #787878;
   --btn-color: rgba(255,255,255,0.7);
-  --btn-bg: #4d4d4d;
+  --btn-bg: #1f1f1f;
   --text-bg-hover: #383838;
   --light-grey: rgba(255,255,255,0.7);
   --dark-grey: rgba(255,255,255,0.2);
@@ -5993,7 +6010,7 @@ blockquote.pullquote.right {
 }
 [data-theme='dark'] #page-header.nav-fixed > #nav,
 [data-theme='dark'] #page-header.not-top-img > #nav {
-  background: rgba(28,28,28,0.8);
+  background: rgba(18,18,18,0.8);
   -webkit-box-shadow: 0 5px 6px -5px rgba(133,133,133,0);
   box-shadow: 0 5px 6px -5px rgba(133,133,133,0);
 }

@@ -4,9 +4,35 @@
   if (window.musicPageLoaded) return;
   window.musicPageLoaded = true;
   const assetRoot = GLOBAL_CONFIG.root;
+  const liquidSite = (window.GLOBAL_CONFIG_SITE && GLOBAL_CONFIG_SITE.liquid) || {};
+  const liquidMusic = liquidSite.music || {};
+  if (liquidMusic.enable === false) return;
+  const i18n = Object.assign({
+    dockLabel: 'Global music player',
+    expand: 'Expand music player',
+    collapse: 'Collapse music player',
+    collapseShort: 'Collapse',
+    previous: 'Previous track',
+    next: 'Next track',
+    play: 'Play',
+    pause: 'Pause',
+    volume: 'Volume',
+    seek: 'Playback position',
+    playlist: 'Playlist',
+    title: 'Music',
+    loading: 'Loading playlist…',
+    selectTrack: 'Select a track',
+    playFailed: 'Playback is unavailable. Please listen on NetEase Cloud Music.',
+    preview: 'Preview only.',
+    trackFailed: 'This track is unavailable. Please listen on NetEase Cloud Music.',
+    emptyPlaylist: 'No playable tracks in this playlist. Please listen on NetEase Cloud Music.',
+    loadFailed: 'The playlist could not be loaded. Refresh the page to retry.'
+  }, liquidMusic.i18n || {});
+  const playlistUrl = liquidMusic.playlistUrl || (assetRoot + 'music/playlist.json');
+  const pageUrl = liquidMusic.pageUrl || (assetRoot + 'music/');
   let tracks = [];
   let current = null;
-  let statusText = '正在加载歌单…';
+  let statusText = i18n.loading;
   let pageRoot = null;
 
   const icons = {
@@ -30,30 +56,30 @@
   const dock = document.createElement('aside');
   dock.id = 'music-dock';
   dock.className = 'music-dock';
-  dock.setAttribute('aria-label', '全局音乐播放器');
+  dock.setAttribute('aria-label', i18n.dockLabel);
   dock.innerHTML = `
-    <button class="music-dock-launcher" type="button" aria-label="展开音乐播放器" title="展开音乐播放器">♫</button>
+    <button class="music-dock-launcher" type="button" aria-label="${i18n.expand}" title="${i18n.expand}">♫</button>
     <div class="music-dock-body">
       <div class="music-dock-header">
         <div class="music-dock-cover music-cover" aria-hidden="true"><span>♫</span><img data-dock-cover alt="" referrerpolicy="no-referrer" hidden></div>
         <div class="music-dock-info">
           <a data-dock-track></a>
-          <small data-dock-artist>正在加载歌单…</small>
+          <small data-dock-artist>${i18n.loading}</small>
         </div>
-        <button class="music-dock-collapse" type="button" data-action="collapse" aria-label="收起音乐播放器" title="收起">×</button>
+        <button class="music-dock-collapse" type="button" data-action="collapse" aria-label="${i18n.collapse}" title="${i18n.collapseShort}">×</button>
       </div>
       <div class="music-dock-lyric" data-dock-lyric hidden></div>
       <div class="music-dock-controls">
-        <button type="button" data-action="previous" aria-label="上一首" title="上一首">⏮</button>
-        <button class="music-dock-play" type="button" data-action="toggle" aria-label="播放" title="播放">▶</button>
-        <button type="button" data-action="next" aria-label="下一首" title="下一首">⏭</button>
-        <label class="music-dock-volume">Volume <input data-dock-volume type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume"></label>
+        <button type="button" data-action="previous" aria-label="${i18n.previous}" title="${i18n.previous}">⏮</button>
+        <button class="music-dock-play" type="button" data-action="toggle" aria-label="${i18n.play}" title="${i18n.play}">▶</button>
+        <button type="button" data-action="next" aria-label="${i18n.next}" title="${i18n.next}">⏭</button>
+        <label class="music-dock-volume">${i18n.volume} <input data-dock-volume type="range" min="0" max="1" step="0.01" value="1" aria-label="${i18n.volume}"></label>
       </div>
       <div class="music-dock-progress">
         <span data-dock-elapsed>0:00</span>
-        <input data-dock-seek type="range" min="0" max="1000" value="0" aria-label="播放进度">
+        <input data-dock-seek type="range" min="0" max="1000" value="0" aria-label="${i18n.seek}">
         <span data-dock-duration>0:00</span>
-        <button class="music-dock-list" type="button" data-action="playlist" aria-label="Playlist" title="Playlist" aria-expanded="false"></button>
+        <button class="music-dock-list" type="button" data-action="playlist" aria-label="${i18n.playlist}" title="${i18n.playlist}" aria-expanded="false"></button>
       </div>
       <audio preload="none"></audio>
       <p class="music-dock-status" data-dock-status role="status"></p>
@@ -80,8 +106,8 @@
   const findPage = (name) => pageRoot && pageRoot.querySelector('[data-music-' + name + ']');
   setTransportIcons(dock, 'data-action');
   setIcon(dock.querySelector('[data-action="playlist"]'), 'list');
-  findDock('track').href = assetRoot + 'music/';
-  findDock('track').textContent = '音乐';
+  findDock('track').href = pageUrl;
+  findDock('track').textContent = i18n.title;
 
   function cover(img, url) {
     if (!img) return;
@@ -250,8 +276,8 @@
     const playing = !audio.paused;
     dock.querySelectorAll('[data-action="toggle"]').forEach((button) => {
       setIcon(button, playing ? 'pause' : 'play');
-      button.setAttribute('aria-label', playing ? '暂停' : '播放');
-      button.title = playing ? '暂停' : '播放';
+      button.setAttribute('aria-label', playing ? i18n.pause : i18n.play);
+      button.title = playing ? i18n.pause : i18n.play;
     });
     findDock('status').textContent = statusText;
     findDock('elapsed').textContent = time(audio.currentTime);
@@ -267,8 +293,8 @@
     if (!pageRoot || !pageRoot.isConnected) return;
     const button = pageRoot.querySelector('[data-music-action="toggle"]');
     setIcon(button, playing ? 'pause' : 'play');
-    button.setAttribute('aria-label', playing ? '暂停' : '播放');
-    findPage('track').textContent = current ? current.name : '请选择歌曲';
+    button.setAttribute('aria-label', playing ? i18n.pause : i18n.play);
+    findPage('track').textContent = current ? current.name : i18n.selectTrack;
     findPage('artist').textContent = current ? current.artist : '';
     findPage('status').textContent = statusText;
     cover(findPage('cover'), current && current.cover);
@@ -281,7 +307,7 @@
   function setStatus(message) { statusText = message; update(); }
   function play() {
     if (!current) return;
-    audio.play().catch(() => setStatus('暂时无法播放，请在网易云收听。'));
+    audio.play().catch(() => setStatus(i18n.playFailed));
   }
   function select(track, shouldPlay) {
     if (!track) return;
@@ -291,7 +317,7 @@
     findDock('artist').textContent = track.artist;
     cover(findDock('cover'), track.cover);
     if (changed) audio.src = 'https://music.163.com/song/media/outer/url?id=' + encodeURIComponent(track.id) + '.mp3';
-    setStatus(track.preview ? '此曲仅提供试听。' : '');
+    setStatus(track.preview ? i18n.preview : '');
     if (shouldPlay) play();
   }
   function advance(direction, shouldPlay = true) {
@@ -346,7 +372,7 @@
   });
   ['play', 'pause', 'timeupdate', 'durationchange', 'volumechange'].forEach((event) => audio.addEventListener(event, update));
   audio.addEventListener('ended', () => advance(1));
-  audio.addEventListener('error', () => { if (current) setStatus('这首歌暂时无法播放，请在网易云收听。'); });
+  audio.addEventListener('error', () => { if (current) setStatus(i18n.trackFailed); });
 
   function initPage() {
     pageRoot = document.getElementById('music-library');
@@ -425,7 +451,7 @@
     if (refreshInFlight) return;
     refreshInFlight = true;
     try {
-      const response = await fetch(assetRoot + 'music/playlist.json', { cache: 'no-store' });
+      const response = await fetch(playlistUrl, { cache: 'no-store' });
       if (!response.ok) throw new Error('playlist unavailable');
       const data = await response.json();
       if (!Array.isArray(data.tracks)) throw new Error('invalid playlist');
@@ -445,10 +471,10 @@
       if (!current) {
         const first = tracks.find((track) => track.available);
         if (first) select(first, false);
-        else setStatus('当前歌单暂无可直接播放的歌曲，请在网易云收听。');
+        else setStatus(i18n.emptyPlaylist);
       }
     } catch (_) {
-      if (!playlist) setStatus('歌单加载失败，请稍后刷新页面重试。');
+      if (!playlist) setStatus(i18n.loadFailed);
     } finally {
       refreshInFlight = false;
     }

@@ -1,11 +1,36 @@
-/* 支持 AVIF 的浏览器加载小体积背景，原 JPG 用于兼容回退。 */
-#web_bg[style*="/images/bg2.jpg"],
-#page-header[style*="/images/bg2.jpg"],
-#footer[style*="/images/bg2.jpg"] {
-  background-image: image-set(
-    url("../images/bg2.avif") type("image/avif"),
-    url("../images/bg2.jpg") type("image/jpeg")
-  ) !important;
+/* Liquid theme appearance layer.
+   Butterfly core stays untouched; site-specific looks live here.
+   Background AVIF overrides are generated from `liquid.background.avif`
+   in the theme config, so no image path is hard-coded in this file. */
+
+/* Preserve the original single-column layout after hiding the aside. */
+.layout.hide-aside {
+  max-width: 100%;
+}
+
+@media screen and (min-width: 900px) {
+  html.hide-aside .layout > div:first-child {
+    width: 100%;
+  }
+}
+
+/* The copyright block in the original design has no decorative corner icon. */
+.post-copyright:before {
+  display: none !important;
+}
+
+/* Slightly lighter dark surfaces, matching the previous site appearance. */
+[data-theme='dark'] {
+  --global-bg: #2e2e2e;
+  --card-bg: #383838;
+  --sidebar-bg: #3e3e3e;
+  --btn-hover-color: #7a7a7a;
+  --btn-bg: #454545;
+}
+
+[data-theme='dark'] #page-header.nav-fixed > #nav,
+[data-theme='dark'] #page-header.not-top-img > #nav {
+  background: rgba(28, 28, 28, 0.8);
 }
 
 /* 让背景融入日夜模式，而不是覆盖页面原本的白色或深色底色。 */
