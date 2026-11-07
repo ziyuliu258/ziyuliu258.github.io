@@ -238,6 +238,12 @@
   opacity: .75;
 }
 
+html[data-theme='light'] .layout .pagination > .space {
+  color: rgba(255, 255, 255, .95);
+  opacity: 1;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, .45);
+}
+
 /* 分页玻璃底上的页码和箭头需要更清晰的对比。 */
 .layout #pagination .pagination > a:not(:hover) {
   color: #075d95;
