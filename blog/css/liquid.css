@@ -231,6 +231,13 @@
   clip-path: inset(0 round var(--glass-radius));
 }
 
+/* 分页省略号在玻璃/图片背景上保持可见。 */
+.layout .pagination > .space {
+  color: var(--font-color);
+  font-weight: 700;
+  opacity: .75;
+}
+
 /* 分页玻璃底上的页码和箭头需要更清晰的对比。 */
 .layout #pagination .pagination > a:not(:hover) {
   color: #075d95;
