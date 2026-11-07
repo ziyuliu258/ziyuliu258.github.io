@@ -1,5 +1,5 @@
 /* Liquid theme appearance layer.
-   Butterfly core stays untouched; site-specific looks live here.
+   The theme core stays untouched; site-specific looks live here.
    Background AVIF overrides are generated from `liquid.background.avif`
    in the theme config, so no image path is hard-coded in this file. */
 
