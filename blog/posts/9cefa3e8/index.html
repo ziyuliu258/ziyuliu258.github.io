@@ -1,0 +1,368 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>在手机上管理Hexo博客？ | Derrick Liu的个人博客</title><meta name="author" content="Derrick Liu,1209830516abc@gmail.com"><meta name="copyright" content="Derrick Liu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="灵感 一直以来，我觉得*“必须守在电脑前用规范的Markdown语法编辑个人博客”*是一件荒谬的事，一个好的博客管理方式应该是类似于“随身记”，什么时候有了零星感想就记下来，而不是为了更新&#x2F;维护个人博客而要牺牲记录的即时性或在场的机会。于是我总有要搓出一个能放在移动设备上的Hexo博客管理app的想法。 时机成熟了 而随着日历被翻到2026年11月这一页，我们也已经迎来了Token比人更省钱更好用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在手机上管理Hexo博客？">
+<meta property="og:url" content="https://ziyuliu258.cn/blog/posts/9cefa3e8/index.html">
+<meta property="og:site_name" content="Derrick Liu的个人博客">
+<meta property="og:description" content="灵感 一直以来，我觉得*“必须守在电脑前用规范的Markdown语法编辑个人博客”*是一件荒谬的事，一个好的博客管理方式应该是类似于“随身记”，什么时候有了零星感想就记下来，而不是为了更新&#x2F;维护个人博客而要牺牲记录的即时性或在场的机会。于是我总有要搓出一个能放在移动设备上的Hexo博客管理app的想法。 时机成熟了 而随着日历被翻到2026年11月这一页，我们也已经迎来了Token比人更省钱更好用">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg">
+<meta property="article:published_time" content="2026-11-08T21:45:50.000Z">
+<meta property="article:modified_time" content="2026-11-14T13:09:14.713Z">
+<meta property="article:author" content="Derrick Liu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "在手机上管理Hexo博客？",
+  "url": "https://ziyuliu258.cn/blog/posts/9cefa3e8/",
+  "image": "https://ziyuliu258.cn/blog/images/avatar.jpg",
+  "datePublished": "2026-11-08T21:45:50.000Z",
+  "dateModified": "2026-11-14T13:09:14.713Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Derrick Liu",
+      "url": "https://ziyuliu258.cn/blog/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/blog/images/avatar.jpg"><link rel="canonical" href="https://ziyuliu258.cn/blog/posts/9cefa3e8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="https://bsz.iirose.cn" crossorigin=""/><link rel="preconnect" href="https://giscus.app" crossorigin=""/><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":1,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: false,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '在手机上管理Hexo博客？',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post',
+  liquid: {"glass":{"enable":true,"refraction":true},"stats":{"enable":true,"api":"https://bsz.iirose.cn/api","siteUv":true,"sitePv":true,"pagePv":true,"note":"新统计服务从启用时开始计数","local":"本地预览不计入访问统计","loading":"正在获取统计数据","error":"统计暂时不可用，刷新页面后重试"},"music":{"enable":true,"pageUrl":"/blog/music/","playlistUrl":"/blog/music/playlist.json","i18n":{"dockLabel":"全局音乐播放器","expand":"展开音乐播放器","collapse":"收起音乐播放器","collapseShort":"收起","previous":"上一首","next":"下一首","play":"播放","pause":"暂停","volume":"音量","seek":"播放进度","playlist":"歌单","title":"音乐","loading":"正在加载歌单…","selectTrack":"请选择歌曲","playFailed":"暂时无法播放，请在网易云收听。","preview":"此曲仅提供试听。","trackFailed":"这首歌暂时无法播放，请在网易云收听。","emptyPlaylist":"当前歌单暂无可直接播放的歌曲，请在网易云收听。","loadFailed":"歌单加载失败，请稍后刷新页面重试。"}},"comments":{"giscus":{"loading":"评论区加载中…","error":"评论区暂时无法加载。","retry":"重试"}}}
+}</script><link rel="stylesheet" href="/blog/css/liquid.css?v=4035b7d20a76"><link rel="preload" as="image" href="/blog/images/bg2.avif" type="image/avif"><style>#web_bg[style*="/blog/images/bg2.jpg"], #page-header[style*="/blog/images/bg2.jpg"], #footer[style*="/blog/images/bg2.jpg"] {
+  background-image: image-set(url("/blog/images/bg2.avif") type("image/avif"), url("/blog/images/bg2.jpg") type("image/jpeg")) !important;
+}</style><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/blog/atom.xml" title="Derrick Liu的个人博客" type="application/atom+xml">
+</head><body><div id="web_bg" style="background-image: url(/blog/images/bg2.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">35</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/blog/images/bg2.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/blog/"></a><a class="nav-page-title" href="/blog/"><span class="site-name">在手机上管理Hexo博客？</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">在手机上管理Hexo博客？</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-08T21:45:50.000Z" title="发表于 2026-11-09 05:45:50">2026-11-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-14T13:09:14.713Z" title="更新于 2026-11-14 21:09:14">2026-11-14</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/blog/categories/%E6%8A%80%E6%9C%AF/">技术</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">244</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>1分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv" title="新统计服务从启用时开始计数" aria-live="polite">—</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="灵感">灵感</h2>
+<p>一直以来，我觉得*“必须守在电脑前用规范的Markdown语法编辑个人博客”*是一件荒谬的事，一个好的博客管理方式应该是类似于“随身记”，什么时候有了零星感想就记下来，而不是为了更新/维护个人博客而要牺牲记录的即时性或在场的机会。于是我总有要搓出一个能放在移动设备上的Hexo博客管理app的想法。</p>
+<h2 id="时机成熟了">时机成熟了</h2>
+<p>而随着日历被翻到2026年11月这一页，我们也已经迎来了Token比人更省钱更好用的伟大新时代，所以这样的一个愿望的实现也是非常没有阻碍了。</p>
+<p>可以看到，这篇文章就是我用这个刚搓出来的小程序做出来的。我觉得这是个好的机会，我准备过几天将这个app开源。希望大家多多支持！</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://ziyuliu258.cn/blog">Derrick Liu</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://ziyuliu258.cn/blog/posts/9cefa3e8/">https://ziyuliu258.cn/blog/posts/9cefa3e8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://ziyuliu258.cn/blog" target="_blank">Derrick Liu的个人博客</a>！</span></div></div><div class="tag_share"><div class="post-share"><div class="social-share" data-image="/blog/images/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/blog/vendor/extsrc/share.min.css" media="print" onload="this.media='all'"><script src="/blog/vendor/extsrc/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"></nav><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Derrick Liu</div><div class="author-info-description">An undergraduate majoring in CS.</div><div class="site-data"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">35</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ziyuliu258"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/ziyuliu258" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1209830516abc@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%81%B5%E6%84%9F"><span class="toc-number">1.</span> <span class="toc-text">灵感</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%B6%E6%9C%BA%E6%88%90%E7%86%9F%E4%BA%86"><span class="toc-number">2.</span> <span class="toc-text">时机成熟了</span></a></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url(/blog/images/bg2.jpg);"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Derrick Liu</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/ziyuliu258/hexo-theme-liquid">Liquid</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js"></script><script defer src="/blog/js/liquid-glass.js?v=b98445d26ed4"></script><script defer src="/blog/js/aside-motion.js?v=bc00aa983ae7"></script><script src="/blog/js/tw_cn.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-category":"Announcements","data-mapping":"pathname","data-strict":"1","data-lang":"zh-CN","data-input-position":"top","data-reactions-enabled":"1","data-emit-metadata":"0"}
+  const siteRoot = "/blog/"
+  const texts = {"loading":"评论区加载中…","error":"评论区暂时无法加载。","retry":"重试"}
+
+  // PJAX can execute this script before location.pathname changes. The new
+  // page's canonical link has already been swapped at that point.
+  const getPathnameTerm = () => {
+    const canonical = document.querySelector('link[rel="canonical"]')
+    const url = canonical ? new URL(canonical.href, location.href) : new URL(location.href)
+    const pathname = (url.origin === location.origin ? url.pathname : location.pathname).replace(/\/index\.html$/, '/')
+    const relative = pathname.startsWith(siteRoot) ? '/' + pathname.slice(siteRoot.length) : pathname
+    return relative.length < 2 ? 'index' : relative.slice(1).replace(/\.\w+$/, '')
+  }
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'noborder_dark' : 'noborder_light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : (!option || !option['data-mapping'] || option['data-mapping'] === 'pathname')
+        ? { 'data-mapping': 'specific', 'data-term': getPathnameTerm() }
+        : { 'data-mapping': option['data-mapping'] }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'ziyuliu258/ziyuliu258.github.io',
+      'data-repo-id': 'R_kgDONzQxiw',
+      'data-category-id': 'DIC_kwDONzQxi84DJPXY',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const wrap = el.querySelector('#giscus-wrap')
+    if (!wrap || wrap.dataset.giscusStarted === 'true') return
+    wrap.dataset.giscusStarted = 'true'
+    let attempts = 0
+    let timer
+    const message = document.createElement('div')
+    message.className = 'giscus-load-message'
+    message.setAttribute('role', 'status')
+    message.textContent = texts.loading
+    wrap.appendChild(message)
+
+    const retry = () => {
+      if (!wrap.isConnected) return
+      clearTimeout(timer)
+      wrap.querySelectorAll('script, .giscus').forEach(node => node.remove())
+      message.replaceChildren(document.createTextNode(texts.error))
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.textContent = texts.retry
+      button.addEventListener('click', () => { attempts = 0; start() })
+      message.appendChild(button)
+    }
+    const start = () => {
+      if (!wrap.isConnected) return
+      clearTimeout(timer)
+      wrap.querySelectorAll('script, .giscus').forEach(node => node.remove())
+      attempts++
+      message.textContent = texts.loading
+      const scriptElement = createScriptElement(giscusConfig)
+      scriptElement.onerror = () => {
+        clearTimeout(timer)
+        if (attempts < 2) timer = setTimeout(start, 1500)
+        else retry()
+      }
+      wrap.appendChild(scriptElement)
+      timer = setTimeout(() => {
+        if (!wrap.isConnected) return
+        const frame = wrap.querySelector('iframe.giscus-frame')
+        if (frame && !frame.classList.contains('giscus-frame--loading')) {
+          message.remove()
+        } else if (attempts < 2) {
+          start()
+        } else {
+          retry()
+        }
+      }, 20000)
+      scriptElement.onload = () => {
+        const frame = wrap.querySelector('iframe.giscus-frame')
+        if (frame) frame.addEventListener('load', () => { clearTimeout(timer); message.remove() }, { once: true })
+      }
+    }
+    start()
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else setTimeout(loadGiscus, 0)
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"]):not([href="https://ziyuliu258.cn/profile/"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      pjax.loadUrl('/blog/404.html')
+    }
+  })
+})()</script><script defer src="/blog/js/site-statistics.js?v=6049b5963362"></script><script defer src="/blog/js/music-player.js?v=1dff4f827d53"></script></div></body></html>
