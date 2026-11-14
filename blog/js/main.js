@@ -482,8 +482,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const target = e.target.closest('.toc-link')
         if (!target) return
 
+        const href = target.getAttribute('href')
+        if (!href) return
+
         e.preventDefault()
-        btf.scrollToDest(btf.getEleTop(document.getElementById(decodeURI(target.getAttribute('href')).replace('#', ''))), 300)
+        btf.scrollToDest(btf.getEleTop(document.getElementById(decodeURI(href).replace('#', ''))), 300)
         if (window.innerWidth < 900) {
           $cardTocLayout.classList.remove('open')
         }
