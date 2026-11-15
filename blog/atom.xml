@@ -12,7 +12,43 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-11-14T19:32:26.413Z</updated>
+  <updated>2026-11-15T13:44:32.328Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="3D Reconstruction" scheme="https://ziyuliu258.cn/blog/tags/3D-Reconstruction/"/>
+    <category term="Novel View Synthesis" scheme="https://ziyuliu258.cn/blog/tags/Novel-View-Synthesis/"/>
+    <id>https://ziyuliu258.cn/blog/posts/c79a8e2/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/c79a8e2/"/>
+    <published>2026-11-15T13:43:05.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：3D Gaussian]]>
+    </summary>
+    <title>论文阅读：3D Gaussian Splatting for Real-Time Radiance Field Rendering</title>
+    <updated>2026-11-15T13:44:32.328Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="3D Reconstruction" scheme="https://ziyuliu258.cn/blog/tags/3D-Reconstruction/"/>
+    <category term="Computer Vision" scheme="https://ziyuliu258.cn/blog/tags/Computer-Vision/"/>
+    <id>https://ziyuliu258.cn/blog/posts/6c23f67f/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/6c23f67f/"/>
+    <published>2026-11-15T13:43:04.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：VGGT 将相机、深度、点图和跨视图跟踪放进同一个前馈模型。它最有意思的地方不是给某一个几何任务增加专用模块，而是让多张图像的 token]]>
+    </summary>
+    <title>论文阅读：VGGT: Visual Geometry Grounded Transformer</title>
+    <updated>2026-11-15T13:44:32.328Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -326,37 +362,5 @@
     </summary>
     <title>沙海拾珠：厉害的人如何做科研</title>
     <updated>2026-09-04T05:18:56.107Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="科研方法论" scheme="https://ziyuliu258.cn/blog/tags/%E7%A7%91%E7%A0%94%E6%96%B9%E6%B3%95%E8%AE%BA/"/>
-    <category term="随感" scheme="https://ziyuliu258.cn/blog/tags/%E9%9A%8F%E6%84%9F/"/>
-    <id>https://ziyuliu258.cn/blog/posts/a2661911/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/a2661911/"/>
-    <published>2026-08-16T19:22:53.000Z</published>
-    <summary>
-      <![CDATA[<p>今天刷B站，偶然看到一个杨植麟早年（2020年）接受的采访的<a]]>
-    </summary>
-    <title>杨植麟的科研三招</title>
-    <updated>2026-09-03T13:37:13.634Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="技术" scheme="https://ziyuliu258.cn/blog/categories/%E6%8A%80%E6%9C%AF/"/>
-    <category term="Linux" scheme="https://ziyuliu258.cn/blog/tags/Linux/"/>
-    <id>https://ziyuliu258.cn/blog/posts/fd1052a6/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/fd1052a6/"/>
-    <published>2026-07-23T04:09:42.000Z</published>
-    <summary>
-      <![CDATA[<div class="markdown-alert markdown-alert-warning"><p class="markdown-alert-title"><svg class="octicon octicon-alert mr-2" viewbox="0 0 16]]>
-    </summary>
-    <title>Arch Linux KDE Wayland 下腾讯会议屏幕共享黑屏修复</title>
-    <updated>2026-08-28T17:06:54.704Z</updated>
   </entry>
 </feed>
