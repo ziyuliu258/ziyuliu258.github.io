@@ -786,9 +786,9 @@ html[data-theme='light'] .layout .pagination > .space::before {
 
 .music-player-panel {
   padding: 1.5rem;
-  border: 1px solid rgba(73, 177, 245, 0.25);
+  border: 1px solid rgba(128, 128, 128, 0.3);
   border-radius: 16px;
-  background: rgba(73, 177, 245, 0.08);
+  background: rgba(128, 128, 128, 0.1);
 }
 
 .music-now-playing {
@@ -810,8 +810,8 @@ html[data-theme='light'] .layout .pagination > .space::before {
   width: 64px;
   height: 64px;
   border-radius: 12px;
-  color: #3976a9;
-  background: rgba(73, 177, 245, 0.18);
+  color: #6f6f6f;
+  background: rgba(128, 128, 128, 0.18);
   font-size: 2rem;
 }
 
@@ -868,16 +868,66 @@ html[data-theme='light'] .layout .pagination > .space::before {
   fill: currentColor;
 }
 
-/* 播放器统一黑白灰，不再使用蓝色。 */
+/* 播放器滑块直接画成灰色，不依赖浏览器默认强调色。 */
 .music-page-controls input[type="range"],
 .music-dock input[type="range"] {
   min-width: 0;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(128, 128, 128, 0.38);
   accent-color: #7a7a7a;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.music-page-controls input[type="range"]::-webkit-slider-thumb,
+.music-dock input[type="range"]::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: #7a7a7a;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.music-page-controls input[type="range"]::-moz-range-thumb,
+.music-dock input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: #7a7a7a;
+}
+
+.music-page-controls input[type="range"]::-moz-range-track,
+.music-dock input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(128, 128, 128, 0.38);
 }
 
 [data-theme='dark'] .music-page-controls input[type="range"],
 [data-theme='dark'] .music-dock input[type="range"] {
-  accent-color: #b5b5b5;
+  background: rgba(255, 255, 255, 0.24);
+  accent-color: #cfcfcf;
+}
+
+[data-theme='dark'] .music-page-controls input[type="range"]::-webkit-slider-thumb,
+[data-theme='dark'] .music-dock input[type="range"]::-webkit-slider-thumb {
+  background: #cfcfcf;
+}
+
+[data-theme='dark'] .music-page-controls input[type="range"]::-moz-range-thumb,
+[data-theme='dark'] .music-dock input[type="range"]::-moz-range-thumb {
+  background: #cfcfcf;
+}
+
+[data-theme='dark'] .music-page-controls input[type="range"]::-moz-range-track,
+[data-theme='dark'] .music-dock input[type="range"]::-moz-range-track {
+  background: rgba(255, 255, 255, 0.24);
 }
 
 .music-page-controls [data-music-seek] {
