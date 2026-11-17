@@ -57,6 +57,49 @@
   opacity: 1;
 }
 
+/* 站点强调色统一改为中性灰：按钮、滚动条、加载底色、页眉页脚兜底色。 */
+:root {
+  --btn-bg: #e8e8e8;
+  --btn-color: #333;
+  --btn-hover-color: #d6d6d6;
+  --scrollbar-color: #c9c9c9;
+  --preloader-bg: #f2f2f2;
+  --preloader-color: #6b6b6b;
+}
+
+/* 图片没加载出来时，页眉和页脚原本会闪主题蓝，改成中性底色。 */
+#page-header,
+#footer {
+  background-color: #f0f0f0;
+}
+
+[data-theme='dark'] #page-header,
+[data-theme='dark'] #footer {
+  background-color: #1e1e1e;
+}
+
+/* 正文链接改成素灰，悬停略深。 */
+#article-container a,
+#post .post-copyright .post-copyright-info a {
+  color: #6f6f6f;
+  text-decoration-color: rgba(111, 111, 111, 0.45);
+}
+
+#article-container a:hover,
+#post .post-copyright .post-copyright-info a:hover {
+  color: #2b2b2b;
+}
+
+[data-theme='dark'] #article-container a,
+[data-theme='dark'] #post .post-copyright .post-copyright-info a {
+  color: #b6b6b6;
+}
+
+[data-theme='dark'] #article-container a:hover,
+[data-theme='dark'] #post .post-copyright .post-copyright-info a:hover {
+  color: #f2f2f2;
+}
+
 /* 版权框、标签和框内链接改成跟随正文颜色，不再用浅蓝色。 */
 #post .post-copyright,
 #post .post-copyright .post-copyright-meta,
@@ -77,6 +120,31 @@
 #post .post-meta__tags:hover {
   background: color-mix(in srgb, var(--font-color) 12%, transparent);
   color: var(--font-color);
+}
+
+/* 文章末尾的标签胶囊改成素灰，不再用主题蓝。 */
+#post .post-meta__tags,
+#post .post-meta__tag-list a {
+  color: #6f6f6f !important;
+  border-color: rgba(111, 111, 111, 0.45) !important;
+}
+
+#post .post-meta__tags:hover,
+#post .post-meta__tag-list a:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+  color: #2b2b2b !important;
+}
+
+[data-theme='dark'] #post .post-meta__tags,
+[data-theme='dark'] #post .post-meta__tag-list a {
+  color: #b6b6b6 !important;
+  border-color: rgba(182, 182, 182, 0.45) !important;
+}
+
+[data-theme='dark'] #post .post-meta__tags:hover,
+[data-theme='dark'] #post .post-meta__tag-list a:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #f2f2f2 !important;
 }
 
 /* Slightly lighter dark surfaces, matching the previous site appearance. */
@@ -568,8 +636,9 @@ html[data-theme='light'] .layout .pagination > .space::before {
   --toc-link-color: #172b40;
   --toc-title-color: #13263b;
   --toc-hover-color: #103b5b;
-  --toc-hover-bg: rgba(73, 177, 245, 0.16);
-  --toc-active-text: #102a43;
+  --toc-hover-bg: rgba(0, 0, 0, 0.07);
+  --toc-active-text: #1b1b1b;
+  --toc-active-bg: rgba(0, 0, 0, 0.1);
   --toc-guide-color: rgba(23, 43, 64, 0.30);
   color: var(--toc-title-color);
 }
@@ -578,7 +647,8 @@ html[data-theme='light'] .layout .pagination > .space::before {
   --toc-link-color: #eef4fb;
   --toc-title-color: #f8fafc;
   --toc-hover-color: #ffffff;
-  --toc-hover-bg: rgba(73, 177, 245, 0.18);
+  --toc-hover-bg: rgba(255, 255, 255, 0.12);
+  --toc-active-bg: rgba(255, 255, 255, 0.18);
   --toc-guide-color: rgba(238, 244, 251, 0.35);
 }
 
@@ -598,6 +668,7 @@ html[data-theme='light'] .layout .pagination > .space::before {
 }
 
 #aside-content #card-toc .toc-content .toc-link.active {
+  background: var(--toc-active-bg);
   color: var(--toc-active-text);
   font-weight: 700;
 }
