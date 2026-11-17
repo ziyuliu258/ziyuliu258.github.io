@@ -27,6 +27,23 @@
     return (clone.textContent || '').replace(/\u200b/g, '').replace(/\s+/g, ' ').trim()
   }
 
+  // 按每行文字的实际边界命中，不把块级标题的整行留白当作链接。
+  const hitsText = (element, event) => {
+    if (event.detail === 0) return true // 保留键盘激活。
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
+    const range = document.createRange()
+    let node
+    while ((node = walker.nextNode())) {
+      if (!node.textContent.trim() || node.parentElement.closest('.headerlink')) continue
+      range.selectNodeContents(node)
+      for (const rect of range.getClientRects()) {
+        if (event.clientX >= rect.left && event.clientX <= rect.right &&
+            event.clientY >= rect.top && event.clientY <= rect.bottom) return true
+      }
+    }
+    return false
+  }
+
   headings.forEach(heading => {
     heading.setAttribute('data-heading-level', heading.tagName)
     if (!heading.id) {
@@ -90,8 +107,8 @@
   }
 
   button.hidden = true
-  button.addEventListener('click', () => {
-    if (currentIndex < 0) return
+  button.addEventListener('click', event => {
+    if (currentIndex < 0 || !hitsText(button, event)) return
     const heading = headings[currentIndex]
     scrollToHeading(heading, false)
     window.history.pushState(null, '', '#' + heading.id)
@@ -135,6 +152,11 @@
     const link = event.target.closest('a[href^="#"]')
     const heading = event.target.closest('h1, h2, h3, h4, h5, h6')
     const fromArticle = heading && article.contains(heading)
+    if (fromArticle && !hitsText(heading, event)) {
+      event.preventDefault()
+      event.stopPropagation()
+      return
+    }
     const target = link ? headingForHash(link.getAttribute('href')) : (fromArticle ? heading : null)
     if (!target) return
 
