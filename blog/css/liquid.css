@@ -89,6 +89,21 @@
   color: #fff !important;
 }
 
+/* 行内代码改成中性灰，不再用红色。代码块仍保留高亮配色。 */
+#article-container :not(pre) > code,
+.container :not(pre) > code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  color: #3d3d3d;
+  background: rgba(128, 128, 128, 0.16);
+}
+
+[data-theme='dark'] #article-container :not(pre) > code,
+[data-theme='dark'] .container :not(pre) > code {
+  color: #e8e8e8;
+  background: rgba(255, 255, 255, 0.14);
+}
+
 /* 引用块改成 GitHub 式的纯竖线，去掉圆角和彩色底。 */
 #article-container blockquote,
 .post-content blockquote {
