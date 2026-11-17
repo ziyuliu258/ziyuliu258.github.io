@@ -179,11 +179,9 @@
   top: 60px;
   z-index: 3;
   padding: 0.16em 0;
-  /* 卡片本身已经叠了一层半透明白，这里再叠同样的白会明显更亮。
-     只用很轻的白 + 足够强度的模糊，颜色接近卡片，文字被糊掉不抢视线。 */
-  background: rgba(255, 255, 255, 0.14);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
-  backdrop-filter: blur(18px) saturate(150%);
+  /* 卡片本身已经是“白 + 模糊”。标题条再叠任何模糊都会被 Chrome 当成
+     独立背景重算，出现明显更白的块，所以这里只留很淡的一层颜色。 */
+  background: rgba(255, 255, 255, 0.1);
 }
 
 [data-theme='dark'] #article-container .is-sticky-heading {
