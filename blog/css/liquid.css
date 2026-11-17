@@ -143,7 +143,7 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
 
 /* 玻璃效果参数：对齐 liquidglass-kde-widgets (LiquidGlass.qml + liquidglass.frag) 的光学参数 */
 :root {
-  --glass-tint: rgba(255, 255, 255, 0.36);
+  --glass-tint: rgba(255, 255, 255, 0.50);
   --glass-reading-tint: rgba(255, 255, 255, 0.80);
   --glass-solid: rgba(250, 252, 255, 0.96);
   --glass-blur: 14px;
@@ -165,7 +165,7 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
   --series-bg: rgba(255, 255, 255, 0.80);
   --series-blur: 14px;
   --series-saturate: 165%;
-  --post-bg: rgba(255, 255, 255, 0.36);
+  --post-bg: rgba(255, 255, 255, 0.50);
   --post-blur: 14px;
   --post-saturate: 165%;
   --archive-bg: rgba(255, 255, 255, 0.80);
@@ -180,7 +180,7 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
   --page-bg: rgba(255, 255, 255, 0.80);
   --page-blur: 14px;
   --page-saturate: 165%;
-  --aside-bg: rgba(255, 255, 255, 0.36);
+  --aside-bg: rgba(255, 255, 255, 0.50);
   --aside-blur: 14px;
   --aside-saturate: 165%;
 }
