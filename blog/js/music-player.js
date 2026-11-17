@@ -55,10 +55,24 @@
 
   const dock = document.createElement('aside');
   dock.id = 'music-dock';
-  dock.className = 'music-dock';
+  // 默认折叠，只显示右下角的圆形音符按钮。
+  dock.className = 'music-dock is-collapsed';
   dock.setAttribute('aria-label', i18n.dockLabel);
   dock.innerHTML = `
-    <button class="music-dock-launcher" type="button" aria-label="${i18n.expand}" title="${i18n.expand}">♫</button>
+    <button class="music-dock-launcher" type="button" aria-label="${i18n.expand}" title="${i18n.expand}">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <rect x="4" y="4" width="15.2" height="1.8"></rect>
+        <rect x="4" y="7.4" width="15.2" height="1.8"></rect>
+        <rect x="4" y="5.2" width="1.7" height="12.4"></rect>
+        <rect x="9" y="5.2" width="1.7" height="12.4"></rect>
+        <rect x="14" y="5.2" width="1.7" height="12.4"></rect>
+        <rect x="18.5" y="5.2" width="1.7" height="12.4"></rect>
+        <ellipse cx="4.85" cy="18.1" rx="2.3" ry="1.9"></ellipse>
+        <ellipse cx="9.85" cy="18.1" rx="2.3" ry="1.9"></ellipse>
+        <ellipse cx="14.85" cy="18.1" rx="2.3" ry="1.9"></ellipse>
+        <ellipse cx="19.35" cy="18.1" rx="2.3" ry="1.9"></ellipse>
+      </svg>
+    </button>
     <div class="music-dock-body">
       <div class="music-dock-header">
         <div class="music-dock-cover music-cover" aria-hidden="true"><span>♫</span><img data-dock-cover alt="" referrerpolicy="no-referrer" hidden></div>

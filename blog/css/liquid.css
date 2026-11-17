@@ -868,9 +868,16 @@ html[data-theme='light'] .layout .pagination > .space::before {
   fill: currentColor;
 }
 
-.music-page-controls input[type="range"] {
+/* 播放器统一黑白灰，不再使用蓝色。 */
+.music-page-controls input[type="range"],
+.music-dock input[type="range"] {
   min-width: 0;
-  accent-color: #49b1f5;
+  accent-color: #7a7a7a;
+}
+
+[data-theme='dark'] .music-page-controls input[type="range"],
+[data-theme='dark'] .music-dock input[type="range"] {
+  accent-color: #b5b5b5;
 }
 
 .music-page-controls [data-music-seek] {
@@ -921,7 +928,7 @@ html[data-theme='light'] .layout .pagination > .space::before {
 }
 
 #article-container .music-lyric-line.is-active {
-  color: #2584c2;
+  color: var(--text-highlight-color);
   font-size: 1.22rem;
   font-weight: 700;
   opacity: 1;
@@ -1028,7 +1035,7 @@ html[data-theme='light'] .layout .pagination > .space::before {
 }
 
 .music-dock-play {
-  color: #2584c2 !important;
+  color: var(--text-highlight-color) !important;
 }
 
 .music-dock-volume {
@@ -1054,7 +1061,6 @@ html[data-theme='light'] .layout .pagination > .space::before {
 
 .music-dock input[type="range"] {
   min-width: 0;
-  accent-color: #49b1f5;
 }
 
 .music-dock-progress input {
@@ -1079,7 +1085,7 @@ html[data-theme='light'] .layout .pagination > .space::before {
 }
 
 .music-dock.is-playlist-open .music-dock-list {
-  color: #2584c2;
+  color: var(--text-highlight-color);
 }
 
 .music-dock-playlist {
@@ -1121,7 +1127,8 @@ html[data-theme='light'] .layout .pagination > .space::before {
 }
 
 .music-dock-playlist button span {
-  color: #3987bc;
+  color: inherit;
+  opacity: 0.6;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1143,8 +1150,8 @@ html[data-theme='light'] .layout .pagination > .space::before {
 }
 
 .music-dock-playlist button.is-current {
-  color: #2584c2;
-  background: rgba(73, 177, 245, 0.16);
+  color: var(--text-highlight-color);
+  background: rgba(128, 128, 128, 0.18);
 }
 
 .music-dock-playlist button:disabled {
@@ -1161,12 +1168,19 @@ html[data-theme='light'] .layout .pagination > .space::before {
   margin-top: 6px;
 }
 
+/* 折叠后的圆形按钮：图标跟随主题黑白，不再用蓝色。 */
 .music-dock-launcher {
   display: none;
   width: 48px;
   height: 48px;
-  font-size: 1.5rem;
-  color: #2584c2 !important;
+  color: inherit !important;
+}
+
+.music-dock-launcher svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 
 .music-dock.is-collapsed {
@@ -1175,7 +1189,9 @@ html[data-theme='light'] .layout .pagination > .space::before {
 }
 
 .music-dock.is-collapsed .music-dock-launcher {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .music-dock.is-collapsed .music-dock-body {
@@ -1267,11 +1283,12 @@ html[data-theme='light'] .layout .pagination > .space::before {
 
 .music-tracks li.is-current {
   border-radius: 8px;
-  background: rgba(73, 177, 245, 0.12);
+  background: rgba(128, 128, 128, 0.16);
 }
 
 .music-track-number {
-  color: #3987bc;
+  color: inherit;
+  opacity: 0.6;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1362,7 +1379,7 @@ html[data-theme='light'] .layout .pagination > .space::before {
   border: 0;
   border-radius: 0.35rem;
   color: #fff;
-  background: #2584c2;
+  background: #4a4a4a;
   cursor: pointer;
 }
 
