@@ -159,7 +159,7 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
   --glass-shadow: rgba(20, 32, 54, 0.16);
   --glass-shadow-hover: rgba(20, 32, 54, 0.24);
   /* 下面每一处单独调，改一个不会带动另一个。 */
-  --home-bg: rgba(255, 255, 255, 0.36);
+  --home-bg: rgba(255, 255, 255, 0.62);
   --home-blur: 14px;
   --home-saturate: 165%;
   --series-bg: rgba(255, 255, 255, 0.80);
