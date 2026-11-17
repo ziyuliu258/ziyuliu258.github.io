@@ -716,9 +716,15 @@ html[data-theme='light'] .layout .pagination > .space::before {
   border-left-color: var(--toc-guide-color);
 }
 
-/* 保留 Font Awesome 置顶图标自身的实心字重，避免继承标题字重后变形 */
+/* 置顶图标改成正放的中性灰小图钉，与整站黑白灰一致。 */
 #recent-posts .article-title > .sticky {
+  margin-right: 7px;
+  color: var(--font-color);
+  font-size: 0.72em;
   font-weight: 900;
+  opacity: 0.55;
+  transform: none;
+  vertical-align: 0.12em;
 }
 
 /* 首页专栏与专栏阅读目录 */
