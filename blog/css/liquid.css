@@ -179,13 +179,32 @@
   top: 60px;
   z-index: 3;
   padding: 0.16em 0;
-  /* 卡片本身已经是“白 + 模糊”。标题条再叠任何模糊都会被 Chrome 当成
-     独立背景重算，出现明显更白的块，所以这里只留很淡的一层颜色。 */
-  background: rgba(255, 255, 255, 0.1);
 }
 
-[data-theme='dark'] #article-container .is-sticky-heading {
-  background: rgba(20, 20, 20, 0.2);
+/* 吸附时：卡片底色在标题这一条被“挖空”，标题自己再画一层同样的玻璃。
+   两层玻璃不会叠加，颜色和卡片完全一致；标题后面的正文被这层玻璃模糊掉。
+   --cut-start / --cut-end 由脚本按滚动位置写入。 */
+html:not(.solid-bg) #post.has-stuck-heading {
+  background-color: transparent;
+  /* 背景固定在视口坐标里：0~60px 是导航区域，60px 之后挖掉标题高度那一条，
+     这样不用每帧更新位置，滚动时也不会重绘整张卡片。 */
+  background-image: linear-gradient(
+    to bottom,
+    var(--post-bg) 0 60px,
+    rgba(255, 255, 255, 0) 60px var(--cut-end, 120px),
+    var(--post-bg) var(--cut-end, 120px)
+  );
+  background-attachment: fixed;
+}
+
+html:not(.solid-bg) #article-container .is-sticky-heading.is-stuck {
+  margin-right: calc(-1 * var(--post-pad-x, 40px));
+  margin-left: calc(-1 * var(--post-pad-x, 40px));
+  padding-right: var(--post-pad-x, 40px);
+  padding-left: var(--post-pad-x, 40px);
+  background: var(--post-bg);
+  -webkit-backdrop-filter: blur(var(--post-blur)) saturate(var(--post-saturate));
+  backdrop-filter: blur(var(--post-blur)) saturate(var(--post-saturate));
 }
 
 /* 已经滚过去的上级标题不再露头，避免和新标题叠在一起。 */
@@ -193,17 +212,21 @@
   visibility: hidden;
 }
 
-/* 纯色模式不需要任何透明或模糊，直接用实色。 */
-html.solid-bg #article-container .is-sticky-heading {
+/* 纯色模式不需要透明或模糊：标题条直接用卡片的实色，天然零色差。 */
+html.solid-bg #article-container .is-sticky-heading.is-stuck {
+  margin-right: calc(-1 * var(--post-pad-x, 40px));
+  margin-left: calc(-1 * var(--post-pad-x, 40px));
+  padding-right: var(--post-pad-x, 40px);
+  padding-left: var(--post-pad-x, 40px);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 
-html.solid-bg:not([data-theme='dark']) #article-container .is-sticky-heading {
+html.solid-bg:not([data-theme='dark']) #article-container .is-sticky-heading.is-stuck {
   background: #fff;
 }
 
-html.solid-bg[data-theme='dark'] #article-container .is-sticky-heading {
+html.solid-bg[data-theme='dark'] #article-container .is-sticky-heading.is-stuck {
   background: #2a2a2a;
 }
 

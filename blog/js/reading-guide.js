@@ -38,10 +38,21 @@
     heading.classList.add('is-sticky-heading')
   })
 
-  // 记录每个标题在文档中的位置。只在加载/尺寸变化时测量，滚动时不再触发布局。
+  const post = document.getElementById('post')
+
+  // 记录每个标题在文档中的位置与高度。只在加载/尺寸变化时测量，滚动时不再触发布局。
   let headingTops = []
+  let headingHeights = []
+  let postTop = 0
+
   const measureHeadings = () => {
     headingTops = headings.map(heading => heading.getBoundingClientRect().top + window.scrollY)
+    headingHeights = headings.map(heading => heading.getBoundingClientRect().height)
+    if (post) {
+      postTop = post.getBoundingClientRect().top + window.scrollY
+      const padX = parseFloat(window.getComputedStyle(post).paddingLeft) || 0
+      post.style.setProperty('--post-pad-x', padX + 'px')
+    }
   }
   measureHeadings()
   window.addEventListener('resize', measureHeadings, { passive: true })
@@ -59,14 +70,24 @@
       if (headingTops[i] <= threshold) index = i
       else break
     }
-    if (index === currentIndex) return
-    currentIndex = index
+    // 判断当前标题是否真的贴到了导航下方（此时才需要挖洞）。
+    const heading = index >= 0 ? headings[index] : null
+    const naturalTop = index >= 0 ? headingTops[index] - window.scrollY : Infinity
+    const stuck = !!heading && naturalTop <= NAV_HEIGHT + 1
 
-    // 只保留当前这级标题可见；它上面的标题已经滚过去的就隐藏掉，
-    // 否则高度不同时会在新标题上方露出半行字。
-    headings.forEach((heading, i) => {
-      heading.classList.toggle('is-stuck-past', i < index)
+    headings.forEach((item, i) => {
+      item.classList.toggle('is-stuck', stuck && i === index)
+      item.classList.toggle('is-stuck-past', i < index)
     })
+
+    if (post) {
+      post.classList.toggle('has-stuck-heading', stuck)
+      if (stuck && index !== currentIndex) {
+        post.style.setProperty('--cut-end', (NAV_HEIGHT + (headingHeights[index] || 0)).toFixed(1) + 'px')
+      }
+    }
+
+    currentIndex = index
   }
 
   window.addEventListener('scroll', () => {
