@@ -89,6 +89,110 @@
   color: #fff !important;
 }
 
+/* 文章标题：悬停时在左侧淡入 H2/H3 这样的层级标签。 */
+#article-container h1,
+#article-container h2,
+#article-container h3,
+#article-container h4,
+#article-container h5,
+#article-container h6 {
+  position: relative;
+  scroll-margin-top: 76px;
+}
+
+#article-container h1::before,
+#article-container h2::before,
+#article-container h3::before,
+#article-container h4::before,
+#article-container h5::before,
+#article-container h6::before {
+  content: attr(data-heading-level);
+  position: absolute;
+  top: 0.5em;
+  right: calc(100% + 14px);
+  color: var(--font-color);
+  font-size: 0.6em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+#article-container h1:hover::before,
+#article-container h2:hover::before,
+#article-container h3:hover::before,
+#article-container h4:hover::before,
+#article-container h5:hover::before,
+#article-container h6:hover::before {
+  opacity: 0.45;
+  transform: translateX(0);
+}
+
+@media screen and (max-width: 1300px) {
+  #article-container h1::before,
+  #article-container h2::before,
+  #article-container h3::before,
+  #article-container h4::before,
+  #article-container h5::before,
+  #article-container h6::before {
+    content: none;
+  }
+}
+
+/* 阅读时贴在导航下方的一条：显示当前所在的最小级章节。 */
+#reading-guide {
+  position: fixed;
+  z-index: 89;
+  top: 60px;
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  padding: 6px 16px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  pointer-events: none;
+}
+
+#reading-guide.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#reading-guide .reading-guide-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  max-width: min(720px, 100%);
+  padding: 4px 14px;
+  border-radius: 999px;
+  color: var(--font-color);
+  background: var(--glass-tint);
+  box-shadow: 0 6px 20px -10px var(--glass-shadow);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  backdrop-filter: blur(10px) saturate(150%);
+}
+
+#reading-guide .reading-guide-level {
+  flex: none;
+  opacity: 0.5;
+  font-size: 0.92em;
+  font-variant-numeric: tabular-nums;
+}
+
+#reading-guide .reading-guide-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* 只有阅读文章时的正文用宋体，其余页面一律黑体。 */
 #post #article-container {
   font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
@@ -261,6 +365,24 @@ html.solid-bg #page-header.full_page {
   min-height: 0;
   padding: 108px 20px 28px;
   background-attachment: scroll;
+}
+
+/* 文章页和其他内页也一样收紧页眉，别留一大片空白。 */
+html.solid-bg #page-header.post-bg,
+html.solid-bg #page-header.not-home-page {
+  height: auto;
+  min-height: 0;
+  padding: 96px 20px 24px;
+  background-attachment: scroll;
+}
+
+html.solid-bg #page-header.post-bg #post-info,
+html.solid-bg #page-header.not-home-page #page-site-info {
+  position: static;
+  top: auto;
+  bottom: auto;
+  padding: 0;
+  transform: none;
 }
 
 html.solid-bg #page-header.full_page #site-info {
