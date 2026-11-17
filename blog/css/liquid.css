@@ -711,13 +711,13 @@ html[data-theme='light'] .layout .pagination > .space::before {
 
 /* 文章目录：文字使用实色，避免与半透明玻璃中的背景混在一起。 */
 #aside-content #card-toc {
-  --toc-link-color: #172b40;
-  --toc-title-color: #13263b;
-  --toc-hover-color: #103b5b;
-  --toc-hover-bg: rgba(0, 0, 0, 0.07);
+  --toc-link-color: #4a4a4a;
+  --toc-title-color: #2b2b2b;
+  --toc-hover-color: #1b1b1b;
+  --toc-hover-bg: rgba(0, 0, 0, 0.06);
   --toc-active-text: #1b1b1b;
   --toc-active-bg: rgba(0, 0, 0, 0.1);
-  --toc-guide-color: rgba(23, 43, 64, 0.30);
+  --toc-guide-color: rgba(0, 0, 0, 0.18);
   color: var(--toc-title-color);
 }
 
@@ -731,8 +731,9 @@ html[data-theme='light'] .layout .pagination > .space::before {
   --toc-guide-color: rgba(238, 244, 251, 0.35);
 }
 
+/* 只有当前所在章节加粗，其他条目保持常规字重。 */
 #aside-content #card-toc .toc-content .toc-link {
-  font-weight: 500;
+  font-weight: 400;
 }
 
 #aside-content #card-toc .toc-content .toc-link:not(.active):hover,
@@ -746,7 +747,9 @@ html[data-theme='light'] .layout .pagination > .space::before {
   outline-offset: 2px;
 }
 
-#aside-content #card-toc .toc-content .toc-link.active {
+#aside-content #card-toc .toc-content .toc-link.active,
+#aside-content #card-toc .toc-content .toc-link.active:hover,
+#aside-content #card-toc .toc-content .toc-link.active:focus-visible {
   background: var(--toc-active-bg);
   color: var(--toc-active-text);
   font-weight: 700;
