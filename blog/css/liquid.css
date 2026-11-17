@@ -67,6 +67,32 @@
   --preloader-color: #6b6b6b;
 }
 
+/* 黑夜需要深底浅图标，覆盖上面的浅色值。 */
+[data-theme='dark'] {
+  --btn-bg: #3a3a3a;
+  --btn-color: rgba(255, 255, 255, 0.9);
+  --btn-hover-color: #4d4d4d;
+  --scrollbar-color: #6a6a6a;
+  --preloader-bg: #1e1e1e;
+  --preloader-color: rgba(255, 255, 255, 0.75);
+}
+
+/* 引用块改成 GitHub 式的纯竖线，去掉圆角和彩色底。 */
+#article-container blockquote,
+.post-content blockquote {
+  border-left: 4px solid rgba(0, 0, 0, 0.18) !important;
+  border-radius: 0 !important;
+  background: rgba(0, 0, 0, 0.03) !important;
+  color: var(--font-color) !important;
+}
+
+[data-theme='dark'] #article-container blockquote,
+[data-theme='dark'] .post-content blockquote {
+  border-left-color: rgba(255, 255, 255, 0.26) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
 /* 图片没加载出来时，页眉和页脚原本会闪主题蓝，改成中性底色。 */
 #page-header,
 #footer {
@@ -647,8 +673,9 @@ html[data-theme='light'] .layout .pagination > .space::before {
   --toc-link-color: #eef4fb;
   --toc-title-color: #f8fafc;
   --toc-hover-color: #ffffff;
-  --toc-hover-bg: rgba(255, 255, 255, 0.12);
-  --toc-active-bg: rgba(255, 255, 255, 0.18);
+  --toc-hover-bg: rgba(255, 255, 255, 0.14);
+  --toc-active-bg: rgba(255, 255, 255, 0.2);
+  --toc-active-text: #ffffff;
   --toc-guide-color: rgba(238, 244, 251, 0.35);
 }
 
