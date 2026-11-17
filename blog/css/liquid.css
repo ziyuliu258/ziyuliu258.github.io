@@ -172,62 +172,35 @@
   will-change: transform, opacity;
 }
 
-/* 章节标题在滚动时吸附在导航下方，正文从它下面继续滚过。
-   这里用接近不透明的实色而不是 backdrop-filter：滚动时每帧重新模糊很吃性能。 */
-#article-container .is-sticky-heading {
+/* 单一背景：置顶层只画文字，正文在其下方裁切。 */
+#post .reading-heading-rail {
   position: sticky;
   top: 60px;
   z-index: 3;
-  padding: 0.16em 0;
+  height: 0;
+  pointer-events: none;
 }
 
-/* 吸附时：卡片底色在标题这一条被“挖空”，标题自己再画一层同样的玻璃。
-   两层玻璃不会叠加，颜色和卡片完全一致；标题后面的正文被这层玻璃模糊掉。
-   --cut-start / --cut-end 由脚本按滚动位置写入。 */
-html:not(.solid-bg) #post.has-stuck-heading {
-  background-color: transparent;
-  /* 背景固定在视口坐标里：0~60px 是导航区域，60px 之后挖掉标题高度那一条，
-     这样不用每帧更新位置，滚动时也不会重绘整张卡片。 */
-  background-image: linear-gradient(
-    to bottom,
-    var(--post-bg) 0 60px,
-    rgba(255, 255, 255, 0) 60px var(--cut-end, 120px),
-    var(--post-bg) var(--cut-end, 120px)
-  );
-  background-attachment: fixed;
-}
-
-html:not(.solid-bg) #article-container .is-sticky-heading.is-stuck {
-  margin-right: calc(-1 * var(--post-pad-x, 40px));
-  margin-left: calc(-1 * var(--post-pad-x, 40px));
-  padding-right: var(--post-pad-x, 40px);
-  padding-left: var(--post-pad-x, 40px);
-  background: var(--post-bg);
-  -webkit-backdrop-filter: blur(var(--post-blur)) saturate(var(--post-saturate));
-  backdrop-filter: blur(var(--post-blur)) saturate(var(--post-saturate));
-}
-
-/* 已经滚过去的上级标题不再露头，避免和新标题叠在一起。 */
-#article-container .is-stuck-past {
-  visibility: hidden;
-}
-
-/* 纯色模式不需要透明或模糊：标题条直接用卡片的实色，天然零色差。 */
-html.solid-bg #article-container .is-sticky-heading.is-stuck {
-  margin-right: calc(-1 * var(--post-pad-x, 40px));
-  margin-left: calc(-1 * var(--post-pad-x, 40px));
-  padding-right: var(--post-pad-x, 40px);
-  padding-left: var(--post-pad-x, 40px);
+#post .reading-heading-button {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 4px 0 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+  color: var(--font-color);
+  text-align: left;
+  overflow-wrap: anywhere;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
-html.solid-bg:not([data-theme='dark']) #article-container .is-sticky-heading.is-stuck {
-  background: #fff;
-}
-
-html.solid-bg[data-theme='dark'] #article-container .is-sticky-heading.is-stuck {
-  background: #2a2a2a;
+#post .reading-heading-button[hidden] {
+  display: none;
 }
 
 /* 纯色模式下的吸顶导航也改成实色，省掉一层模糊。 */
@@ -516,6 +489,13 @@ html.solid-bg .music-dock-playlist {
 }
 
 html.solid-bg:not([data-theme='dark']) #aside-content .card-widget,
+html.solid-bg:not([data-theme='dark']) #post,
+html.solid-bg:not([data-theme='dark']) #archive,
+html.solid-bg:not([data-theme='dark']) #tag,
+html.solid-bg:not([data-theme='dark']) #category,
+html.solid-bg:not([data-theme='dark']) #page,
+html.solid-bg:not([data-theme='dark']) .music-dock,
+html.solid-bg:not([data-theme='dark']) .music-dock-playlist,
 html.solid-bg:not([data-theme='dark']) #recent-posts:not(.series-directory) .recent-post-item,
 html.solid-bg:not([data-theme='dark']) #recent-posts:not(.series-directory) .home-announcement {
   background: #fff;

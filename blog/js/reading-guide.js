@@ -2,7 +2,7 @@
  * 1. 文章标题悬停时标记 H1/H2/... 层级（CSS 读取 data-heading-level）。
  * 2. 点击标题或目录项，滚到页眉正下方，并把 #章节 写进地址栏。
  * 3. 打开带 #章节 的链接时，等页面稳定后定位到同一位置。
- * 4. 最高一级的章节标题在滚动时吸附在导航下方，正文从它下面继续滚过。
+ * 4. 当前章节文字置顶，与正文共享卡片背景，点击返回原始标题。
  */
 (() => {
   'use strict'
@@ -33,62 +33,78 @@
       const slug = titleOf(heading).replace(/\s+/g, '-')
       if (slug) heading.id = slug
     }
-    // 所有层级都吸附：滚到哪里，最靠近文段的那一级标题就盖在最上面，
-    // 父级标题被压在下层，不会挡住当前的小标题。
-    heading.classList.add('is-sticky-heading')
   })
 
-  const post = document.getElementById('post')
+  // 置顶文字与正文共享 #post 的背景，不再绘制第二层玻璃。
+  const rail = document.createElement('div')
+  rail.className = 'reading-heading-rail'
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.className = 'reading-heading-button'
+  rail.appendChild(button)
+  article.before(rail)
 
-  // 记录每个标题在文档中的位置与高度。只在加载/尺寸变化时测量，滚动时不再触发布局。
   let headingTops = []
-  let headingHeights = []
-  let postTop = 0
-
-  const measureHeadings = () => {
-    headingTops = headings.map(heading => heading.getBoundingClientRect().top + window.scrollY)
-    headingHeights = headings.map(heading => heading.getBoundingClientRect().height)
-    if (post) {
-      postTop = post.getBoundingClientRect().top + window.scrollY
-      const padX = parseFloat(window.getComputedStyle(post).paddingLeft) || 0
-      post.style.setProperty('--post-pad-x', padX + 'px')
-    }
-  }
-  measureHeadings()
-  window.addEventListener('resize', measureHeadings, { passive: true })
-  window.addEventListener('load', measureHeadings)
-
+  let articleTop = 0
+  let articleBottom = 0
+  let railHeight = 0
   let currentIndex = -1
   let guideTicking = false
 
+  const measureHeadings = () => {
+    headingTops = headings.map(heading => heading.getBoundingClientRect().top + window.scrollY)
+    const rect = article.getBoundingClientRect()
+    articleTop = rect.top + window.scrollY
+    articleBottom = articleTop + rect.height
+    currentIndex = -1
+    updateCurrent()
+  }
+
   const updateCurrent = () => {
     guideTicking = false
-    const threshold = window.scrollY + NAV_HEIGHT + OFFSET
+    const threshold = window.scrollY + NAV_HEIGHT
 
     let index = -1
     for (let i = 0; i < headingTops.length; i++) {
       if (headingTops[i] <= threshold) index = i
       else break
     }
-    // 判断当前标题是否真的贴到了导航下方（此时才需要挖洞）。
-    const heading = index >= 0 ? headings[index] : null
-    const naturalTop = index >= 0 ? headingTops[index] - window.scrollY : Infinity
-    const stuck = !!heading && naturalTop <= NAV_HEIGHT + 1
-
-    headings.forEach((item, i) => {
-      item.classList.toggle('is-stuck', stuck && i === index)
-      item.classList.toggle('is-stuck-past', i < index)
-    })
-
-    if (post) {
-      post.classList.toggle('has-stuck-heading', stuck)
-      if (stuck && index !== currentIndex) {
-        post.style.setProperty('--cut-end', (NAV_HEIGHT + (headingHeights[index] || 0)).toFixed(1) + 'px')
+    // 下一标题进入置顶区域时让出空间；点击返回后原始标题不会被上节挡住。
+    if (index >= 0 && headingTops[index + 1] <= threshold + railHeight + OFFSET) index = -1
+    if (threshold >= articleBottom - railHeight) index = -1
+    button.hidden = index < 0
+    if (index !== currentIndex) {
+      if (index >= 0) {
+        const heading = headings[index]
+        button.textContent = titleOf(heading)
+        button.setAttribute('aria-label', '返回章节：' + titleOf(heading))
+        const style = getComputedStyle(heading)
+        button.style.font = style.font
+        button.style.letterSpacing = style.letterSpacing
+        railHeight = button.getBoundingClientRect().height
       }
+      currentIndex = index
     }
-
-    currentIndex = index
+    const cut = index < 0 ? 0 : Math.max(0, threshold + railHeight - articleTop)
+    article.style.clipPath = cut ? 'inset(' + cut + 'px -40px 0)' : ''
   }
+
+  button.hidden = true
+  button.addEventListener('click', () => {
+    if (currentIndex < 0) return
+    const heading = headings[currentIndex]
+    scrollToHeading(heading, false)
+    window.history.pushState(null, '', '#' + heading.id)
+  })
+  measureHeadings()
+  window.addEventListener('resize', measureHeadings, { passive: true })
+  window.addEventListener('load', measureHeadings)
+  const layoutObserver = new ResizeObserver(measureHeadings)
+  layoutObserver.observe(article)
+  const pageHeader = document.getElementById('page-header')
+  if (pageHeader) layoutObserver.observe(pageHeader)
+  new MutationObserver(measureHeadings).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] })
+  if (document.fonts) document.fonts.ready.then(measureHeadings)
 
   window.addEventListener('scroll', () => {
     if (guideTicking) return
@@ -98,6 +114,7 @@
   updateCurrent()
 
   const scrollToHeading = (heading, smooth) => {
+    measureHeadings()
     const top = heading.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT - OFFSET
     window.scrollTo({ top: Math.max(0, top), behavior: smooth ? 'smooth' : 'auto' })
   }
