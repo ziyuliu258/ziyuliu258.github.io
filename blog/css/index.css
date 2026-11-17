@@ -2675,6 +2675,7 @@ figure.highlight pre .javascript .function {
   margin: 6px 0 -6px;
 }
 #aside-content .card-info .card-info-social-icons .social-icon {
+  position: relative;
   margin: 0 10px;
   padding: 0;
   border: 0;
@@ -2682,6 +2683,26 @@ figure.highlight pre .javascript .function {
   color: var(--font-color);
   font-size: 1.4em;
   cursor: pointer;
+}
+#aside-content .card-info .card-info-social-icons .social-icon[data-copied]::after {
+  content: attr(data-copied);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  z-index: 2;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--btn-bg);
+  color: var(--btn-color);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  -webkit-transform: translateX(-50%);
+  -moz-transform: translateX(-50%);
+  -o-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 #aside-content .card-info .card-info-social-icons i {
   -webkit-transition: all 0.3s;

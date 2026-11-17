@@ -668,11 +668,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const button = event.target.closest('.social-icon[data-copy]')
     if (!button) return
     const text = button.dataset.copy
+    const showCopyState = message => {
+      button.dataset.copied = message
+      clearTimeout(button.copyTimer)
+      button.copyTimer = setTimeout(() => { delete button.dataset.copied }, 1600)
+    }
     try {
       await navigator.clipboard.writeText(text)
-      window.btf && btf.snackbarShow && btf.snackbarShow('已复制微信号')
+      showCopyState('已复制')
     } catch (error) {
-      window.btf && btf.snackbarShow && btf.snackbarShow('复制失败，请手动复制')
+      showCopyState('复制失败')
     }
   })
 
