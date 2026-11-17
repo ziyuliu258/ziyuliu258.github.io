@@ -168,20 +168,18 @@
 }
 
 /* 正文标题随滚动缩小淡出，和导航栏里的小标题交接。 */
-#post-info .post-title,
-#post-info #post-meta {
+#post-info .post-title {
   will-change: transform, opacity;
 }
 
-/* 章节标题在滚动时吸附在导航下方，正文从它下面继续滚过。 */
+/* 章节标题在滚动时吸附在导航下方，正文从它下面继续滚过。
+   这里用接近不透明的实色而不是 backdrop-filter：滚动时每帧重新模糊很吃性能。 */
 #article-container .is-sticky-heading {
   position: sticky;
   top: 60px;
   z-index: 3;
   padding: 0.16em 0;
-  background: var(--post-bg);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  backdrop-filter: blur(14px) saturate(160%);
+  background: var(--glass-solid);
 }
 
 html.solid-bg:not([data-theme='dark']) #article-container .is-sticky-heading {

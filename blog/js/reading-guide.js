@@ -84,12 +84,23 @@
   const postMeta = postInfo && postInfo.querySelector('#post-meta')
   let titleTicking = false
 
+  // 页眉高度只在加载和改变窗口时量一次，避免每帧读取触发重排。
+  let collapseRange = 320
+  const measureCollapseRange = () => {
+    collapseRange = Math.max(160, (header ? header.offsetHeight : 400) - NAV_HEIGHT)
+  }
+  measureCollapseRange()
+  window.addEventListener('resize', measureCollapseRange, { passive: true })
+
   const updateTitleCollapse = () => {
     titleTicking = false
     if (!postTitle) return
 
-    const range = Math.max(160, (header ? header.offsetHeight : 400) - NAV_HEIGHT)
-    const progress = Math.min(1, Math.max(0, window.scrollY / range))
+    const progress = Math.min(1, Math.max(0, window.scrollY / collapseRange))
+    if (progress >= 1) {
+      if (postTitle.style.opacity !== '0') postTitle.style.opacity = '0'
+      return
+    }
 
     postTitle.style.transformOrigin = 'left top'
     postTitle.style.transform = 'translateY(' + (-14 * progress).toFixed(1) +
