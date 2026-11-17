@@ -327,10 +327,12 @@ html.solid-bg #footer:before {
 }
 
 /* 首页不再铺满一屏。标题留在导航下面，当成普通标题。 */
+/* 注意：这里不能给 #page-header 加左右 padding，
+   否则绝对定位的 #nav 会从内容盒开始，左侧露出一块空隙。 */
 html.solid-bg #page-header.full_page {
   height: auto;
   min-height: 0;
-  padding: 108px 20px 28px;
+  padding: 108px 0 28px;
   background-attachment: scroll;
 }
 
@@ -339,7 +341,7 @@ html.solid-bg #page-header.post-bg,
 html.solid-bg #page-header.not-home-page {
   height: auto;
   min-height: 0;
-  padding: 96px 20px 24px;
+  padding: 96px 0 24px;
   background-attachment: scroll;
 }
 
@@ -352,10 +354,15 @@ html.solid-bg #page-header.not-home-page #page-site-info {
   transform: none;
 }
 
+/* 页面标题原来靠页眉的左右内边距缩进，现在补回到标题本身。 */
+html.solid-bg #page-header.not-home-page #page-site-info {
+  padding: 0 20px;
+}
+
 html.solid-bg #page-header.full_page #site-info {
   position: static;
   top: auto;
-  padding: 0;
+  padding: 0 20px;
 }
 
 html.solid-bg #page-header #scroll-down {
