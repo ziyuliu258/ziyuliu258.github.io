@@ -731,8 +731,9 @@ html[data-theme='light'] .layout .pagination > .space::before {
   border-left-color: var(--toc-guide-color);
 }
 
-/* 置顶图标改成正放的中性灰小图钉，与整站黑白灰一致。 */
-#recent-posts .article-title > .sticky {
+/* 置顶图标改成正放的中性灰小图钉，与整站黑白灰一致。
+   选择器必须和主题原来的 `#recent-posts .recent-post-item > .recent-post-info > .article-title .sticky` 同权重。 */
+#recent-posts .recent-post-item > .recent-post-info > .article-title .sticky {
   margin-right: 7px;
   color: var(--font-color);
   font-size: 0.72em;
