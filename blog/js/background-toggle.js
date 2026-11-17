@@ -50,7 +50,8 @@
     }
   }
 
-  const boot = () => apply(saved() === 'solid')
+  // 没有记录时默认纯色，只有明确选过图片才保留图片背景。
+  const boot = () => apply(saved() !== 'image')
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot, { once: true })
