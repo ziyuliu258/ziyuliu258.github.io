@@ -37,7 +37,7 @@
 html.solid-bg #web_bg,
 html.solid-bg #page-header,
 html.solid-bg #footer {
-  background-color: var(--solid-bg, #d5d8dc) !important;
+  background-color: var(--solid-bg, #f6f6f6) !important;
   background-image: none !important;
 }
 
@@ -49,14 +49,46 @@ html.solid-bg #footer:before {
   content: none;
 }
 
-html.solid-bg #page-header #site-title,
-html.solid-bg #page-header #site-subtitle,
-html.solid-bg #page-header #page-site-info,
-html.solid-bg #page-header #scroll-down,
-html.solid-bg #footer,
-html.solid-bg #footer a {
+/* 首页不再铺满一屏。标题留在导航下面，当成普通标题。 */
+html.solid-bg #page-header.full_page {
+  height: auto;
+  min-height: 0;
+  padding: 108px 20px 28px;
+  background-attachment: scroll;
+}
+
+html.solid-bg #page-header.full_page #site-info {
+  position: static;
+  top: auto;
+  padding: 0;
+}
+
+html.solid-bg #page-header #scroll-down {
+  display: none;
+}
+
+html.solid-bg:not([data-theme='dark']) #page-header #site-title,
+html.solid-bg:not([data-theme='dark']) #page-header #site-subtitle,
+html.solid-bg:not([data-theme='dark']) #page-header #page-site-info,
+html.solid-bg:not([data-theme='dark']) #page-header #post-info,
+html.solid-bg:not([data-theme='dark']) #page-header #post-info .post-title,
+html.solid-bg:not([data-theme='dark']) #page-header #post-meta,
+html.solid-bg:not([data-theme='dark']) #page-header #post-meta a,
+html.solid-bg:not([data-theme='dark']) #page-header #nav,
+html.solid-bg:not([data-theme='dark']) #page-header #nav a,
+html.solid-bg:not([data-theme='dark']) #page-header #nav span.site-page,
+html.solid-bg:not([data-theme='dark']) #page-header #blog-info,
+html.solid-bg:not([data-theme='dark']) #page-header #toggle-menu,
+html.solid-bg:not([data-theme='dark']) #footer,
+html.solid-bg:not([data-theme='dark']) #footer a {
   color: var(--solid-fg, #2c3138);
   text-shadow: none;
+}
+
+html.solid-bg:not([data-theme='dark']) #page-header #nav a:hover,
+html.solid-bg:not([data-theme='dark']) #page-header #nav span.site-page:hover,
+html.solid-bg:not([data-theme='dark']) #page-header #toggle-menu:hover {
+  color: var(--solid-fg, #2c3138);
 }
 
 #bg-toggle.is-solid i::before {
