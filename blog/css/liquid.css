@@ -19,10 +19,16 @@
   display: none !important;
 }
 
-/* 分享按钮使用页面已加载的 Font Awesome，压过后面加载的旧字体样式。 */
-.social-share,
-.social-share * {
-  font-family: "Font Awesome 6 Brands" !important;
+/* 分享按钮使用页面已加载的 Font Awesome。
+   旧 share.min.css 用 `.social-share *` 强制了不存在的 socialshare 字体，
+   这里用更高优先级的选择器（含 ::before）把它覆盖掉。 */
+.social-share .social-share-icon,
+.social-share .social-share-icon::before,
+.social-share .social-share-icon::after,
+.post-share .social-share .social-share-icon,
+.post-share .social-share .social-share-icon::before {
+  /* CDN 未锁版本：家族名随版本变化，按新旧顺序回退。 */
+  font-family: "Font Awesome 7 Brands", "Font Awesome 6 Brands", "Font Awesome 5 Brands" !important;
   font-weight: 400 !important;
 }
 
