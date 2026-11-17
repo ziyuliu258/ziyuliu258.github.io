@@ -91,13 +91,38 @@ html.solid-bg:not([data-theme='dark']) #page-header #toggle-menu:hover {
   color: var(--solid-fg, #2c3138);
 }
 
-/* 纯色白天没有背景可透，侧栏改成和主卡片一样的不透明白。 */
+/* 纯色没有背景可透。白天用白卡片，黑夜用比背景略浅的实色。 */
+html.solid-bg #recent-posts .recent-post-item,
+html.solid-bg #recent-posts .home-announcement,
+html.solid-bg #aside-content .card-widget,
+html.solid-bg #post,
+html.solid-bg #archive,
+html.solid-bg #tag,
+html.solid-bg #category,
+html.solid-bg #page,
+html.solid-bg .music-dock,
+html.solid-bg .music-dock-playlist {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 html.solid-bg:not([data-theme='dark']) #aside-content .card-widget,
 html.solid-bg:not([data-theme='dark']) #recent-posts:not(.series-directory) .recent-post-item,
 html.solid-bg:not([data-theme='dark']) #recent-posts:not(.series-directory) .home-announcement {
   background: #fff;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+}
+
+html.solid-bg[data-theme='dark'] #recent-posts .recent-post-item,
+html.solid-bg[data-theme='dark'] #recent-posts .home-announcement,
+html.solid-bg[data-theme='dark'] #aside-content .card-widget,
+html.solid-bg[data-theme='dark'] #post,
+html.solid-bg[data-theme='dark'] #archive,
+html.solid-bg[data-theme='dark'] #tag,
+html.solid-bg[data-theme='dark'] #category,
+html.solid-bg[data-theme='dark'] #page,
+html.solid-bg[data-theme='dark'] .music-dock,
+html.solid-bg[data-theme='dark'] .music-dock-playlist {
+  background: #2a2a2a;
 }
 
 #bg-toggle.is-solid i::before {
@@ -140,7 +165,7 @@ html.solid-bg:not([data-theme='dark']) #recent-posts:not(.series-directory) .hom
   --series-bg: rgba(255, 255, 255, 0.80);
   --series-blur: 14px;
   --series-saturate: 165%;
-  --post-bg: rgba(255, 255, 255, 0.80);
+  --post-bg: rgba(255, 255, 255, 0.36);
   --post-blur: 14px;
   --post-saturate: 165%;
   --archive-bg: rgba(255, 255, 255, 0.80);
@@ -172,7 +197,7 @@ html.solid-bg:not([data-theme='dark']) #recent-posts:not(.series-directory) .hom
   --glass-shadow-hover: rgba(0, 0, 0, 0.44);
   --home-bg: rgba(28, 28, 28, 0.32);
   --series-bg: rgba(32, 32, 32, 0.82);
-  --post-bg: rgba(32, 32, 32, 0.82);
+  --post-bg: rgba(28, 28, 28, 0.32);
   --archive-bg: rgba(32, 32, 32, 0.82);
   --tag-bg: rgba(32, 32, 32, 0.82);
   --category-bg: rgba(32, 32, 32, 0.82);
