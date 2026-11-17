@@ -109,7 +109,7 @@
   content: attr(data-heading-level);
   position: absolute;
   top: 0.5em;
-  right: calc(100% + 14px);
+  right: calc(100% + 4px);
   color: var(--font-color);
   font-size: 0.6em;
   font-weight: 500;
@@ -141,56 +141,23 @@
   }
 }
 
-/* 阅读时贴在导航下方的一条：显示当前所在的最小级章节。 */
-#reading-guide {
-  position: fixed;
-  z-index: 89;
+/* 章节标题在滚动时吸附在导航下方，正文从它下面继续滚过。 */
+#article-container .is-sticky-heading {
+  position: sticky;
   top: 60px;
-  right: 0;
-  left: 0;
-  display: flex;
-  justify-content: center;
-  padding: 6px 16px;
-  opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity 0.22s ease, transform 0.22s ease;
-  pointer-events: none;
+  z-index: 3;
+  padding: 0.16em 0;
+  background: var(--post-bg);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
 }
 
-#reading-guide.is-visible {
-  opacity: 1;
-  transform: translateY(0);
+html.solid-bg:not([data-theme='dark']) #article-container .is-sticky-heading {
+  background: #fff;
 }
 
-#reading-guide .reading-guide-inner {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55em;
-  max-width: min(720px, 100%);
-  padding: 4px 14px;
-  border-radius: 999px;
-  color: var(--font-color);
-  background: var(--glass-tint);
-  box-shadow: 0 6px 20px -10px var(--glass-shadow);
-  font-size: 0.82rem;
-  line-height: 1.6;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  -webkit-backdrop-filter: blur(10px) saturate(150%);
-  backdrop-filter: blur(10px) saturate(150%);
-}
-
-#reading-guide .reading-guide-level {
-  flex: none;
-  opacity: 0.5;
-  font-size: 0.92em;
-  font-variant-numeric: tabular-nums;
-}
-
-#reading-guide .reading-guide-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
+html.solid-bg[data-theme='dark'] #article-container .is-sticky-heading {
+  background: #2a2a2a;
 }
 
 /* 只有阅读文章时的正文用宋体，其余页面一律黑体。 */
