@@ -77,6 +77,18 @@
   --preloader-color: rgba(255, 255, 255, 0.75);
 }
 
+/* 侧栏作者卡：黑夜按钮和图标一律纯白，避免灰底灰字。 */
+[data-theme='dark'] #aside-content .card-info #card-info-btn,
+[data-theme='dark'] #aside-content .card-info #card-info-btn i,
+[data-theme='dark'] #aside-content .card-info #card-info-btn span {
+  color: #fff !important;
+}
+
+[data-theme='dark'] #aside-content .card-info .card-info-social-icons .social-icon,
+[data-theme='dark'] #aside-content .card-info .card-info-social-icons .social-icon i {
+  color: #fff !important;
+}
+
 /* 引用块改成 GitHub 式的纯竖线，去掉圆角和彩色底。 */
 #article-container blockquote,
 .post-content blockquote {
