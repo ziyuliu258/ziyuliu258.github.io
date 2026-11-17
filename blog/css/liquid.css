@@ -19,6 +19,67 @@
   display: none !important;
 }
 
+/* 分享图标原来依赖缺失的 socialshare 字体，改用站内已有的 Font Awesome。 */
+.social-share,
+.social-share * {
+  font-family: inherit !important;
+}
+
+.social-share .social-share-icon {
+  font-family: "Font Awesome 6 Brands" !important;
+  font-weight: 400;
+  border-color: var(--font-color);
+  color: var(--font-color);
+  opacity: 0.72;
+}
+
+.social-share .social-share-icon::before {
+  font-family: "Font Awesome 6 Brands" !important;
+}
+
+.social-share .icon-weibo,
+.social-share .icon-wechat,
+.social-share .icon-qq,
+.social-share .icon-facebook,
+.social-share .icon-twitter {
+  color: var(--font-color);
+  border-color: var(--font-color);
+}
+
+.social-share .icon-weibo::before { content: "\f18a"; }
+.social-share .icon-wechat::before { content: "\f1d7"; }
+.social-share .icon-qq::before { content: "\f1d6"; }
+.social-share .icon-facebook::before { content: "\f09a"; }
+.social-share .icon-twitter::before { content: "\e61b"; }
+
+.social-share .social-share-icon:hover {
+  background: transparent;
+  color: var(--font-color);
+  opacity: 1;
+}
+
+/* 版权框、标签和框内链接改成跟随正文颜色，不再用浅蓝色。 */
+#post .post-copyright,
+#post .post-copyright .post-copyright-meta,
+#post .post-copyright .post-copyright-info,
+#post .post-copyright .post-copyright-info a,
+#post .post-meta__tags {
+  color: var(--font-color);
+}
+
+#post .post-copyright {
+  border-color: color-mix(in srgb, var(--font-color) 28%, transparent);
+}
+
+#post .post-meta__tags {
+  border-color: color-mix(in srgb, var(--font-color) 45%, transparent);
+}
+
+#post .post-meta__tags:hover {
+  background: color-mix(in srgb, var(--font-color) 12%, transparent);
+  color: var(--font-color);
+}
+
 /* Slightly lighter dark surfaces, matching the previous site appearance. */
 [data-theme='dark'] {
   --global-bg: #2e2e2e;
@@ -143,7 +204,7 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
 
 /* 玻璃效果参数：对齐 liquidglass-kde-widgets (LiquidGlass.qml + liquidglass.frag) 的光学参数 */
 :root {
-  --glass-tint: rgba(255, 255, 255, 0.62);
+  --glass-tint: rgba(255, 255, 255, 0.78);
   --glass-reading-tint: rgba(255, 255, 255, 0.80);
   --glass-solid: rgba(250, 252, 255, 0.96);
   --glass-blur: 14px;
@@ -159,13 +220,13 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
   --glass-shadow: rgba(20, 32, 54, 0.16);
   --glass-shadow-hover: rgba(20, 32, 54, 0.24);
   /* 下面每一处单独调，改一个不会带动另一个。 */
-  --home-bg: rgba(255, 255, 255, 0.62);
+  --home-bg: rgba(255, 255, 255, 0.78);
   --home-blur: 14px;
   --home-saturate: 165%;
   --series-bg: rgba(255, 255, 255, 0.80);
   --series-blur: 14px;
   --series-saturate: 165%;
-  --post-bg: rgba(255, 255, 255, 0.62);
+  --post-bg: rgba(255, 255, 255, 0.78);
   --post-blur: 14px;
   --post-saturate: 165%;
   --archive-bg: rgba(255, 255, 255, 0.80);
@@ -180,13 +241,13 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
   --page-bg: rgba(255, 255, 255, 0.80);
   --page-blur: 14px;
   --page-saturate: 165%;
-  --aside-bg: rgba(255, 255, 255, 0.62);
+  --aside-bg: rgba(255, 255, 255, 0.78);
   --aside-blur: 14px;
   --aside-saturate: 165%;
 }
 
 [data-theme='dark'] {
-  --glass-tint: rgba(28, 28, 28, 0.55);
+  --glass-tint: rgba(28, 28, 28, 0.72);
   --glass-reading-tint: rgba(32, 32, 32, 0.82);
   --glass-solid: rgba(30, 30, 30, 0.97);
   --glass-blur: 14px;
@@ -195,14 +256,14 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
   --glass-border: rgba(255, 255, 255, 0.18);
   --glass-shadow: rgba(0, 0, 0, 0.32);
   --glass-shadow-hover: rgba(0, 0, 0, 0.44);
-  --home-bg: rgba(28, 28, 28, 0.55);
+  --home-bg: rgba(28, 28, 28, 0.72);
   --series-bg: rgba(32, 32, 32, 0.82);
-  --post-bg: rgba(28, 28, 28, 0.55);
+  --post-bg: rgba(28, 28, 28, 0.72);
   --archive-bg: rgba(32, 32, 32, 0.82);
   --tag-bg: rgba(32, 32, 32, 0.82);
   --category-bg: rgba(32, 32, 32, 0.82);
   --page-bg: rgba(32, 32, 32, 0.82);
-  --aside-bg: rgba(28, 28, 28, 0.55);
+  --aside-bg: rgba(28, 28, 28, 0.72);
 }
 
 #article-container .shuoshuo-item,
