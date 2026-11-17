@@ -2676,8 +2676,12 @@ figure.highlight pre .javascript .function {
 }
 #aside-content .card-info .card-info-social-icons .social-icon {
   margin: 0 10px;
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--font-color);
   font-size: 1.4em;
+  cursor: pointer;
 }
 #aside-content .card-info .card-info-social-icons i {
   -webkit-transition: all 0.3s;

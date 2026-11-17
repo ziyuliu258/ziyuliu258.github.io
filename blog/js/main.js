@@ -664,6 +664,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  document.addEventListener('click', async event => {
+    const button = event.target.closest('.social-icon[data-copy]')
+    if (!button) return
+    const text = button.dataset.copy
+    try {
+      await navigator.clipboard.writeText(text)
+      window.btf && btf.snackbarShow && btf.snackbarShow('已复制微信号')
+    } catch (error) {
+      window.btf && btf.snackbarShow && btf.snackbarShow('复制失败，请手动复制')
+    }
+  })
+
   document.getElementById('rightside').addEventListener('click', e => {
     const $target = e.target.closest('[id]')
     if ($target && rightSideFn[$target.id]) {
