@@ -179,7 +179,9 @@
   top: 60px;
   z-index: 3;
   padding: 0.16em 0;
-  background: var(--glass-solid);
+  background: var(--post-bg);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%);
 }
 
 /* 已经滚过去的上级标题不再露头，避免和新标题叠在一起。 */
@@ -187,11 +189,54 @@
   visibility: hidden;
 }
 
+/* 纯色模式不需要任何透明或模糊，直接用实色。 */
+html.solid-bg #article-container .is-sticky-heading {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 html.solid-bg:not([data-theme='dark']) #article-container .is-sticky-heading {
   background: #fff;
 }
 
 html.solid-bg[data-theme='dark'] #article-container .is-sticky-heading {
+  background: #2a2a2a;
+}
+
+/* 纯色模式下的吸顶导航也改成实色，省掉一层模糊。 */
+html.solid-bg #page-header.nav-fixed > #nav,
+html.solid-bg #page-header.not-top-img > #nav {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+html.solid-bg:not([data-theme='dark']) #page-header.nav-fixed > #nav,
+html.solid-bg:not([data-theme='dark']) #page-header.not-top-img > #nav {
+  background: #fff;
+}
+
+html.solid-bg[data-theme='dark'] #page-header.nav-fixed > #nav,
+html.solid-bg[data-theme='dark'] #page-header.not-top-img > #nav {
+  background: #1e1e1e;
+}
+
+/* 纯色模式下其余玻璃块同样改成实色。 */
+html.solid-bg #article-container .shuoshuo-item,
+html.solid-bg .type-404 .error-content,
+html.solid-bg .layout .pagination > *:not(.space) {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+html.solid-bg:not([data-theme='dark']) #article-container .shuoshuo-item,
+html.solid-bg:not([data-theme='dark']) .type-404 .error-content,
+html.solid-bg:not([data-theme='dark']) .layout .pagination > *:not(.space) {
+  background: #fff;
+}
+
+html.solid-bg[data-theme='dark'] #article-container .shuoshuo-item,
+html.solid-bg[data-theme='dark'] .type-404 .error-content,
+html.solid-bg[data-theme='dark'] .layout .pagination > *:not(.space) {
   background: #2a2a2a;
 }
 
