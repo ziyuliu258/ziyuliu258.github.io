@@ -26,19 +26,15 @@
     return (clone.textContent || '').replace(/\u200b/g, '').replace(/\s+/g, ' ').trim()
   }
 
-  const levels = headings.map(heading => Number(heading.tagName.slice(1)))
-  const topLevel = Math.min.apply(null, levels)
-
   headings.forEach(heading => {
     heading.setAttribute('data-heading-level', heading.tagName)
     if (!heading.id) {
       const slug = titleOf(heading).replace(/\s+/g, '-')
       if (slug) heading.id = slug
     }
-    // 只有最高一级的章节吸附；子标题跟着正文滚，避免和父标题互相盖住。
-    if (Number(heading.tagName.slice(1)) === topLevel) {
-      heading.classList.add('is-sticky-heading')
-    }
+    // 所有层级都吸附：滚到哪里，最靠近文段的那一级标题就盖在最上面，
+    // 父级标题被压在下层，不会挡住当前的小标题。
+    heading.classList.add('is-sticky-heading')
   })
 
   const scrollToHeading = (heading, smooth) => {
