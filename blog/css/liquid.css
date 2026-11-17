@@ -733,6 +733,8 @@ html[data-theme='light'] .layout .pagination > .space::before {
 
 /* 只有当前所在章节加粗，其他条目保持常规字重。 */
 #aside-content #card-toc .toc-content .toc-link {
+  font-size: 0.95rem;
+  line-height: 1.7;
   font-weight: 400;
 }
 
