@@ -143,7 +143,7 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
 
 /* 玻璃效果参数：对齐 liquidglass-kde-widgets (LiquidGlass.qml + liquidglass.frag) 的光学参数 */
 :root {
-  --glass-tint: rgba(255, 255, 255, 0.50);
+  --glass-tint: rgba(255, 255, 255, 0.62);
   --glass-reading-tint: rgba(255, 255, 255, 0.80);
   --glass-solid: rgba(250, 252, 255, 0.96);
   --glass-blur: 14px;
@@ -165,7 +165,7 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
   --series-bg: rgba(255, 255, 255, 0.80);
   --series-blur: 14px;
   --series-saturate: 165%;
-  --post-bg: rgba(255, 255, 255, 0.50);
+  --post-bg: rgba(255, 255, 255, 0.62);
   --post-blur: 14px;
   --post-saturate: 165%;
   --archive-bg: rgba(255, 255, 255, 0.80);
@@ -180,13 +180,13 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
   --page-bg: rgba(255, 255, 255, 0.80);
   --page-blur: 14px;
   --page-saturate: 165%;
-  --aside-bg: rgba(255, 255, 255, 0.50);
+  --aside-bg: rgba(255, 255, 255, 0.62);
   --aside-blur: 14px;
   --aside-saturate: 165%;
 }
 
 [data-theme='dark'] {
-  --glass-tint: rgba(28, 28, 28, 0.32);
+  --glass-tint: rgba(28, 28, 28, 0.55);
   --glass-reading-tint: rgba(32, 32, 32, 0.82);
   --glass-solid: rgba(30, 30, 30, 0.97);
   --glass-blur: 14px;
@@ -195,14 +195,14 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
   --glass-border: rgba(255, 255, 255, 0.18);
   --glass-shadow: rgba(0, 0, 0, 0.32);
   --glass-shadow-hover: rgba(0, 0, 0, 0.44);
-  --home-bg: rgba(28, 28, 28, 0.32);
+  --home-bg: rgba(28, 28, 28, 0.55);
   --series-bg: rgba(32, 32, 32, 0.82);
-  --post-bg: rgba(28, 28, 28, 0.32);
+  --post-bg: rgba(28, 28, 28, 0.55);
   --archive-bg: rgba(32, 32, 32, 0.82);
   --tag-bg: rgba(32, 32, 32, 0.82);
   --category-bg: rgba(32, 32, 32, 0.82);
   --page-bg: rgba(32, 32, 32, 0.82);
-  --aside-bg: rgba(28, 28, 28, 0.32);
+  --aside-bg: rgba(28, 28, 28, 0.55);
 }
 
 #article-container .shuoshuo-item,
