@@ -179,9 +179,15 @@
   top: 60px;
   z-index: 3;
   padding: 0.16em 0;
-  background: var(--post-bg);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
-  backdrop-filter: blur(10px) saturate(140%);
+  /* 卡片本身已经叠了一层半透明白，这里再叠同样的白会明显更亮。
+     只用很轻的白 + 足够强度的模糊，颜色接近卡片，文字被糊掉不抢视线。 */
+  background: rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+}
+
+[data-theme='dark'] #article-container .is-sticky-heading {
+  background: rgba(20, 20, 20, 0.2);
 }
 
 /* 已经滚过去的上级标题不再露头，避免和新标题叠在一起。 */
