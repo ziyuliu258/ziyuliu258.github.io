@@ -182,6 +182,11 @@
   background: var(--glass-solid);
 }
 
+/* 已经滚过去的上级标题不再露头，避免和新标题叠在一起。 */
+#article-container .is-stuck-past {
+  visibility: hidden;
+}
+
 html.solid-bg:not([data-theme='dark']) #article-container .is-sticky-heading {
   background: #fff;
 }

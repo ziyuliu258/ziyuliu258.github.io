@@ -17,7 +17,8 @@
   if (!headings.length) return
 
   const NAV_HEIGHT = 60
-  const OFFSET = 16
+  // 定位后标题正好落在吸附位置附近，切换时不会有空白带。
+  const OFFSET = 6
 
   const titleOf = heading => {
     const clone = heading.cloneNode(true)
@@ -36,6 +37,44 @@
     // 父级标题被压在下层，不会挡住当前的小标题。
     heading.classList.add('is-sticky-heading')
   })
+
+  // 记录每个标题在文档中的位置。只在加载/尺寸变化时测量，滚动时不再触发布局。
+  let headingTops = []
+  const measureHeadings = () => {
+    headingTops = headings.map(heading => heading.getBoundingClientRect().top + window.scrollY)
+  }
+  measureHeadings()
+  window.addEventListener('resize', measureHeadings, { passive: true })
+  window.addEventListener('load', measureHeadings)
+
+  let currentIndex = -1
+  let guideTicking = false
+
+  const updateCurrent = () => {
+    guideTicking = false
+    const threshold = window.scrollY + NAV_HEIGHT + OFFSET
+
+    let index = -1
+    for (let i = 0; i < headingTops.length; i++) {
+      if (headingTops[i] <= threshold) index = i
+      else break
+    }
+    if (index === currentIndex) return
+    currentIndex = index
+
+    // 只保留当前这级标题可见；它上面的标题已经滚过去的就隐藏掉，
+    // 否则高度不同时会在新标题上方露出半行字。
+    headings.forEach((heading, i) => {
+      heading.classList.toggle('is-stuck-past', i < index)
+    })
+  }
+
+  window.addEventListener('scroll', () => {
+    if (guideTicking) return
+    guideTicking = true
+    window.requestAnimationFrame(updateCurrent)
+  }, { passive: true })
+  updateCurrent()
 
   const scrollToHeading = (heading, smooth) => {
     const top = heading.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT - OFFSET
