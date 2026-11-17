@@ -11,7 +11,7 @@
 
   const storageKey = 'blog-bg-mode'
   const root = document.documentElement
-  const light = config.light || '#f4f6f8'
+  const light = config.light || '#d5d8dc'
   const dark = config.dark || '#1c1f24'
 
   const saved = () => {
@@ -27,7 +27,9 @@
   }
 
   const paint = solid => {
-    root.style.setProperty('--solid-bg', root.getAttribute('data-theme') === 'dark' ? dark : light)
+    const night = root.getAttribute('data-theme') === 'dark'
+    root.style.setProperty('--solid-bg', night ? dark : light)
+    root.style.setProperty('--solid-fg', night ? 'rgba(255, 255, 255, .82)' : '#2c3138')
     root.classList.toggle('solid-bg', solid)
 
     const button = document.getElementById('bg-toggle')
