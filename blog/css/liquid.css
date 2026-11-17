@@ -21,14 +21,19 @@
 
 /* 分享按钮不再使用缺失的 socialshare 字体，直接画成本地 SVG。 */
 .social-share .social-share-icon {
+  display: inline-block !important;
+  width: 32px !important;
+  height: 32px !important;
   font-size: 0 !important;
+  line-height: 32px !important;
   color: transparent;
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 54%;
-  border-color: var(--font-color);
+  background-size: 16px 16px;
+  border: 1px solid var(--font-color) !important;
   opacity: 0.78;
+  vertical-align: middle;
 }
 
 .social-share .icon-weibo {
