@@ -91,6 +91,15 @@ html.solid-bg:not([data-theme='dark']) #page-header #toggle-menu:hover {
   color: var(--solid-fg, #2c3138);
 }
 
+/* 纯色白天没有背景可透，侧栏改成和主卡片一样的不透明白。 */
+html.solid-bg:not([data-theme='dark']) #aside-content .card-widget,
+html.solid-bg:not([data-theme='dark']) #recent-posts:not(.series-directory) .recent-post-item,
+html.solid-bg:not([data-theme='dark']) #recent-posts:not(.series-directory) .home-announcement {
+  background: #fff;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 #bg-toggle.is-solid i::before {
   content: '\f576';
 }
@@ -125,7 +134,7 @@ html.solid-bg:not([data-theme='dark']) #page-header #toggle-menu:hover {
   --glass-shadow: rgba(20, 32, 54, 0.16);
   --glass-shadow-hover: rgba(20, 32, 54, 0.24);
   /* 下面每一处单独调，改一个不会带动另一个。 */
-  --home-bg: rgba(255, 255, 255, 0.80);
+  --home-bg: rgba(255, 255, 255, 0.36);
   --home-blur: 14px;
   --home-saturate: 165%;
   --series-bg: rgba(255, 255, 255, 0.80);
@@ -152,23 +161,23 @@ html.solid-bg:not([data-theme='dark']) #page-header #toggle-menu:hover {
 }
 
 [data-theme='dark'] {
-  --glass-tint: rgba(16, 20, 28, 0.32);
-  --glass-reading-tint: rgba(20, 25, 35, 0.82);
-  --glass-solid: rgba(22, 26, 34, 0.97);
+  --glass-tint: rgba(28, 28, 28, 0.32);
+  --glass-reading-tint: rgba(32, 32, 32, 0.82);
+  --glass-solid: rgba(30, 30, 30, 0.97);
   --glass-blur: 14px;
   --glass-saturate: 165%;
   --glass-spec-strength: 0.75;
   --glass-border: rgba(255, 255, 255, 0.18);
   --glass-shadow: rgba(0, 0, 0, 0.32);
   --glass-shadow-hover: rgba(0, 0, 0, 0.44);
-  --home-bg: rgba(20, 25, 35, 0.82);
-  --series-bg: rgba(20, 25, 35, 0.82);
-  --post-bg: rgba(20, 25, 35, 0.82);
-  --archive-bg: rgba(20, 25, 35, 0.82);
-  --tag-bg: rgba(20, 25, 35, 0.82);
-  --category-bg: rgba(20, 25, 35, 0.82);
-  --page-bg: rgba(20, 25, 35, 0.82);
-  --aside-bg: rgba(16, 20, 28, 0.32);
+  --home-bg: rgba(28, 28, 28, 0.32);
+  --series-bg: rgba(32, 32, 32, 0.82);
+  --post-bg: rgba(32, 32, 32, 0.82);
+  --archive-bg: rgba(32, 32, 32, 0.82);
+  --tag-bg: rgba(32, 32, 32, 0.82);
+  --category-bg: rgba(32, 32, 32, 0.82);
+  --page-bg: rgba(32, 32, 32, 0.82);
+  --aside-bg: rgba(28, 28, 28, 0.32);
 }
 
 #article-container .shuoshuo-item,
@@ -740,9 +749,9 @@ html[data-theme='light'] .layout .pagination > .space::before {
 }
 
 [data-theme="dark"] .music-dock {
-  color: #e7eef5;
+  color: #ececec;
   border-color: rgba(255, 255, 255, 0.18);
-  background: rgba(30, 37, 46, 0.9);
+  background: rgba(36, 36, 36, 0.9);
 }
 
 .music-dock-body {
@@ -895,9 +904,9 @@ html[data-theme='light'] .layout .pagination > .space::before {
 }
 
 [data-theme="dark"] .music-dock-playlist {
-  color: #e7eef5;
+  color: #ececec;
   border-color: rgba(255, 255, 255, 0.18);
-  background: rgba(30, 37, 46, 0.96);
+  background: rgba(36, 36, 36, 0.96);
 }
 
 .music-dock-playlist ol {
