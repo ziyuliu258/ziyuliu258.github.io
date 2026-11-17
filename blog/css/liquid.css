@@ -33,6 +33,22 @@
   background: rgba(28, 28, 28, 0.8);
 }
 
+/* 纯色背景由右下角按钮切换。日夜颜色写在 html 上，避免和图片的滤镜叠在一起。 */
+html.solid-bg #web_bg {
+  background-color: var(--solid-bg, #f4f6f8) !important;
+  background-image: none !important;
+}
+
+html.solid-bg #web_bg::before,
+html.solid-bg[data-theme='dark'] #web_bg::before,
+html.solid-bg[data-theme='dark'] #web_bg:before {
+  content: none;
+}
+
+#bg-toggle.is-solid i::before {
+  content: '\f576';
+}
+
 /* 让背景融入日夜模式，而不是覆盖页面原本的白色或深色底色。 */
 #web_bg::before {
   position: absolute;

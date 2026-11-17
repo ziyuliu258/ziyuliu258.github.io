@@ -1,0 +1,69 @@
+/* Swap the site image background for a solid color.
+   Light and dark mode each keep the color configured in liquid.background. */
+(() => {
+  'use strict'
+
+  if (window.__blogBackgroundToggle) return
+  window.__blogBackgroundToggle = true
+
+  const config = ((window.GLOBAL_CONFIG_SITE || {}).liquid || {}).background || {}
+  if (!config.toggle) return
+
+  const storageKey = 'blog-bg-mode'
+  const root = document.documentElement
+  const light = config.light || '#f4f6f8'
+  const dark = config.dark || '#1c1f24'
+
+  const saved = () => {
+    try {
+      return window.btf && btf.saveToLocal ? btf.saveToLocal.get(storageKey) : undefined
+    } catch (error) {
+      return undefined
+    }
+  }
+
+  const remember = value => {
+    if (window.btf && btf.saveToLocal) btf.saveToLocal.set(storageKey, value, 365)
+  }
+
+  const paint = solid => {
+    root.style.setProperty('--solid-bg', root.getAttribute('data-theme') === 'dark' ? dark : light)
+    root.classList.toggle('solid-bg', solid)
+
+    const button = document.getElementById('bg-toggle')
+    if (!button) return
+    button.classList.toggle('is-solid', solid)
+    button.setAttribute('aria-pressed', solid ? 'true' : 'false')
+  }
+
+  const apply = solid => {
+    paint(solid)
+    if (!solid && config.image) {
+      const background = document.getElementById('web_bg')
+      if (background && config.avif && !background.dataset.bgImageRestored) {
+        const imageSet = `image-set(url("${config.avif}") type("image/avif"), url("${config.image}") type("image/jpeg"))`
+        background.style.backgroundImage = imageSet
+        background.dataset.bgImageRestored = '1'
+      }
+    }
+  }
+
+  const boot = () => apply(saved() === 'solid')
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true })
+  } else {
+    boot()
+  }
+
+  document.addEventListener('click', event => {
+    if (!event.target.closest('#bg-toggle')) return
+    const nextSolid = !root.classList.contains('solid-bg')
+    apply(nextSolid)
+    remember(nextSolid ? 'solid' : 'image')
+  })
+
+  new MutationObserver(() => {
+    if (root.classList.contains('solid-bg')) paint(true)
+  }).observe(root, { attributes: true, attributeFilter: ['data-theme'] })
+})()
