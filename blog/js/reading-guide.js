@@ -81,6 +81,57 @@
     }
   }, true)
 
+  // 页眉里的大标题随滚动缩小、淡出，看起来像收进了导航栏。
+  const header = document.getElementById('page-header')
+  const postInfo = document.getElementById('post-info')
+  const postTitle = postInfo && postInfo.querySelector('.post-title')
+  const postMeta = postInfo && postInfo.querySelector('#post-meta')
+  let titleTicking = false
+
+  const updateTitleCollapse = () => {
+    titleTicking = false
+    if (!postTitle) return
+
+    const range = Math.max(160, (header ? header.offsetHeight : 400) - NAV_HEIGHT)
+    const progress = Math.min(1, Math.max(0, window.scrollY / range))
+
+    postTitle.style.transformOrigin = 'left top'
+    postTitle.style.transform = 'translateY(' + (-14 * progress).toFixed(1) +
+      'px) scale(' + (1 - 0.3 * progress).toFixed(3) + ')'
+    postTitle.style.opacity = String(Math.max(0, 1 - progress))
+
+    if (postMeta) postMeta.style.opacity = String(Math.max(0, 1 - progress * 1.4))
+  }
+
+  window.addEventListener('scroll', () => {
+    if (titleTicking) return
+    titleTicking = true
+    window.requestAnimationFrame(updateTitleCollapse)
+  }, { passive: true })
+  updateTitleCollapse()
+
+  // 导航栏里的文章名：回到文章开头，而不是回主页。
+  const navTitle = document.querySelector('#nav .nav-page-title')
+  if (navTitle) {
+    navTitle.addEventListener('click', event => {
+      event.preventDefault()
+      const top = article.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT - OFFSET
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+    })
+  }
+
+  // 返回箭头：回到上一个页面；没有历史时回博客首页。
+  const backButton = document.getElementById('nav-back')
+  if (backButton) {
+    backButton.addEventListener('click', () => {
+      if (window.history.length > 1) {
+        window.history.back()
+      } else {
+        window.location.href = (window.GLOBAL_CONFIG && GLOBAL_CONFIG.root) || '/'
+      }
+    })
+  }
+
   // 直接访问带 #章节 的链接：等字体、公式和图片撑开后再校正一次位置。
   const restoreHash = () => {
     const target = headingForHash(window.location.hash)

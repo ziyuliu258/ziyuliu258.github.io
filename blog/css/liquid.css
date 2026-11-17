@@ -141,6 +141,38 @@
   }
 }
 
+/* 吸顶导航里的返回箭头：只在收起后出现。 */
+#nav .nav-back {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 0.82em;
+  line-height: 1;
+  vertical-align: middle;
+  opacity: 0.62;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+#page-header.nav-fixed #nav .nav-back {
+  display: inline-flex;
+}
+
+#nav .nav-back:hover {
+  opacity: 1;
+}
+
+/* 正文标题随滚动缩小淡出，和导航栏里的小标题交接。 */
+#post-info .post-title,
+#post-info #post-meta {
+  will-change: transform, opacity;
+}
+
 /* 章节标题在滚动时吸附在导航下方，正文从它下面继续滚过。 */
 #article-container .is-sticky-heading {
   position: sticky;
