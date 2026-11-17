@@ -736,6 +736,18 @@ html[data-theme='light'] .layout .pagination > .space::before {
   font-weight: 400;
 }
 
+/* 编号固定宽度、右对齐，让所有条目的文字左边缘落在同一条竖线上。 */
+#aside-content #card-toc .toc-content .toc-number {
+  display: inline-block;
+  min-width: 1.6em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#aside-content #card-toc .toc-content .toc-text {
+  margin-left: 0.45em;
+}
+
 #aside-content #card-toc .toc-content .toc-link:not(.active):hover,
 #aside-content #card-toc .toc-content .toc-link:not(.active):focus-visible {
   color: var(--toc-hover-color);
