@@ -1497,8 +1497,8 @@ html[data-theme='light'] .layout .pagination > .space::before {
 
 .music-dock-launcher svg {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 32px;
+  height: 24px;
   fill: currentColor;
 }
 

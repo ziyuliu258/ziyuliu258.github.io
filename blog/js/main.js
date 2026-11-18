@@ -604,6 +604,8 @@ document.addEventListener('DOMContentLoaded', () => {
       $body.classList.add('read-mode')
       newEle.type = 'button'
       newEle.className = 'fas fa-sign-out-alt exit-readmode'
+      newEle.title = '退出阅读模式'
+      newEle.setAttribute('aria-label', '退出阅读模式')
       newEle.addEventListener('click', exitReadMode)
       $body.appendChild(newEle)
     },

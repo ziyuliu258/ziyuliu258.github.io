@@ -60,17 +60,20 @@
   dock.setAttribute('aria-label', i18n.dockLabel);
   dock.innerHTML = `
     <button class="music-dock-launcher" type="button" aria-label="${i18n.expand}" title="${i18n.expand}">
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <rect x="4" y="4" width="15.2" height="1.8"></rect>
-        <rect x="4" y="7.4" width="15.2" height="1.8"></rect>
-        <rect x="4" y="5.2" width="1.7" height="12.4"></rect>
-        <rect x="9" y="5.2" width="1.7" height="12.4"></rect>
-        <rect x="14" y="5.2" width="1.7" height="12.4"></rect>
-        <rect x="18.5" y="5.2" width="1.7" height="12.4"></rect>
-        <ellipse cx="4.85" cy="18.1" rx="2.3" ry="1.9"></ellipse>
-        <ellipse cx="9.85" cy="18.1" rx="2.3" ry="1.9"></ellipse>
-        <ellipse cx="14.85" cy="18.1" rx="2.3" ry="1.9"></ellipse>
-        <ellipse cx="19.35" cy="18.1" rx="2.3" ry="1.9"></ellipse>
+      <svg viewBox="10 10 245 145" aria-hidden="true" focusable="false">
+        <!-- Adapted from https://commons.wikimedia.org/wiki/File:Sixteenth_note_run.svg
+             by Pko and Ekips39/9cfilorux, CC BY-SA 3.0: https://creativecommons.org/licenses/by-sa/3.0/
+             Staff removed, stems thickened, cropped and recolored. -->
+        <g stroke="currentColor" stroke-width="5" fill="none">
+          <path d="M50.8 44.75v84M115.5 34.25v84M181 26.75v80M246.2 17.8v75"/>
+        </g>
+        <g transform="matrix(.816,-.578,.616,.788,0,0)">
+          <ellipse cx="-55.3" cy="130.4" rx="18.8" ry="12.2"/>
+          <ellipse cx="3.3" cy="157.8" rx="18.8" ry="12.2"/>
+          <ellipse cx="63.6" cy="184.6" rx="18.8" ry="12.2"/>
+          <ellipse cx="122.5" cy="212" rx="18.8" ry="12.2"/>
+        </g>
+        <path d="M247.7 16.5 49.3 42.6v12.9l198.4-26.2ZM247.7 37.4 49.3 63.5v12.9l198.4-26.2Z"/>
       </svg>
     </button>
     <div class="music-dock-body">

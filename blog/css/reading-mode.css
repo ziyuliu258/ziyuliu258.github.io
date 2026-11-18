@@ -1,0 +1,147 @@
+/* 阅读页保持纸面排版：目录只用细线，不设卡片、圆角或阴影。 */
+.reading-only { display: none; }
+.read-mode .reading-only { display: block; }
+.read-mode #post {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  width: 100%;
+  max-width: 900px;
+  padding: 32px 20px;
+}
+.read-mode #page-header {
+  background: transparent !important;
+}
+body.read-mode #page-header.post-bg {
+  height: auto;
+  min-height: 0;
+  padding: 96px 20px 24px;
+}
+body.read-mode #page-header #post-info {
+  position: static;
+  width: 100%;
+  max-width: 900px;
+  margin: auto;
+  padding: 0;
+  transform: none;
+}
+body.read-mode #post-info .post-title {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  white-space: normal;
+}
+.read-mode #post-info .post-title,
+.read-mode #post-info #post-meta {
+  opacity: 1 !important;
+  transform: none !important;
+}
+.read-mode #post > #reading-heading-rail {
+  display: block !important;
+  top: 20px;
+}
+.read-mode #post .reading-heading-button {
+  color: var(--font-color);
+}
+.read-mode #music-dock { display: none !important; }
+.read-mode #article-container a { color: inherit; }
+.read-mode #reading-toc {
+  position: fixed;
+  left: 32px;
+  top: 110px;
+  width: 210px;
+  max-height: calc(100dvh - 160px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  font-family: var(--global-font), sans-serif;
+  font-size: .85rem;
+  line-height: 1.6;
+  z-index: 10;
+}
+.reading-toc-label { margin-bottom: 20px; letter-spacing: .18em; opacity: .55; }
+#reading-toc a {
+  position: relative;
+  display: block;
+  border-left: 1px solid var(--hr-border);
+  padding: 7px 4px 7px calc(20px + var(--level) * 12px);
+  color: var(--font-color);
+  opacity: .55;
+  text-decoration: none;
+}
+#reading-toc a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 1.2em;
+  width: calc(12px + var(--level) * 12px);
+  border-top: 1px solid currentColor;
+}
+#reading-toc a:hover,
+#reading-toc a[aria-current] { opacity: 1; }
+#reading-toc a[aria-current] { font-weight: 600; border-left-color: currentColor; }
+.read-mode .reading-tools { position: fixed; right: 80px; top: 30px; z-index: 101; }
+.read-mode .reading-tool,
+.read-mode .exit-readmode {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--exit-btn-bg);
+  color: var(--exit-btn-color);
+  font-size: 16px;
+  cursor: pointer;
+}
+.read-mode .exit-readmode { top: 30px; bottom: auto; right: 30px; }
+.read-mode .reading-tool:hover { background: var(--exit-btn-hover); }
+.reading-tool:focus-visible, #reading-toc a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.read-mode .reading-top { position: fixed; bottom: 30px; right: 30px; z-index: 100; }
+#reading-export-menu {
+  position: absolute;
+  right: 0;
+  top: 48px;
+  width: 220px;
+  padding: 8px 0;
+  background: var(--readmode-light-color);
+  border: 1px solid var(--hr-border);
+}
+#reading-export-menu[hidden] { display: none; }
+#reading-export-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  background: none;
+  color: var(--font-color);
+  cursor: pointer;
+}
+#reading-export-menu button:hover { background: var(--highlight-bg); }
+#reading-export-menu small { opacity: .55; margin-left: 8px; }
+.reading-export-status { position: absolute; right: 0; top: 52px; width: 240px; font-size: .8rem; text-align: right; pointer-events: none; }
+.reading-tools:has(#reading-export-menu:not([hidden])) .reading-export-status { display: none; }
+@media (min-width: 1100px) {
+  .read-mode #content-inner { padding-left: 260px; padding-right: 80px; max-width: 1500px; }
+  body.read-mode #page-header.post-bg { padding-left: 260px; padding-right: 80px; max-width: 1500px; margin: auto; }
+}
+@media (max-width: 1099px) {
+  .read-mode #reading-toc {
+    order: -1;
+    position: static;
+    width: 100%;
+    max-height: 240px;
+    margin: 0 auto 24px;
+    padding: 0 20px;
+    max-width: 900px;
+  }
+  .read-mode #content-inner { display: flex; flex-direction: column; }
+  .read-mode #post { padding: 20px 16px; }
+  body.read-mode #post-info .post-title { font-size: 1.55rem; }
+}
+@media print {
+  .reading-only, .reading-heading-rail, .exit-readmode { display: none !important; }
+  #article-container { clip-path: none !important; }
+}
+@media (max-width: 600px) {
+  .read-mode #post .reading-heading-button { max-width: calc(100% - 110px); }
+}

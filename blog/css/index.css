@@ -6200,7 +6200,7 @@ blockquote.pullquote.right {
 }
 .read-mode .highlight-tools,
 .read-mode #footer,
-.read-mode #post > *:not(#post-info):not(.post-content),
+.read-mode #post > *:not(#post-info):not(.post-content):not(.reading-heading-rail),
 .read-mode #nav,
 .read-mode #post-outdate-notice,
 .read-mode #web_bg,

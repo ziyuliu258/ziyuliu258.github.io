@@ -83,6 +83,12 @@
     return service.turndown(holder.innerHTML).replace(/\n{3,}/g, '\n\n').trim()
   }
 
+  window.liquidArticleMarkdown = element => {
+    const range = document.createRange()
+    range.selectNodeContents(element)
+    return toMarkdown(range)
+  }
+
   const withCopyright = markdown => {
     const config = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.copyright
     if (!config || !config.limitCount || !config.languages) return markdown
@@ -95,6 +101,7 @@
   }
 
   document.addEventListener('copy', event => {
+    if (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.copy && GLOBAL_CONFIG.copy.enable === false) return
     const article = document.querySelector(ARTICLE)
     const selection = window.getSelection()
     if (!article || !selection || selection.isCollapsed || !selection.rangeCount) return

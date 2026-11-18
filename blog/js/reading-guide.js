@@ -16,7 +16,7 @@
   const headings = Array.from(article.querySelectorAll('h1, h2, h3, h4, h5, h6'))
   if (!headings.length) return
 
-  const NAV_HEIGHT = 60
+  let NAV_HEIGHT = 60
   // 定位后标题正好落在吸附位置附近，切换时不会有空白带。
   const OFFSET = 6
 
@@ -54,6 +54,7 @@
 
   // 置顶文字与正文共享 #post 的背景，不再绘制第二层玻璃。
   const rail = document.createElement('div')
+  rail.id = 'reading-heading-rail'
   rail.className = 'reading-heading-rail'
   const button = document.createElement('button')
   button.type = 'button'
@@ -69,6 +70,7 @@
   let guideTicking = false
 
   const measureHeadings = () => {
+    NAV_HEIGHT = document.body.classList.contains('read-mode') ? 20 : 60
     headingTops = headings.map(heading => heading.getBoundingClientRect().top + window.scrollY)
     const rect = article.getBoundingClientRect()
     articleTop = rect.top + window.scrollY
@@ -101,6 +103,7 @@
         railHeight = button.getBoundingClientRect().height
       }
       currentIndex = index
+      document.dispatchEvent(new CustomEvent('reading:section', { detail: { id: index >= 0 ? headings[index].id : '' } }))
     }
     const cut = index < 0 ? 0 : Math.max(0, threshold + railHeight - articleTop)
     article.style.clipPath = cut ? 'inset(' + cut + 'px -40px 0)' : ''
@@ -121,6 +124,7 @@
   const pageHeader = document.getElementById('page-header')
   if (pageHeader) layoutObserver.observe(pageHeader)
   new MutationObserver(measureHeadings).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] })
+  new MutationObserver(measureHeadings).observe(document.body, { attributes: true, attributeFilter: ['class'] })
   if (document.fonts) document.fonts.ready.then(measureHeadings)
 
   window.addEventListener('scroll', () => {
