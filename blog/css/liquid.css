@@ -167,6 +167,27 @@
   opacity: 1;
 }
 
+/* 标题和返回按钮独立响应悬停，不继承父容器的蓝色 hover。 */
+#page-header.nav-fixed #nav #blog-info,
+#page-header.nav-fixed #nav #blog-info:hover {
+  color: var(--font-color);
+}
+
+#page-header #nav #blog-info .nav-page-title,
+#page-header #nav #blog-info .nav-back {
+  color: var(--font-color) !important;
+}
+
+#page-header #nav #blog-info .nav-page-title:hover,
+#page-header #nav #blog-info .nav-back:hover {
+  color: #666 !important;
+}
+
+[data-theme='dark'] #page-header #nav #blog-info .nav-page-title:hover,
+[data-theme='dark'] #page-header #nav #blog-info .nav-back:hover {
+  color: #ccc !important;
+}
+
 /* 正文标题随滚动缩小淡出，和导航栏里的小标题交接。 */
 #post-info .post-title {
   will-change: transform, opacity;
