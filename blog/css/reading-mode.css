@@ -61,11 +61,31 @@ body.read-mode #post-info .post-title {
   z-index: 10;
 }
 .reading-toc-label { margin-bottom: 20px; letter-spacing: .18em; opacity: .55; }
+#reading-toc ul { margin: 0; padding: 0; list-style: none; }
+#reading-toc li { position: relative; margin: 0; padding: 0; list-style: none; }
+#reading-toc li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-left: 1px solid var(--hr-border);
+}
+#reading-toc li:last-child::before { bottom: auto; height: 10px; }
+/* 分支从父标题文字下方延伸，不跨接到祖先的主干。 */
+#reading-toc li > ul { position: relative; margin-left: 20px; }
+#reading-toc li > ul::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -7px;
+  height: 7px;
+  border-left: 1px solid var(--hr-border);
+}
 #reading-toc a {
   position: relative;
   display: block;
-  border-left: 1px solid var(--hr-border);
-  padding: 7px 4px 7px calc(20px + var(--level) * 12px);
+  padding: 7px 4px 7px 20px;
   color: var(--font-color);
   opacity: .55;
   text-decoration: none;
@@ -74,13 +94,17 @@ body.read-mode #post-info .post-title {
   content: '';
   position: absolute;
   left: 0;
-  top: 1.2em;
-  width: calc(12px + var(--level) * 12px);
-  border-top: 1px solid currentColor;
+  top: 9px;
+  width: 12px;
+  height: 10px;
+  border-left: 1px solid var(--hr-border);
+  border-bottom: 1px solid var(--hr-border);
+  border-bottom-left-radius: 7px;
 }
 #reading-toc a:hover,
 #reading-toc a[aria-current] { opacity: 1; }
-#reading-toc a[aria-current] { font-weight: 600; border-left-color: currentColor; }
+#reading-toc a[aria-current] { font-weight: 600; }
+#reading-toc a[aria-current]::before { border-color: currentColor; }
 .read-mode .reading-tools { position: fixed; right: 80px; top: 30px; z-index: 101; }
 .read-mode .reading-tool,
 .read-mode .exit-readmode {

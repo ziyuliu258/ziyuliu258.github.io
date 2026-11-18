@@ -12,16 +12,31 @@
   label.textContent = '目录'
   nav.appendChild(label)
   const headings = [...article.querySelectorAll('h1,h2,h3,h4,h5,h6')]
-  const minLevel = Math.min(...headings.map(h => Number(h.tagName.slice(1))))
+  const tree = document.createElement('ul')
+  nav.appendChild(tree)
+  const parents = []
   const links = headings.map(heading => {
+    const level = Number(heading.tagName.slice(1))
+    while (parents.length && parents[parents.length - 1].level >= level) parents.pop()
+    let list = tree
+    if (parents.length) {
+      const parent = parents[parents.length - 1]
+      if (!parent.children) {
+        parent.children = document.createElement('ul')
+        parent.item.appendChild(parent.children)
+      }
+      list = parent.children
+    }
+    const item = document.createElement('li')
+    list.appendChild(item)
     const link = document.createElement('a')
     link.href = '#' + encodeURIComponent(heading.id)
     const clone = heading.cloneNode(true)
     clone.querySelectorAll('.headerlink').forEach(node => node.remove())
     link.textContent = clone.textContent.trim()
-    link.style.setProperty('--level', Number(heading.tagName.slice(1)) - minLevel)
     link.dataset.heading = heading.id
-    nav.appendChild(link)
+    item.appendChild(link)
+    parents.push({ level, item })
     return link
   })
   document.getElementById('post').after(nav)
