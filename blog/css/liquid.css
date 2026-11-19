@@ -767,13 +767,35 @@ html[data-theme='light'] .layout .pagination > .space::before {
   text-shadow: 0 1px 4px rgba(0, 0, 0, .6);
 }
 
-/* 分页玻璃底上的页码和箭头需要更清晰的对比。 */
-.layout #pagination .pagination > a:not(:hover) {
-  color: #075d95;
+/* 分页按钮的字、当前页和悬停状态统一使用中性灰。 */
+html .layout #pagination .pagination > a:not(.space) {
+  color: #343434;
 }
 
-[data-theme="dark"] .layout #pagination .pagination > a:not(:hover) {
-  color: #e3f3ff;
+html .layout #pagination .pagination > a:not(.space):hover,
+html .layout #pagination .pagination > a:not(.space):focus-visible {
+  background: #d4d4d4;
+  color: #171717;
+}
+
+html .layout #pagination .pagination > .page-number.current {
+  background: #555;
+  color: #fff;
+}
+
+html[data-theme='dark'] .layout #pagination .pagination > a:not(.space) {
+  color: #e4e4e4;
+}
+
+html[data-theme='dark'] .layout #pagination .pagination > a:not(.space):hover,
+html[data-theme='dark'] .layout #pagination .pagination > a:not(.space):focus-visible {
+  background: #4a4a4a;
+  color: #fff;
+}
+
+html[data-theme='dark'] .layout #pagination .pagination > .page-number.current {
+  background: #d1d1d1;
+  color: #1e1e1e;
 }
 
 #recent-posts .recent-post-item:hover,
