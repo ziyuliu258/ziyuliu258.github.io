@@ -495,6 +495,19 @@ html.solid-bg:not([data-theme='dark']) #page-header #toggle-menu:hover {
   color: var(--solid-fg, #2c3138);
 }
 
+/* 页脚包装层原本单独指定浅色文字，不能只设置 #footer 的继承色。 */
+html.solid-bg:not([data-theme='dark']) #footer #footer-wrap,
+html.solid-bg:not([data-theme='dark']) #footer #footer-wrap a {
+  color: #505050;
+  text-shadow: none;
+}
+
+html.solid-bg[data-theme='dark'] #footer #footer-wrap,
+html.solid-bg[data-theme='dark'] #footer #footer-wrap a {
+  color: #c6c6c6;
+  text-shadow: none;
+}
+
 /* 纯色没有背景可透。白天用白卡片，黑夜用比背景略浅的实色。 */
 html.solid-bg #recent-posts .recent-post-item,
 html.solid-bg #recent-posts .home-announcement,
