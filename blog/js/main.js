@@ -666,6 +666,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // PJAX replaces the header, so handle the back button on the document.
+  document.addEventListener('click', event => {
+    if (!event.target.closest('#nav-back')) return
+
+    const navigation = window.navigation
+    if (navigation && navigation.currentEntry) {
+      const currentUrl = new URL(window.location.href)
+      currentUrl.hash = ''
+      const previousEntries = navigation.entries().slice(0, navigation.currentEntry.index)
+      for (const entry of previousEntries.reverse()) {
+        if (!entry.url) continue
+        const url = new URL(entry.url)
+        url.hash = ''
+        if (url.href === currentUrl.href) continue
+        navigation.traverseTo(entry.key).committed.catch(() => {
+          window.location.href = GLOBAL_CONFIG.root
+        })
+        return
+      }
+    } else if (window.history.length > 1) {
+      window.history.back()
+      return
+    }
+
+    window.location.href = GLOBAL_CONFIG.root
+  })
+
   document.addEventListener('click', async event => {
     const button = event.target.closest('.social-icon[data-copy]')
     if (!button) return

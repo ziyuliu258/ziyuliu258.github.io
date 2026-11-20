@@ -230,18 +230,6 @@
     })
   }
 
-  // 返回箭头：回到上一个页面；没有历史时回博客首页。
-  const backButton = document.getElementById('nav-back')
-  if (backButton) {
-    backButton.addEventListener('click', () => {
-      if (window.history.length > 1) {
-        window.history.back()
-      } else {
-        window.location.href = (window.GLOBAL_CONFIG && GLOBAL_CONFIG.root) || '/'
-      }
-    })
-  }
-
   // 直接访问带 #章节 的链接：等字体、公式和图片撑开后再校正一次位置。
   const restoreHash = () => {
     const target = headingForHash(window.location.hash)
