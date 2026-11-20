@@ -751,15 +751,30 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
   clip-path: inset(0 round var(--glass-radius));
 }
 
-/* 浅色和深色主题共用同一个分页省略号，文字颜色随主题变化。 */
+/* 两种主题共用白底分页按钮和带阴影的白点。 */
 .layout .pagination > .space {
-  color: var(--font-color);
-  font-weight: 700;
+  position: relative;
+  color: transparent;
   text-shadow: none;
 }
 
-/* 分页按钮的字、当前页和悬停状态统一使用中性灰。 */
+.layout .pagination > .space::before {
+  content: "•••";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: .2em;
+  color: rgba(255, 255, 255, .98);
+  font-size: .9em;
+  font-weight: 800;
+  letter-spacing: .2em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+}
+
 html .layout #pagination .pagination > a:not(.space) {
+  background: #fff;
   color: #343434;
 }
 
@@ -772,21 +787,6 @@ html .layout #pagination .pagination > a:not(.space):focus-visible {
 html .layout #pagination .pagination > .page-number.current {
   background: #555;
   color: #fff;
-}
-
-html[data-theme='dark'] .layout #pagination .pagination > a:not(.space) {
-  color: #e4e4e4;
-}
-
-html[data-theme='dark'] .layout #pagination .pagination > a:not(.space):hover,
-html[data-theme='dark'] .layout #pagination .pagination > a:not(.space):focus-visible {
-  background: #4a4a4a;
-  color: #fff;
-}
-
-html[data-theme='dark'] .layout #pagination .pagination > .page-number.current {
-  background: #d1d1d1;
-  color: #1e1e1e;
 }
 
 #recent-posts .recent-post-item:hover,
