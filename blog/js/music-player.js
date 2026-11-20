@@ -334,6 +334,7 @@
       list.append(item);
     });
     watchOverflow(list);
+    bindMarqueeReturn(list, 'button[data-track-id]');
     const currentButton = list.querySelector('.is-current');
     if (currentButton) dock.querySelector('[data-dock-playlist]').scrollTop = Math.max(0, currentButton.offsetTop - 24);
   }
@@ -519,6 +520,7 @@
     });
     watchOverflow(list);
     bindTips(list);
+    bindMarqueeReturn(list, 'li[data-id]');
     update();
   }
   // Give a one-line label a slow horizontal scroll only while it actually overflows.
@@ -532,7 +534,7 @@
       box.style.removeProperty('--music-marquee-duration');
       if (overflow > 2) {
         box.style.setProperty('--music-marquee-shift', `${-overflow}px`);
-        box.style.setProperty('--music-marquee-duration', `${Math.min(18, Math.max(5, overflow / 22))}s`);
+        box.style.setProperty('--music-marquee-duration', `${Math.min(14, Math.max(4, overflow / 45))}s`);
         box.classList.add('is-scrolling');
       }
     });
@@ -545,6 +547,33 @@
       const observer = new ResizeObserver(() => measureMarquee(scope));
       observer.observe(scope);
     }
+  }
+  // 鼠标移开后，滚动停止并从当前位置平滑回到开头。
+  function returnToStart(row) {
+    if (!row || !row.querySelector) return;
+    row.querySelectorAll('.is-scrolling > .music-track-text').forEach((text) => {
+      const current = getComputedStyle(text).transform;
+      if (!current || current === 'none') return;
+      text.getAnimations().forEach((animation) => animation.cancel());
+      try {
+        text.animate(
+          [{ transform: current }, { transform: 'translateX(0)' }],
+          { duration: 420, easing: 'ease-out', fill: 'none' }
+        );
+      } catch (_error) {
+        text.style.transform = 'translateX(0)';
+      }
+    });
+  }
+  function bindMarqueeReturn(list, selector) {
+    if (!list || list.dataset.marqueeReturnBound) return;
+    list.dataset.marqueeReturnBound = 'true';
+    list.addEventListener('pointerleave', (event) => {
+      const row = event.target.closest(selector);
+      if (!row || !list.contains(row)) return;
+      if (event.relatedTarget && row.contains(event.relatedTarget)) return;
+      returnToStart(row);
+    }, true);
   }
   let playlist = null;
   document.addEventListener('pjax:complete', initPage);

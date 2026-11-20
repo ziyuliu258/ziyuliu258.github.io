@@ -1664,7 +1664,7 @@ html[data-theme='dark'] .layout #pagination .pagination > .page-number.current {
   opacity: 0.75;
 }
 
-/* 一行显示，只有真正溢出时才缓慢横向滚动。 */
+/* 一行显示；只有鼠标悬停在该行、且文字确实溢出时，才单向从左滚到右。 */
 .music-track-text {
   display: inline-block;
   width: max-content;
@@ -1672,27 +1672,27 @@ html[data-theme='dark'] .layout #pagination .pagination > .page-number.current {
   will-change: transform;
 }
 
-.is-scrolling > .music-track-text {
-  animation: music-track-marquee var(--music-marquee-duration, 8s) linear infinite alternate;
+.music-tracks li:hover .is-scrolling > .music-track-text,
+.music-tracks li:focus-within .is-scrolling > .music-track-text {
+  animation: music-track-marquee var(--music-marquee-duration, 8s) linear infinite;
 }
 
-.music-tracks li:hover .is-scrolling > .music-track-text,
-.music-tracks li:focus-within .is-scrolling > .music-track-text,
 .music-dock-playlist button:hover .is-scrolling > .music-track-text {
-  animation-play-state: paused;
+  animation: music-track-marquee var(--music-marquee-duration, 8s) linear infinite;
 }
 
 @keyframes music-track-marquee {
-  from {
+  0%, 5% {
     transform: translateX(0);
   }
-  to {
+  95%, 100% {
     transform: translateX(var(--music-marquee-shift, 0));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .is-scrolling > .music-track-text {
+  .music-tracks li:hover .is-scrolling > .music-track-text,
+  .music-dock-playlist button:hover .is-scrolling > .music-track-text {
     animation: none;
   }
 }
