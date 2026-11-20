@@ -12,7 +12,25 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-11-20T17:00:20.495Z</updated>
+  <updated>2026-11-20T18:49:52.848Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="Object Pose Estimation" scheme="https://ziyuliu258.cn/blog/tags/Object-Pose-Estimation/"/>
+    <category term="Robotic Manipulation" scheme="https://ziyuliu258.cn/blog/tags/Robotic-Manipulation/"/>
+    <id>https://ziyuliu258.cn/blog/posts/57f7e4a5/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/57f7e4a5/"/>
+    <published>2026-11-20T18:45:34.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：本文来自 NVIDIA（Bowen Wen、Wei Yang、Jan Kautz、Stan Birchfield），CVPR 2024。它想用<strong>一个模型</strong>同时解决四件事：新物体的 6D]]>
+    </summary>
+    <title>论文阅读：FoundationPose</title>
+    <updated>2026-11-20T18:49:52.848Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -351,23 +369,5 @@
     </summary>
     <title>论文阅读：OpenVLA</title>
     <updated>2026-11-20T10:39:19.452Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="VQ-VAE" scheme="https://ziyuliu258.cn/blog/tags/VQ-VAE/"/>
-    <category term="VAE" scheme="https://ziyuliu258.cn/blog/tags/VAE/"/>
-    <id>https://ziyuliu258.cn/blog/posts/81cd8b0a/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/81cd8b0a/"/>
-    <published>2026-10-27T19:19:46.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>引：这篇由 Aaron van den Oord、Oriol Vinyals 和 Koray Kavukcuoglu 提出的工作，提出了 <strong>VQ-VAE（Vector Quantised Variational]]>
-    </summary>
-    <title>论文阅读：Neural Discrete Representation Learning</title>
-    <updated>2026-11-20T10:39:21.845Z</updated>
   </entry>
 </feed>
