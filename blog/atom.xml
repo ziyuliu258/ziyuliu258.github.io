@@ -12,7 +12,43 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-11-20T11:18:57.200Z</updated>
+  <updated>2026-11-20T16:18:50.997Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="Spatial Reasoning" scheme="https://ziyuliu258.cn/blog/tags/Spatial-Reasoning/"/>
+    <category term="VLM" scheme="https://ziyuliu258.cn/blog/tags/VLM/"/>
+    <id>https://ziyuliu258.cn/blog/posts/db8dcf90/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/db8dcf90/"/>
+    <published>2026-11-20T16:16:00.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：本文由 UIUC、上海交大、UC Merced 与 Amazon AGI 的研究者完成。它要解决的是 VLM 的<strong>视角采择（perspective]]>
+    </summary>
+    <title>论文阅读：LeRF</title>
+    <updated>2026-11-20T16:18:50.997Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="3D Vision" scheme="https://ziyuliu258.cn/blog/tags/3D-Vision/"/>
+    <category term="Object Pose Estimation" scheme="https://ziyuliu258.cn/blog/tags/Object-Pose-Estimation/"/>
+    <id>https://ziyuliu258.cn/blog/posts/9ca2403e/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/9ca2403e/"/>
+    <published>2026-11-20T16:16:00.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：本文由香港科技大学、深圳 Loop Area Institute、香港大学与清华的研究者完成。它处理的是“把生成出来的物体放回场景”这一步：给定一张 RGB]]>
+    </summary>
+    <title>论文阅读：ScenePlacer</title>
+    <updated>2026-11-20T16:18:50.997Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -333,41 +369,5 @@
     </summary>
     <title>论文阅读：Fine-Tuning Vision-Language-Action Models - Optimizing Speed and Success</title>
     <updated>2026-11-20T10:38:46.000Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="Diffusion Models" scheme="https://ziyuliu258.cn/blog/tags/Diffusion-Models/"/>
-    <category term="论文精读" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E7%B2%BE%E8%AF%BB/"/>
-    <id>https://ziyuliu258.cn/blog/posts/a96313f0/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/a96313f0/"/>
-    <published>2026-10-26T11:41:22.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>引：DDPM 是 Jonathan Ho、Ajay Jain 和 Pieter Abbeel 在 2020]]>
-    </summary>
-    <title>论文阅读：Denoising Diffusion Probabilistic Models</title>
-    <updated>2026-11-20T10:39:06.141Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="Diffusion Models" scheme="https://ziyuliu258.cn/blog/tags/Diffusion-Models/"/>
-    <category term="Transformer" scheme="https://ziyuliu258.cn/blog/tags/Transformer/"/>
-    <id>https://ziyuliu258.cn/blog/posts/f097c2bc/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/f097c2bc/"/>
-    <published>2026-10-26T11:10:10.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>引：这篇由 William Peebles 和 Saining Xie 提出的工作，将 latent diffusion 中常用的 U-Net 去噪主干替换成了 Transformer，形成 <strong>Diffusion]]>
-    </summary>
-    <title>论文阅读：Scalable Diffusion Models with Transformers</title>
-    <updated>2026-11-20T10:38:45.986Z</updated>
   </entry>
 </feed>
