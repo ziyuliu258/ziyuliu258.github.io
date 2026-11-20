@@ -12,7 +12,61 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-11-19T08:11:49.530Z</updated>
+  <updated>2026-11-20T11:18:57.200Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="3D Dataset" scheme="https://ziyuliu258.cn/blog/tags/3D-Dataset/"/>
+    <category term="Spatial Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Spatial-Intelligence/"/>
+    <id>https://ziyuliu258.cn/blog/posts/c537def8/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/c537def8/"/>
+    <published>2026-11-20T09:39:21.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：Spatial Foundry]]>
+    </summary>
+    <title>论文阅读：Spatial Foundry</title>
+    <updated>2026-11-20T11:18:57.200Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="3D Generation" scheme="https://ziyuliu258.cn/blog/tags/3D-Generation/"/>
+    <category term="Agent" scheme="https://ziyuliu258.cn/blog/tags/Agent/"/>
+    <id>https://ziyuliu258.cn/blog/posts/4318b9d/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/4318b9d/"/>
+    <published>2026-11-20T09:06:12.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：BlenderFORGE 研究如何让多模态大模型在 Blender 中反复观察、执行代码和检查结果，直到把场景改成目标状态。论文的重点是将已有 3D 资产转化为编辑任务，再用可执行环境和可验证奖励训练交互式编辑]]>
+    </summary>
+    <title>论文阅读：BlenderFORGE</title>
+    <updated>2026-11-20T10:38:08.232Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="Vision-Language Models" scheme="https://ziyuliu258.cn/blog/tags/Vision-Language-Models/"/>
+    <category term="LLM Agent" scheme="https://ziyuliu258.cn/blog/tags/LLM-Agent/"/>
+    <id>https://ziyuliu258.cn/blog/posts/76521c01/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/76521c01/"/>
+    <published>2026-11-19T13:29:27.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：VULCAN 由 Stanford、Google 与 NYU 合作完成，第一作者 Zhengfei Kuang 在 Google 实习期间完成这项工作，谢赛宁（Saining Xie）是作者之一。论文要解决的是让多模态大模型在三维场景里]]>
+    </summary>
+    <title>论文阅读：VULCAN</title>
+    <updated>2026-11-20T10:39:20.630Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -28,8 +82,8 @@
       <![CDATA[<blockquote>
 <p>引：NeRF]]>
     </summary>
-    <title>论文阅读：NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis</title>
-    <updated>2026-11-19T08:11:49.530Z</updated>
+    <title>论文阅读：NeRF</title>
+    <updated>2026-11-20T10:38:55.323Z</updated>
   </entry>
   <entry>
     <author>
@@ -47,7 +101,7 @@
 <p>引：3D Gaussian]]>
     </summary>
     <title>论文阅读：3D Gaussian Splatting for Real-Time Radiance Field Rendering</title>
-    <updated>2026-11-15T13:44:32.328Z</updated>
+    <updated>2026-11-20T10:38:55.315Z</updated>
   </entry>
   <entry>
     <author>
@@ -64,8 +118,8 @@
       <![CDATA[<blockquote>
 <p>引：VGGT 将相机、深度、点图和跨视图跟踪放进同一个前馈模型。它最有意思的地方不是给某一个几何任务增加专用模块，而是让多张图像的 token]]>
     </summary>
-    <title>论文阅读：VGGT: Visual Geometry Grounded Transformer</title>
-    <updated>2026-11-15T13:44:32.328Z</updated>
+    <title>论文阅读：VGGT</title>
+    <updated>2026-11-20T10:38:55.333Z</updated>
   </entry>
   <entry>
     <author>
@@ -114,8 +168,8 @@
       <![CDATA[<blockquote>
 <p>引：VIMA 把“按语言操作”“达到目标图像”“观看一次示范”“根据图片学习新概念”等任务，统一为 <strong>文字与图像交错的 multimodal prompt</strong>。模型再将画面拆成 object tokens，用]]>
     </summary>
-    <title>论文阅读：VIMA - General Robot Manipulation with Multimodal Prompts</title>
-    <updated>2026-11-05T15:57:30.342Z</updated>
+    <title>论文阅读：VIMA</title>
+    <updated>2026-11-20T10:39:32.992Z</updated>
   </entry>
   <entry>
     <author>
@@ -133,8 +187,8 @@
       <![CDATA[<blockquote>
 <p>引：<span class="katex"><span class="katex-mathml"><math]]>
     </summary>
-    <title>论文阅读：$\pi_0$ - A Vision-Language-Action Flow Model for General Robot Control</title>
-    <updated>2026-11-17T14:36:01.600Z</updated>
+    <title>论文阅读：$\pi_0$</title>
+    <updated>2026-11-20T10:40:13.015Z</updated>
   </entry>
   <entry>
     <author>
@@ -151,8 +205,8 @@
       <![CDATA[<blockquote>
 <p>引：DAgger 研究的问题很直接： <strong>策略做出的动作会改变下一次看到的输入，那么只在专家走过的状态上训练，为什么能保证策略独立执行时也表现良好？</strong>]]>
     </summary>
-    <title>论文阅读：DAgger - A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning</title>
-    <updated>2026-11-05T15:57:30.342Z</updated>
+    <title>论文阅读：DAgger</title>
+    <updated>2026-11-20T10:38:50.722Z</updated>
   </entry>
   <entry>
     <author>
@@ -170,8 +224,8 @@
       <![CDATA[<blockquote>
 <p>引：UI-TARS 将 GUI agent 中的感知、动作选择和部分工作流程，放进一个接收截图、生成操作的 VLM。本文最值得关注的是它怎样构造训练数据：从界面元素理解到多步轨迹，再到模型亲自执行后产生的错误与纠正。尤其是]]>
     </summary>
-    <title>论文阅读：UI-TARS - Pioneering Automated GUI Interaction with Native Agents</title>
-    <updated>2026-11-05T15:57:30.342Z</updated>
+    <title>论文阅读：UI-TARS</title>
+    <updated>2026-11-20T10:39:32.993Z</updated>
   </entry>
   <entry>
     <author>
@@ -189,7 +243,7 @@
 <p>引：Idefics2 最值得读的地方，是作者把构建 VLM 时经常一起变化的选择拆开比较：预训练主干怎样选，图像怎样进入语言模型，哪些参数需要适配，以及视觉 token 应该保留多少。最后得到的 8B]]>
     </summary>
     <title>论文阅读：What matters when building vision-language models?（Idefics2）</title>
-    <updated>2026-11-05T15:57:30.342Z</updated>
+    <updated>2026-11-20T10:39:17.681Z</updated>
   </entry>
   <entry>
     <author>
@@ -205,8 +259,8 @@
       <![CDATA[<blockquote>
 <p>引：Edward Hu、Yelong Shen 等人在这篇文章中提出 LoRA。全量微调会为每个下游任务保存一整份与预训练模型同样大的参数；LoRA 改为冻结预训练权重，只训练插在权重旁边的低秩分解。以 GPT-3 175B]]>
     </summary>
-    <title>论文阅读：LoRA: Low-Rank Adaptation of Large Language Models</title>
-    <updated>2026-10-30T19:24:51.836Z</updated>
+    <title>论文阅读：LoRA</title>
+    <updated>2026-11-20T10:37:29.343Z</updated>
   </entry>
   <entry>
     <author>
@@ -214,8 +268,8 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="Embodied Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Embodied-Intelligence/"/>
     <category term="3D Generation" scheme="https://ziyuliu258.cn/blog/tags/3D-Generation/"/>
+    <category term="Embodied Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Embodied-Intelligence/"/>
     <id>https://ziyuliu258.cn/blog/posts/32a3a35f/</id>
     <link href="https://ziyuliu258.cn/blog/posts/32a3a35f/"/>
     <published>2026-10-29T17:03:48.000Z</published>
@@ -223,8 +277,8 @@
       <![CDATA[<blockquote>
 <p>引：Minghan Qin、Yuang Wang、Xiuyu Yang 等人提出 Lucida，从真实室内场景的多视角观测中恢复完整、可独立编辑的物体资产，并将它们放回原来的位置。本文保留“解析、生成、摆放”的三阶段流程，最值得关注的是最后的]]>
     </summary>
-    <title>论文阅读：Lucida: Parse, Generate, and Place for Composable Real-to-Sim Scene Modeling</title>
-    <updated>2026-10-29T17:13:57.350Z</updated>
+    <title>论文阅读：Lucida</title>
+    <updated>2026-11-20T10:38:31.167Z</updated>
   </entry>
   <entry>
     <author>
@@ -241,8 +295,8 @@
       <![CDATA[<blockquote>
 <p>引：Moo Jin Kim、Karl Pertsch、Siddharth Karamcheti 等人在这篇文章中提出 OpenVLA，将已有的视觉语言模型微调为机器人控制策略。模型接收一张图像和一条指令，将七维机器人动作转换为离散]]>
     </summary>
-    <title>论文阅读：OpenVLA: An Open-Source Vision-Language-Action Model</title>
-    <updated>2026-10-29T16:44:22.525Z</updated>
+    <title>论文阅读：OpenVLA</title>
+    <updated>2026-11-20T10:39:19.452Z</updated>
   </entry>
   <entry>
     <author>
@@ -260,7 +314,7 @@
 <p>引：这篇由 Aaron van den Oord、Oriol Vinyals 和 Koray Kavukcuoglu 提出的工作，提出了 <strong>VQ-VAE（Vector Quantised Variational]]>
     </summary>
     <title>论文阅读：Neural Discrete Representation Learning</title>
-    <updated>2026-10-29T15:15:15.130Z</updated>
+    <updated>2026-11-20T10:39:21.845Z</updated>
   </entry>
   <entry>
     <author>
@@ -278,7 +332,7 @@
 <p>引：Moo Jin Kim、Chelsea Finn 和 Percy Liang 在这篇文章中研究，怎样更有效地将已有的 Vision-Language-Action 模型微调到新机器人和新任务。作者以 OpenVLA]]>
     </summary>
     <title>论文阅读：Fine-Tuning Vision-Language-Action Models - Optimizing Speed and Success</title>
-    <updated>2026-10-29T15:14:38.604Z</updated>
+    <updated>2026-11-20T10:38:46.000Z</updated>
   </entry>
   <entry>
     <author>
@@ -296,7 +350,7 @@
 <p>引：DDPM 是 Jonathan Ho、Ajay Jain 和 Pieter Abbeel 在 2020]]>
     </summary>
     <title>论文阅读：Denoising Diffusion Probabilistic Models</title>
-    <updated>2026-10-29T15:14:51.608Z</updated>
+    <updated>2026-11-20T10:39:06.141Z</updated>
   </entry>
   <entry>
     <author>
@@ -314,55 +368,6 @@
 <p>引：这篇由 William Peebles 和 Saining Xie 提出的工作，将 latent diffusion 中常用的 U-Net 去噪主干替换成了 Transformer，形成 <strong>Diffusion]]>
     </summary>
     <title>论文阅读：Scalable Diffusion Models with Transformers</title>
-    <updated>2026-10-29T15:15:46.359Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="科研" scheme="https://ziyuliu258.cn/blog/categories/%E7%A7%91%E7%A0%94/"/>
-    <category term="科研方法论" scheme="https://ziyuliu258.cn/blog/tags/%E7%A7%91%E7%A0%94%E6%96%B9%E6%B3%95%E8%AE%BA/"/>
-    <id>https://ziyuliu258.cn/blog/posts/68e9ee50/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/68e9ee50/"/>
-    <published>2026-10-21T05:45:40.000Z</published>
-    <summary>
-      <![CDATA[<p>本来前段时间说好了要一直更新阅读笔记，用这个方法来鞭策自己读论文；但是我仍然是只有三分钟热度，热情持续没几天，就变成了“既不想读论文，又不想写博客”的状态。</p>
-<p>这个情况，当然有一部分原因是开始在新的课题组做事之后，工作量和工作压力比以前要大得多，老板对进度的要求]]>
-    </summary>
-    <title>一个有关论文阅读和记录的工作方法设想</title>
-    <updated>2026-10-21T07:13:14.757Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="3D Generation" scheme="https://ziyuliu258.cn/blog/tags/3D-Generation/"/>
-    <id>https://ziyuliu258.cn/blog/posts/50ab24e6/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/50ab24e6/"/>
-    <published>2026-09-12T04:16:28.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>引：本文作者大多为VAST的科研人员，最大的亮点是提出了一种新的拓扑表示方式，从而避免了此前的方式——将Mesh表示为一串离散Token，并使用Transformer自回归生成——引入的<strong>自回归过程累计误差</strong>以及<st]]>
-    </summary>
-    <title>论文阅读：Nexus</title>
-    <updated>2026-10-29T15:15:33.462Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="闲谈" scheme="https://ziyuliu258.cn/blog/tags/%E9%97%B2%E8%B0%88/"/>
-    <id>https://ziyuliu258.cn/blog/posts/e3d0e307/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/e3d0e307/"/>
-    <published>2026-09-05T18:21:16.000Z</published>
-    <summary>
-      <![CDATA[<h2]]>
-    </summary>
-    <title>转几个弯，重新再来——记我在西湖大学访问的一个月</title>
-    <updated>2026-09-06T10:37:30.137Z</updated>
+    <updated>2026-11-20T10:38:45.986Z</updated>
   </entry>
 </feed>
