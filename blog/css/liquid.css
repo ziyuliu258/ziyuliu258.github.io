@@ -1491,15 +1491,14 @@ html[data-theme='dark'] .layout #pagination .pagination > .page-number.current {
   flex: 1;
   overflow: hidden;
   font-weight: 650;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .music-dock-playlist button small {
+  min-width: 0;
   max-width: 42%;
   overflow: hidden;
   opacity: 0.65;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -1628,22 +1627,22 @@ html[data-theme='dark'] .layout #pagination .pagination > .page-number.current {
 }
 
 .music-tracks li {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 0.8rem 0.6rem;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+  padding: 0.7rem 0.6rem;
+  border-radius: 8px;
+  transition: background-color 0.18s ease;
+}
+
+.music-tracks li:hover,
+.music-tracks li:focus-within {
+  background: rgba(128, 128, 128, 0.12);
 }
 
 .music-tracks li.is-current {
-  border-radius: 8px;
   background: rgba(128, 128, 128, 0.16);
-}
-
-.music-track-number {
-  color: inherit;
-  opacity: 0.6;
-  font-variant-numeric: tabular-nums;
 }
 
 .music-track-info {
@@ -1656,11 +1655,79 @@ html[data-theme='dark'] .layout #pagination .pagination > .page-number.current {
 .music-track-info span,
 .music-track-info small {
   display: block;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  white-space: nowrap;
+  overflow-wrap: normal;
 }
 
 .music-track-info small {
   opacity: 0.75;
+}
+
+/* 一行显示，只有真正溢出时才缓慢横向滚动。 */
+.music-track-text {
+  display: inline-block;
+  width: max-content;
+  max-width: none;
+  will-change: transform;
+}
+
+.is-scrolling > .music-track-text {
+  animation: music-track-marquee var(--music-marquee-duration, 8s) linear infinite alternate;
+}
+
+.music-tracks li:hover .is-scrolling > .music-track-text,
+.music-tracks li:focus-within .is-scrolling > .music-track-text,
+.music-dock-playlist button:hover .is-scrolling > .music-track-text {
+  animation-play-state: paused;
+}
+
+@keyframes music-track-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--music-marquee-shift, 0));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-scrolling > .music-track-text {
+    animation: none;
+  }
+}
+
+/* 悬停时浮出的完整曲目信息，固定定位避免被容器裁掉。 */
+.music-track-tip {
+  position: fixed;
+  z-index: 60;
+  max-width: min(22rem, 80vw);
+  padding: 0.45rem 0.62rem;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 10px;
+  background: rgba(128, 128, 128, 0.2);
+  color: var(--font-color);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  box-shadow: 0 10px 26px rgba(64, 64, 64, 0.16);
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.music-track-tip.is-open {
+  opacity: 1;
+}
+
+.music-track-tip strong {
+  display: block;
+  font-weight: 650;
+}
+
+.music-track-tip small {
+  display: block;
+  opacity: 0.72;
 }
 
 @media (max-width: 600px) {

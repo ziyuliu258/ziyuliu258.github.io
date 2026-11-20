@@ -260,6 +260,54 @@
     });
     view.style.scrollBehavior = 'smooth';
   }
+  let trackTip = null;
+  function ensureTip() {
+    if (trackTip && trackTip.isConnected) return trackTip;
+    trackTip = document.createElement('div');
+    trackTip.className = 'music-track-tip';
+    trackTip.setAttribute('role', 'tooltip');
+    document.body.appendChild(trackTip);
+    return trackTip;
+  }
+  function showTip(row) {
+    if (!row.querySelector('.is-scrolling')) return;
+    const tipRoot = ensureTip();
+    tipRoot.replaceChildren();
+    const name = document.createElement('strong');
+    name.textContent = row.dataset.fullName || '';
+    tipRoot.append(name);
+    if (row.dataset.fullArtist) {
+      const artist = document.createElement('small');
+      artist.textContent = row.dataset.fullArtist;
+      tipRoot.append(artist);
+    }
+    tipRoot.classList.add('is-open');
+    const rowBox = row.getBoundingClientRect();
+    const tipBox = tipRoot.getBoundingClientRect();
+    let top = rowBox.top - tipBox.height - 8;
+    if (top < 8) top = Math.min(window.innerHeight - tipBox.height - 8, rowBox.bottom + 8);
+    const left = Math.min(Math.max(8, rowBox.left), window.innerWidth - tipBox.width - 8);
+    tipRoot.style.top = `${Math.round(top)}px`;
+    tipRoot.style.left = `${Math.round(left)}px`;
+  }
+  function hideTip() {
+    if (trackTip) trackTip.classList.remove('is-open');
+  }
+  function bindTips(list) {
+    if (!list || list.dataset.tipsBound) return;
+    list.dataset.tipsBound = 'true';
+    list.addEventListener('pointerenter', (event) => {
+      const row = event.target.closest('li[data-full-name]');
+      if (row && list.contains(row)) showTip(row);
+    }, true);
+    list.addEventListener('pointerleave', (event) => {
+      const row = event.target.closest('li[data-full-name]');
+      if (row && list.contains(row) && !row.contains(event.relatedTarget)) hideTip();
+    }, true);
+  }
+  window.addEventListener('scroll', hideTip, { passive: true, capture: true });
+  window.addEventListener('resize', hideTip);
+
   function renderDockList() {
     const list = dock.querySelector('[data-dock-list]');
     list.replaceChildren();
@@ -270,16 +318,22 @@
       button.dataset.trackId = String(track.id);
       button.disabled = !track.available;
       if (current && current.id === track.id) button.classList.add('is-current');
-      const number = document.createElement('span');
-      number.textContent = String(index + 1).padStart(2, '0');
       const name = document.createElement('strong');
-      name.textContent = track.name;
+      const nameText = document.createElement('span');
+      nameText.className = 'music-track-text';
+      nameText.textContent = track.name;
+      name.append(nameText);
       const artist = document.createElement('small');
-      artist.textContent = track.artist;
-      button.append(number, name, artist);
+      const artistText = document.createElement('span');
+      artistText.className = 'music-track-text';
+      artistText.textContent = track.artist;
+      artist.append(artistText);
+      button.append(name, artist);
+      button.title = track.artist ? `${track.name} — ${track.artist}` : track.name;
       item.append(button);
       list.append(item);
     });
+    watchOverflow(list);
     const currentButton = list.querySelector('.is-current');
     if (currentButton) dock.querySelector('[data-dock-playlist]').scrollTop = Math.max(0, currentButton.offsetTop - 24);
   }
@@ -437,12 +491,9 @@
     findPage('playlist-link').href = data.url;
     const list = findPage('tracks');
     list.replaceChildren();
-    data.tracks.forEach((track, index) => {
+    data.tracks.forEach((track) => {
       const li = document.createElement('li');
       li.dataset.id = track.id;
-      const number = document.createElement('span');
-      number.className = 'music-track-number';
-      number.textContent = String(index + 1).padStart(2, '0');
       const info = document.createElement(track.available ? 'button' : 'div');
       info.className = 'music-track-info';
       if (track.available) {
@@ -451,14 +502,49 @@
       }
       const name = document.createElement('span');
       name.className = 'music-track-name';
-      name.textContent = track.name;
+      const nameText = document.createElement('span');
+      nameText.className = 'music-track-text';
+      nameText.textContent = track.name;
+      name.append(nameText);
       const artist = document.createElement('small');
-      artist.textContent = track.artist;
+      const artistText = document.createElement('span');
+      artistText.className = 'music-track-text';
+      artistText.textContent = track.artist;
+      artist.append(artistText);
       info.append(name, artist);
-      li.append(number, info);
+      li.dataset.fullName = track.name;
+      li.dataset.fullArtist = track.artist || '';
+      li.append(info);
       list.append(li);
     });
+    watchOverflow(list);
+    bindTips(list);
     update();
+  }
+  // Give a one-line label a slow horizontal scroll only while it actually overflows.
+  function measureMarquee(scope) {
+    scope.querySelectorAll('.music-track-text').forEach((text) => {
+      const box = text.parentElement;
+      if (!box) return;
+      const overflow = text.scrollWidth - box.clientWidth;
+      box.classList.remove('is-scrolling');
+      box.style.removeProperty('--music-marquee-shift');
+      box.style.removeProperty('--music-marquee-duration');
+      if (overflow > 2) {
+        box.style.setProperty('--music-marquee-shift', `${-overflow}px`);
+        box.style.setProperty('--music-marquee-duration', `${Math.min(18, Math.max(5, overflow / 22))}s`);
+        box.classList.add('is-scrolling');
+      }
+    });
+  }
+  function watchOverflow(scope) {
+    if (!scope) return;
+    measureMarquee(scope);
+    if (typeof ResizeObserver === 'function' && !scope.dataset.marqueeWatched) {
+      scope.dataset.marqueeWatched = 'true';
+      const observer = new ResizeObserver(() => measureMarquee(scope));
+      observer.observe(scope);
+    }
   }
   let playlist = null;
   document.addEventListener('pjax:complete', initPage);
