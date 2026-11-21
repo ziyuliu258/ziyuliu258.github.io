@@ -3507,22 +3507,6 @@ figure.highlight pre .javascript .function {
     font-size: 1.72em;
   }
 }
-#page-header #site_social_icons {
-  display: none;
-  margin: 0 auto;
-  text-align: center;
-}
-@media screen and (max-width: 768px) {
-  #page-header #site_social_icons {
-    display: block;
-  }
-}
-#page-header #site_social_icons .social-icon {
-  margin: 0 10px;
-  color: var(--light-grey);
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.15);
-  font-size: 1.43em;
-}
 #page-header #scroll-down {
   position: absolute;
   bottom: 10px;
