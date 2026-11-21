@@ -1,0 +1,963 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>论文阅读：Spatial Harness | Derrick Liu的个人博客</title><meta name="author" content="Derrick Liu,1209830516abc@gmail.com"><meta name="copyright" content="Derrick Liu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="引：Spatial Harness 由香港浸会大学 TMLR Group 与 ByteDance Seed 合作完成（Chentao Cao、Zhanke Zhou 等，通讯作者 Bo Han），发表于 NeurIPS 2026。它把空间推理拆成两件事：先让感知模型把问题涉及的对象和相机写成一份显式世界状态，再把这份状态放进 MuJoCo，让模型通过调用工具去转视角、量距离、渲染画面。引擎从当前">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文阅读：Spatial Harness">
+<meta property="og:url" content="https://ziyuliu258.cn/blog/posts/7e2bbf7c/index.html">
+<meta property="og:site_name" content="Derrick Liu的个人博客">
+<meta property="og:description" content="引：Spatial Harness 由香港浸会大学 TMLR Group 与 ByteDance Seed 合作完成（Chentao Cao、Zhanke Zhou 等，通讯作者 Bo Han），发表于 NeurIPS 2026。它把空间推理拆成两件事：先让感知模型把问题涉及的对象和相机写成一份显式世界状态，再把这份状态放进 MuJoCo，让模型通过调用工具去转视角、量距离、渲染画面。引擎从当前">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg">
+<meta property="article:published_time" content="2026-11-21T11:24:39.000Z">
+<meta property="article:modified_time" content="2026-11-21T17:56:01.136Z">
+<meta property="article:author" content="Derrick Liu">
+<meta property="article:tag" content="论文阅读笔记">
+<meta property="article:tag" content="Spatial Reasoning">
+<meta property="article:tag" content="Vision-Language Models">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "论文阅读：Spatial Harness",
+  "url": "https://ziyuliu258.cn/blog/posts/7e2bbf7c/",
+  "image": "https://ziyuliu258.cn/blog/images/avatar.jpg",
+  "datePublished": "2026-11-21T11:24:39.000Z",
+  "dateModified": "2026-11-21T17:56:01.136Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Derrick Liu",
+      "url": "https://ziyuliu258.cn/blog/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/blog/images/avatar.jpg"><link rel="canonical" href="https://ziyuliu258.cn/blog/posts/7e2bbf7c/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="https://bsz.iirose.cn" crossorigin=""/><link rel="preconnect" href="https://giscus.app" crossorigin=""/><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="/blog/css/image-viewer.css?v=2059977d432b"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":1,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    enable: true,
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'viewer',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: false,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '论文阅读：Spatial Harness',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post',
+  liquid: {"glass":{"enable":true,"refraction":true},"background":{"toggle":true,"image":"/blog/images/bg2.jpg","avif":"/blog/images/bg2.avif","light":"#f6f6f6","dark":"#1e1e1e"},"stats":{"enable":true,"api":"https://bsz.iirose.cn/api","siteUv":true,"sitePv":true,"pagePv":true,"note":"新统计服务从启用时开始计数","local":"本地预览不计入访问统计","loading":"正在获取统计数据","error":"统计暂时不可用，刷新页面后重试"},"music":{"enable":true,"pageUrl":"/blog/music/","playlistUrl":"/blog/music/playlist.json","i18n":{"dockLabel":"全局音乐播放器","expand":"展开音乐播放器","collapse":"收起音乐播放器","collapseShort":"收起","previous":"上一首","next":"下一首","play":"播放","pause":"暂停","volume":"音量","seek":"播放进度","playlist":"歌单","title":"音乐","loading":"正在加载歌单…","selectTrack":"请选择歌曲","playFailed":"暂时无法播放，请在网易云收听。","preview":"此曲仅提供试听。","trackFailed":"这首歌暂时无法播放，请在网易云收听。","emptyPlaylist":"当前歌单暂无可直接播放的歌曲，请在网易云收听。","loadFailed":"歌单加载失败，请稍后刷新页面重试。"}},"comments":{"giscus":{"loading":"评论区加载中…","error":"评论区暂时无法加载。","retry":"重试"}}}
+}
+</script><script>(function () {
+  try {
+    var saved = window.btf && btf.saveToLocal ? btf.saveToLocal.get('blog-bg-mode') : undefined
+    if (saved === 'image') return
+    var bg = (window.GLOBAL_CONFIG_SITE.liquid || {}).background || {}
+    var night = document.documentElement.getAttribute('data-theme') === 'dark'
+    document.documentElement.style.setProperty('--solid-bg', night ? bg.dark : bg.light)
+    document.documentElement.style.setProperty('--solid-fg', night ? 'rgba(255, 255, 255, 0.82)' : '#2c3138')
+    document.documentElement.classList.add('solid-bg')
+  } catch (error) {}
+})()</script><link rel="stylesheet" href="/blog/css/liquid.css?v=419f8f55079e"><link rel="preload" as="image" href="/blog/images/bg2.avif" type="image/avif"><style>#web_bg[style*="/blog/images/bg2.jpg"], #page-header[style*="/blog/images/bg2.jpg"], #footer[style*="/blog/images/bg2.jpg"] {
+  background-image: image-set(url("/blog/images/bg2.avif") type("image/avif"), url("/blog/images/bg2.jpg") type("image/jpeg")) !important;
+}</style><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/blog/atom.xml" title="Derrick Liu的个人博客" type="application/atom+xml">
+</head><body><div id="web_bg" style="background-image: url(/blog/images/bg2.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">40</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> More</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/blog/images/bg2.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/blog/"></a><button class="nav-back" id="nav-back" type="button" title="返回上一页" aria-label="返回上一页"><i class="fas fa-chevron-left"></i></button><a class="nav-page-title" href="#"><span class="site-name">论文阅读：Spatial Harness</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> More</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">论文阅读：Spatial Harness</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-21T11:24:39.000Z" title="发表于 2026-11-21 19:24:39">2026-11-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-21T17:56:01.136Z" title="更新于 2026-11-22 01:56:01">2026-11-22</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">10.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>38分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv" title="新统计服务从启用时开始计数" aria-live="polite">—</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>引：Spatial Harness 由香港浸会大学 TMLR Group 与 ByteDance Seed 合作完成（Chentao Cao、Zhanke Zhou 等，通讯作者 Bo Han），发表于 NeurIPS 2026。它把空间推理拆成两件事：先让感知模型把问题涉及的对象和相机写成一份显式世界状态，再把这份状态放进 MuJoCo，让模型通过调用工具去转视角、量距离、渲染画面。引擎从当前状态计算测量值和渲染图，供模型作答。最值得看的是这套接口的边界：状态里有什么、引擎能算什么、模型的判断和引擎的反馈冲突时听谁的。</p>
+</blockquote>
+<p><img src="/blog/posts/7e2bbf7c/spatial-harness-teaser.jpg" alt="从模型内部推理转向可执行的世界状态"></p>
+<h2 id="背景">背景</h2>
+<p>先看一个具体问题：给你三张从同一间屋子不同视角拍的照片，然后问“从 View 1 出发向左转 180°，你身后是什么”。要回答它，模型得先恢复这间屋子怎么摆的，再在转过之后的新朝向里算出谁在身后。</p>
+<p>这两件事可以分开叫：前者是 <em><strong>感知</strong></em> ，从有限的图像里确定场景事实，比如物体在哪、每张图是从哪拍的；后者是 <em><strong>推理</strong></em> ，从这些事实推出答案，比如换一个视角之后会看到什么。</p>
+<p>MindCube (Wang, Q. et al., 2026) 就是围绕这类问题构建的 benchmark，包含 1,050 道选择题，按相机运动分成 Rotation、Among、Around 三组。GPT-5 在它上面的准确率是 47.59%，而随机猜测是 32.35%。这个数字说明题目难，也说明“猜对”和“看懂”之间还隔着相当一段距离。</p>
+<p>VLM 直接作答时，这两步都发生在一次生成里（图 1 上半部分）：模型从图像形成一个隐式的场景理解，然后在脑子里想象变换之后的样子，最后读出答案。这样会带来两种不同的失败：</p>
+<ul>
+<li>场景读错了，但后续推理在错误的场景里依然自洽，答案顺着错误一路走下去；</li>
+<li>场景读对了，但把要求的变换用错了，比如该转 180° 却按 90° 去推。</li>
+</ul>
+<p>麻烦在于，只看最终答案区分不出这两种情况，一段流畅的解释也不构成对任何一步的独立检查。补充视图是一条直觉上的出路，比如 MindJourney (Yang, Y. et al., 2025) 用视频世界模型沿着 VLM 提出的相机轨迹生成新视角。但生成的视图本身没有被某个显式的场景约束，它提供了更多视觉证据，却不保证场景估计和后续变换之间的一致。</p>
+<p>作者的中心论点是： <strong>一个好的场景表示应当能自己决定空间操作的后果</strong> 。把估计出的物体、位姿和关系写成文本，它们确实变得可检查了，但“转身之后看见什么”仍要模型自己推；让这份状态变成可执行的，引擎就能从指定的几何里算出测量值和渲染图（图 1 下半部分）。执行把 <em><strong>状态</strong></em> 和 <em><strong>后果</strong></em> 分开摆出来，各自接受检查。</p>
+<p>这样同时解决了两件事：后续操作都在同一个场景上进行，模型每一步的判断都可以拿引擎的结果去核对。论文的贡献据此列出：</p>
+<ul>
+<li><strong>可执行的世界状态</strong>：把可检查的场景估计和算出来的空间后果用一个显式接口连起来；</li>
+<li><strong>Spatial Harness</strong>：把语言约束和视觉估计整合进一份共享世界状态，并支持用测量和渲染做交互式推理；</li>
+<li><strong>可控评测</strong>：在四个 benchmark 上评测，用“同一份状态、不同使用方式”的对照把感知误差和推理误差拆开。</li>
+</ul>
+<h3 id="相关工作">相关工作</h3>
+<p>工具型多模态推理 (ReAct, ViperGPT; Yao et al., 2023; Surís et al., 2023) 主要关心工具怎样选择、调用和协调。Spatial Harness 不改动这套编排方式，它补的是 <strong>空间工具之间共享的那份几何状态</strong> ，让连续几次调用都返回同一个显式场景的测量和视图。</p>
+<p>在 VLM 空间推理这条线上，一类工作靠训练增强空间理解，比如 SpatialVLM (Chen et al., 2024)、Visual Spatial Tuning (Yang, R. et al., 2025) 和 SpatialRGPT (Cheng et al., 2024)；另一类靠视觉专家构造空间先验或场景抽象。工具派里，pySpatial (Luo et al., 2026) 在重建出来的三维几何上执行程序，GCA (Chen et al., 2025) 用几何约束求解。差别在于信息来源：这两者约束的是“查询用的参考系”或“从像素重建的场景”，而 Spatial Harness 用题面陈述的对象关系和相机运动去约束 <em><strong>状态本身</strong></em> 。</p>
+<p>在模拟器这条线上，Mind’s Eye (Liu et al., 2022) 从文字描述模拟物理结果，LLMPhy (Cherian et al., 2026) 通过模拟反馈估计物理参数和布局。Spatial Harness 用物理引擎做的是另一件事：只做空间测量和视角渲染。它不需要估计物理参数，也不需要预测物体动力学，因为世界状态里已经写明了物体和相机的几何。</p>
+<h2 id="可执行世界状态">可执行世界状态</h2>
+<h3 id="问题定义">问题定义</h3>
+<p>任务是空间问答。每个实例包含一组图像 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mo stretchy="false">{</mo><msub><mi>I</mi><mi>i</mi></msub><msubsup><mo stretchy="false">}</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></msubsup></mrow><annotation encoding="application/x-tex">x=\{I_i\}_{i=1}^{m}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0087em;vertical-align:-0.2587em;"></span><span class="mopen">{</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0785em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0785em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">}</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-2.4413em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">m</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2587em;"><span></span></span></span></span></span></span></span></span></span>（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>≥</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">m\ge 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mord mathnormal">m</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>）、一个文字问题 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span></span></span></span>、一个标准答案 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>∈</mo><mi mathvariant="script">Y</mi></mrow><annotation encoding="application/x-tex">y\in\mathcal{Y}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7335em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7805em;vertical-align:-0.0972em;"></span><span class="mord mathcal" style="margin-right:0.0822em;">Y</span></span></span></span>，模型要从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>q</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(x,q)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="mclose">)</span></span></span></span> 预测 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>∈</mo><mi mathvariant="script">Y</mi></mrow><annotation encoding="application/x-tex">\hat{y}\in\mathcal{Y}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7805em;vertical-align:-0.0972em;"></span><span class="mord mathcal" style="margin-right:0.0822em;">Y</span></span></span></span>。</p>
+<p>VLM 直接从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>q</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(x,q)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="mclose">)</span></span></span></span> 作答时，感知和推理被压在同一次生成里，感知出来的事实没有独立表示。于是感知错和推理错无法区分，两步也没法单独检查或改进。Spatial Harness 的做法是把感知的结果显式写成世界状态，再把推理交给“在状态上执行计算”。引擎从状态计算几何量和渲染结果，为模型的空间判断提供依据。</p>
+<p>形式化地，系统由两部分组成：一个 Perceiver <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">P</mi></mrow><annotation encoding="application/x-tex">\mathcal{P}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal" style="margin-right:0.0822em;">P</span></span></span></span> 从图像和问题估计状态，一个 Reasoner <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">R</mi></mrow><annotation encoding="application/x-tex">\mathcal{R}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal">R</span></span></span></span> 在状态的引擎实例 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">E</mi><mo stretchy="false">[</mo><mover accent="true"><mi>s</mi><mo>^</mo></mover><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">\mathcal{E}[\hat{s}]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathcal" style="margin-right:0.0894em;">E</span><span class="mopen">[</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">s</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mclose">]</span></span></span></span> 上作答：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mover accent="true"><mi>s</mi><mo>^</mo></mover><mo>=</mo><mi mathvariant="script">P</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>q</mi><mo stretchy="false">)</mo><mo separator="true">,</mo><mspace width="2em"><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><mi mathvariant="script">R</mi><mtext> ⁣</mtext><mrow><mo fence="true">(</mo><mi>x</mi><mo separator="true">,</mo><mi>q</mi><mo separator="true">,</mo><mover accent="true"><mi>s</mi><mo>^</mo></mover><mo separator="true">;</mo><mtext> </mtext><mi mathvariant="script">E</mi><mo stretchy="false">[</mo><mover accent="true"><mi>s</mi><mo>^</mo></mover><mo stretchy="false">]</mo><mo fence="true">)</mo></mrow><mi mathvariant="normal">.</mi></mspace></mrow><annotation encoding="application/x-tex">\hat{s}=\mathcal{P}(x,q),\qquad \hat{y}=\mathcal{R}\!\left(x,q,\hat{s};\,\mathcal{E}[\hat{s}]\right).
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">s</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathcal" style="margin-right:0.0822em;">P</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathcal">R</span><span class="mspace" style="margin-right:-0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">s</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mpunct">;</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathcal" style="margin-right:0.0894em;">E</span><span class="mopen">[</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">s</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mclose">]</span><span class="mclose delimcenter" style="top:0em;">)</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">.</span></span></span></span></span></p>
+<p>也就是说，<strong>感知变成一个可以单独检查的对象 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>s</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{s}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">s</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span>，推理变成在这个对象上执行的操作</strong> ，两者共用一个 VLM 作为骨干，但分别被配上感知模型和引擎。</p>
+<h3 id="世界状态的两层">世界状态的两层</h3>
+<p>一个世界状态是场景事实的显式表示，但它只覆盖问题涉及的部分。设问题涉及的对象集合为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo>=</mo><mo stretchy="false">{</mo><msub><mi>o</mi><mi>j</mi></msub><msubsup><mo stretchy="false">}</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup></mrow><annotation encoding="application/x-tex">O=\{o_j\}_{j=1}^{n}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1448em;vertical-align:-0.3948em;"></span><span class="mopen">{</span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">}</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-2.4413em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3948em;"><span></span></span></span></span></span></span></span></span></span>，状态记录这些对象及其空间配置，以及相机的空间配置。所谓“可执行”，指的是这份表示具体到足够算出几何量：两个对象之间的距离、某个对象从指定视角看过去的方向、或者站在场景中任意位置的相机看到的画面。</p>
+<p>状态分两层，如图 5 所示：</p>
+<ul>
+<li>
+<p><strong>观察层 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Ω</mi><mo>=</mo><mo stretchy="false">{</mo><msub><mi mathvariant="normal">Ω</mi><mi>i</mi></msub><msubsup><mo stretchy="false">}</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></msubsup></mrow><annotation encoding="application/x-tex">\Omega=\{\Omega_i\}_{i=1}^{m}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Ω</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0087em;vertical-align:-0.2587em;"></span><span class="mopen">{</span><span class="mord"><span class="mord">Ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">}</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-2.4413em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">m</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2587em;"><span></span></span></span></span></span></span></span></span></span></strong> ：每张图显示了什么。<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Ω</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\Omega_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord">Ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 列出 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">I_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0785em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0785em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 中可见的实体，以及它们相对相机 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 的方向、距离和朝向，可以是度量值，也可以是“在左边”“在更远处”这样的定性描述。</p>
+</li>
+<li>
+<p><strong>布局层 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">L</mi></mrow><annotation encoding="application/x-tex">\mathcal{L}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal">L</span></span></span></span></strong> ：所有实体和相机在同一个坐标系里的位置。<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">L</mi></mrow><annotation encoding="application/x-tex">\mathcal{L}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal">L</span></span></span></span> 给出每个实体的位置与朝向 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>p</mi><mi>j</mi></msub><mo separator="true">,</mo><msub><mi>θ</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(p_j,\theta_j)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>、每个相机的位姿 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mi>i</mi></msub><mo separator="true">,</mo><msub><mi>ϕ</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(c_i,\phi_i)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">ϕ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>。这一层是把观察层通过相机位姿对齐之后得到的，也是被实例化去计算的那一层。</p>
+</li>
+<li>
+<p><strong>约束 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">C</mi></mrow><annotation encoding="application/x-tex">\mathcal{C}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal" style="margin-right:0.0583em;">C</span></span></span></span></strong> ：问题里明确陈述的场景事实，比如两个实体之间的关系、两个视角之间的关系。它们被当作精确成立，同时作用于上面两层。</p>
+</li>
+</ul>
+<p>完整的状态写作 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>=</mo><mo stretchy="false">(</mo><mi mathvariant="script">L</mi><mo separator="true">,</mo><mi mathvariant="normal">Ω</mi><mo separator="true">,</mo><mi mathvariant="script">C</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">s=(\mathcal{L},\Omega,\mathcal{C})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathcal">L</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">Ω</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathcal" style="margin-right:0.0583em;">C</span><span class="mclose">)</span></span></span></span> 。</p>
+<p>为什么对齐之后还要保留观察层？因为对齐会丢失或扭曲单张图里的信息：只在一张图里可见的实体，被投影到共享坐标系之后可能和别的实体挤在一起；一张图的左右顺序也可能因为投影误差被破坏。保留 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Ω</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\Omega_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord">Ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> ，Reasoner 就能直接查阅“这张图里 A 在 B 的左边”这样的原始证据，而不必只依赖合成后的布局。</p>
+<p><img src="/blog/posts/7e2bbf7c/spatial-harness-world-state.jpg" alt="世界状态与它在引擎中的实例化"></p>
+<p>图 5 的例子值得跟着走一遍。View 1 里看到 A 在左边、B 在右边，相机朝向 up；View 2 里看到 B 在左、A 在右，相机朝向 down。两张图的观测都只在自己的相机坐标系里有意义。题目又陈述了一句“View 2 在 View 1 前方 4 个单位、朝向相反”。把 View 1 放在网格的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo separator="true">,</mo><mn>6</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4,6)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">6</span><span class="mclose">)</span></span></span></span> 朝上，View 2 就在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4,2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mclose">)</span></span></span></span> 朝下；再把两个相机各自的局部偏移换算到网格坐标，两个视角给出的 A 都落到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo separator="true">,</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3,4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">4</span><span class="mclose">)</span></span></span></span>。<strong>同一个实体在两个视角下的推断对上了，这才是“共享坐标系”真正做的事</strong> ，也是后面所有测量有意义的前提。</p>
+<h2 id="Perceiver">Perceiver</h2>
+<p>Perceiver 从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>q</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(x,q)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="mclose">)</span></span></span></span> 估计 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>s</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{s}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">s</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span> 。问题决定了状态里必须包含哪些实体和属性，同时它本身可能陈述了一部分事实；图像则提供观测和相机位姿。系统用一条文本通道和一条视觉通道分别处理这两类输入，再把结果编译成布局。</p>
+<p><img src="/blog/posts/7e2bbf7c/spatial-harness-overview.jpg" alt="Spatial Harness 总览"></p>
+<h3 id="文本通道">文本通道</h3>
+<p>一个 VLM 把 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span></span></span></span> 解析成四类信息：</p>
+<ul>
+<li><strong>实体</strong> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi></mrow><annotation encoding="application/x-tex">O</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span></span></span></span> ：问题涉及的对象和观察者；</li>
+<li><strong>关系</strong>：问题陈述的两个实体之间的事实，比如 A 在 B 左边；</li>
+<li><strong>视角</strong>：问题陈述的相机事实，比如两张图之间相机向左转了；</li>
+<li><strong>查询</strong>：要回答的空间问题本身，以及它需要哪几类信息——方向、距离、朝向，还是相机运动。</li>
+</ul>
+<p>关系和视角构成 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">C</mi></mrow><annotation encoding="application/x-tex">\mathcal{C}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal" style="margin-right:0.0583em;">C</span></span></span></span> ，用来约束布局与相机位姿；查询需要的信息类型则决定了后面的路由：状态能不能支撑这个答案。</p>
+<p>举个例子，“View 2 在 View 1 前面 4 米、朝向相反”这种句子，对多视图任务来说是黄金信息：它直接给出了两个相机之间的相对位姿，而这恰恰是从像素里最难恢复、最容易出错的部分。把它写成约束，等于把一个感知难题换成了一个已知量。</p>
+<h3 id="视觉通道">视觉通道</h3>
+<p>视觉通道为每张图估计 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Ω</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\Omega_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord">Ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> ，并在多图时估计相机之间的相对位姿。它用四个专用模型，分四步：</p>
+<ul>
+<li><strong>检测</strong>(LocateAnything-3B; Wang, S. et al., 2026) 在图中定位 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi></mrow><annotation encoding="application/x-tex">O</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span></span></span></span> 里的每个实体，配合相机内参就得到方向；检测标签与实体名对不上时，用 Qwen3-Reranker-0.6B (Zhang et al., 2025) 做名称绑定；</li>
+<li><strong>深度</strong>(MoGe-2; Wang, R. et al., 2025) 给出度量深度，实体深度取检测框中央一半像素的中位深度；</li>
+<li><strong>朝向</strong>(Orient Anything V2; Wang, Z. et al., 2026) 给出实体在相机坐标系里的朝向，前向置信度至少 0.5 才保留；</li>
+<li><strong>相机位姿</strong>（多图时用 Reloc3r；Dong et al., 2025）给出第一张图与其他各图之间的相对旋转和平移方向。</li>
+</ul>
+<p>除了这些度量，VLM 还会给每张图写一份定性描述：哪些实体可见、粗略的水平位置（左、中、右）、深度次序、粗略朝向，以及实体对的左右与前后顺序。这份描述用来覆盖模型测不到的部分。如果某个关系决定答案，而所有观测都没能给出这对实体的关系，Perceiver 就直接问 VLM，保证每个关键关系至少有一个来源。</p>
+<h3 id="编译">编译</h3>
+<p>编译把观测和约束变成布局。共享坐标系由拍第一张图的相机定义：它被放在原点，视线方向作为参考朝向，所以 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>ϕ</mi><mn>1</mn></msub><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(c_1,\phi_1)=(0,0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">ϕ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span> 。其他相机的位姿最多有四个来源：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>来源与优先级</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>朝向</td>
+<td>问题陈述的视角 → 与其他图共同可见的实体 → 位姿估计器 Reloc3r → VLM 描述的相机运动</td>
+</tr>
+<tr>
+<td>位置</td>
+<td>问题陈述的视角 → 位姿估计器 Reloc3r → VLM 描述的相机运动</td>
+</tr>
+</tbody>
+</table>
+<p>两个分量分开选择，各自取最高置信度的来源；某个分量没有任何来源提供时，就留作未知。每个来源带一个固定置信度，比如文本 0.95、Reloc3r 0.5 到 0.7、VLM 描述 0.4，共同实体对应的地标匹配给 0.6。附录还处理了几种冲突：地标匹配报告“没有旋转”，但 Reloc3r 测到了至少 15° 的转向时，把地标的结果降级；经另一张图间接链式推算出来的朝向，排在直接测得的后面。</p>
+<p>接下来把每个观测投影到共享坐标系。对在图像 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">I_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0785em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0785em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 中可见的实体 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span></span></span></span>，设 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">r_{ij}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> 是它在相机坐标系里的平面位移，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>α</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\alpha_{ij}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0037em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> 是它相对相机前进方向的朝向，那么</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>c</mi><mi>i</mi></msub><mo>+</mo><mi>R</mi><mo stretchy="false">(</mo><msub><mi>ϕ</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mtext> </mtext><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo separator="true">,</mo><mspace width="2em"><msub><mi>θ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mo stretchy="false">(</mo><msub><mi>ϕ</mi><mi>i</mi></msub><mo>+</mo><msub><mi>α</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false">)</mo><mtext> </mtext><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi></mrow><mtext> </mtext><mn>2</mn><mi>π</mi><mo separator="true">,</mo></mspace></mrow><annotation encoding="application/x-tex">p_{ij}=c_i+R(\phi_i)\,r_{ij},\qquad \theta_{ij}=(\phi_i+\alpha_{ij})\ \mathrm{mod}\ 2\pi,
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">ϕ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">ϕ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0037em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace"> </span><span class="mord"><span class="mord mathrm">mod</span></span><span class="mspace"> </span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="mpunct">,</span></span></span></span></span></p>
+<p>其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mo stretchy="false">(</mo><msub><mi>ϕ</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">R(\phi_i)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">ϕ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> 是旋转 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϕ</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\phi_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">ϕ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 的旋转矩阵。附录把 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">r_{ij}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> 写得更具体：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mfrac><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mi>cos</mi><mo>⁡</mo><msub><mi>β</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow></mfrac><mtext> </mtext><mi mathvariant="bold">u</mi><mo stretchy="false">(</mo><msub><mi>β</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false">)</mo><mo separator="true">,</mo></mrow><annotation encoding="application/x-tex">r_{ij}=\frac{d_{ij}}{\cos\beta_{ij}}\,\mathbf{u}(\beta_{ij}),
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3435em;vertical-align:-0.9721em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop">cos</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0528em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9721em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathbf">u</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0528em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mpunct">,</span></span></span></span></span></p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">d_{ij}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> 是沿光轴的深度，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\beta_{ij}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0528em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> 是像素位置与相机内参算出的水平方位角，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">u</mi><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{u}(\theta)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf">u</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span><span class="mclose">)</span></span></span></span> 是距相机前进方向 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span></span></span></span> 的单位向量。<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mi>cos</mi><mo>⁡</mo><msub><mi>β</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">1/\cos\beta_{ij}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord">1/</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">cos</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0528em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> 这一项把“沿光轴的深度”换算成“沿射线的距离”：画面边缘的物体光轴深度不变，但它离相机更远，这一步不能省。Orient Anything V2 给出的方位角 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">a_{ij}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> 以“正对相机”为零，转成相对相机前进方向的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>α</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mi>π</mi><mo>−</mo><msub><mi>a</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\alpha_{ij}=\pi-a_{ij}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0037em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> 。</p>
+<p>同一个实体在多张图里出现时会有多个候选。位置取权重最高的那个观测，朝向取所有候选在四个 90° 区间上的加权投票。观测的权重是几项的乘积：观测自身的置信度（不低于 0.05）、来源先验（度量估计 1.0、VLM 描述 0.6）、相机位姿因子 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.35</mn><mo>+</mo><mn>0.65</mn><mi>c</mi></mrow><annotation encoding="application/x-tex">0.35+0.65c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">0.35</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.65</span><span class="mord mathnormal">c</span></span></span></span>（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span> 取该相机朝向和位置置信度的较小值）、定性观测再乘 0.45。度量观测优先于同一定性观测。只被“位姿未知”的相机看到的实体，直接不进布局——与其把它放到错误的位置上，不如承认看不到。</p>
+<p>编译还做了一个简化：布局固定使用 10×10 网格（MindCube 认知地图的格式），第一台相机放在网格中心朝上，其余坐标经过一个单调映射落到网格上，内部的坐标保持不变、外围的坐标被压缩。如果题面明确说明后面每张图都是“原地转、位置不变”，并且没有陈述其他关系、也没有实体被判为移动过，就直接采用这个布局，不再做优化。</p>
+<h3 id="布局优化">布局优化</h3>
+<p>候选布局满足了测量，却可能违背某个陈述的关系或某对实体的左右顺序，这是因为投影有误差。所以编译的最后一步是找一份最符合关系、又尽量贴近测量的布局：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msup><mi mathvariant="script">L</mi><mo lspace="0em" rspace="0em">∗</mo></msup><mo>=</mo><mi>arg</mi><mo>⁡</mo><munder><mrow><mi>max</mi><mo>⁡</mo></mrow><mi mathvariant="script">L</mi></munder><mtext> </mtext><munder><mo>∑</mo><mi>k</mi></munder><msub><mi>w</mi><mi>k</mi></msub><mtext> </mtext><mn mathvariant="bold">1</mn><mtext> ⁣</mtext><mrow><mo fence="true">[</mo><mi mathvariant="script">L</mi><mo>⊨</mo><msub><mi>r</mi><mi>k</mi></msub><mo fence="true">]</mo></mrow><mo>−</mo><mi>λ</mi><munder><mo>∑</mo><mi>j</mi></munder><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">∥</mo><msub><mi mathvariant="bold">p</mi><mi>j</mi></msub><mo>−</mo><msub><mover accent="true"><mi mathvariant="bold">p</mi><mo>^</mo></mover><mi>j</mi></msub><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">∥</mo><mo separator="true">,</mo></mrow><annotation encoding="application/x-tex">\mathcal{L}^{*}=\arg\max_{\mathcal{L}}\ \sum_{k}w_{k}\,\mathbf{1}\!\left[\mathcal{L}\models r_{k}\right]-\lambda\sum_{j}\big\|\mathbf{p}_{j}-\hat{\mathbf{p}}_{j}\big\|,
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7387em;"></span><span class="mord"><span class="mord mathcal">L</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7387em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">∗</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3521em;vertical-align:-1.3021em;"></span><span class="mop">ar<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.4306em;"><span style="top:-2.3557em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathcal mtight">L</span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">max</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7443em;"><span></span></span></span></span></span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.8479em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.3021em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0269em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathbf">1</span><span class="mspace" style="margin-right:-0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">[</span><span class="mord mathcal">L</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⊨</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;">]</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.4638em;vertical-align:-1.4138em;"></span><span class="mord mathnormal">λ</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.4138em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.85em;"><span style="top:-2.85em;"><span class="pstrut" style="height:3.2em;"></span><span style="width:0.556em;height:1.2em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.556em" height="1.2em" viewbox="0 0 556 1200"><path d="M145 15 v585 v0 v585 c2.667,10,9.667,15,21,15
+c10,0,16.667,-5,20,-15 v-585 v0 v-585 c-2.667,-10,-9.667,-15,-21,-15
+c-10,0,-16.667,5,-20,15z M188 15 H145 v585 v0 v585 h43z
+M367 15 v585 v0 v585 c2.667,10,9.667,15,21,15
+c10,0,16.667,-5,20,-15 v-585 v0 v-585 c-2.667,-10,-9.667,-15,-21,-15
+c-10,0,-16.667,5,-20,15z M410 15 H367 v585 v0 v585 h43z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.35em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7079em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathbf">p</span></span><span style="top:-3.0134em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.85em;"><span style="top:-2.85em;"><span class="pstrut" style="height:3.2em;"></span><span style="width:0.556em;height:1.2em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.556em" height="1.2em" viewbox="0 0 556 1200"><path d="M145 15 v585 v0 v585 c2.667,10,9.667,15,21,15
+c10,0,16.667,-5,20,-15 v-585 v0 v-585 c-2.667,-10,-9.667,-15,-21,-15
+c-10,0,-16.667,5,-20,15z M188 15 H145 v585 v0 v585 h43z
+M367 15 v585 v0 v585 c2.667,10,9.667,15,21,15
+c10,0,16.667,-5,20,-15 v-585 v0 v-585 c-2.667,-10,-9.667,-15,-21,-15
+c-10,0,-16.667,5,-20,15z M410 15 H367 v585 v0 v585 h43z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.35em;"><span></span></span></span></span></span></span><span class="mpunct">,</span></span></span></span></span></p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">r_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 遍历 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">C</mi></mrow><annotation encoding="application/x-tex">\mathcal{C}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal" style="margin-right:0.0583em;">C</span></span></span></span> 和观测里的所有成对关系，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">L</mi><mo>⊨</mo><msub><mi>r</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\mathcal{L}\models r_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.999em;vertical-align:-0.249em;"></span><span class="mord mathcal">L</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⊨</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 表示布局满足 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">r_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">w_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0269em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 反映这条关系来源的可靠性。<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">C</mi></mrow><annotation encoding="application/x-tex">\mathcal{C}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal" style="margin-right:0.0583em;">C</span></span></span></span> 里的关系是硬约束，第二项把布局拉回测量值，最大化由一个确定性的局部搜索完成：一次移动一个实体，在网格上逐格尝试。</p>
+<p>权重取值的意图比较清楚：陈述关系 20，图像描述给出的前后顺序 3.2，检测方位角相差超过 15° 得到的左右顺序 2.5，图像描述给出的左右顺序 1.6；另有一项 0.5 专门让被问及的实体彼此分开，以及每格 0.1 的位移成本，使初始放置在同分时胜出。排序本身就是一种信任排序：题面说的最可信，VLM 描述的相对位置最不可信。</p>
+<h2 id="Reasoner">Reasoner</h2>
+<p>Reasoner 把 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>s</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{s}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">s</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span> 实例化进物理引擎 (MuJoCo; Todorov et al., 2012)，然后通过查询它来回答 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span></span></span></span> 。</p>
+<h3 id="把引擎当作工具">把引擎当作工具</h3>
+<p>从图像为每个实体生成忠实的网格，目前做不到可靠，所以每个实体用代理表示：固定尺寸的圆柱放在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>p</mi><mi>j</mi></msub><mo separator="true">,</mo><msub><mi>θ</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(p_j,\theta_j)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> ，带一个朝向标记，用实体名作标签。每张输入图对应位于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mi>i</mi></msub><mo separator="true">,</mo><msub><mi>ϕ</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(c_i,\phi_i)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">ϕ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> 的一台相机。代理承载的恰好是布局里的信息，而空间问题依赖的也正是这些信息。这样得到的场景记作 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">E</mi><mo stretchy="false">[</mo><mover accent="true"><mi>s</mi><mo>^</mo></mover><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">\mathcal{E}[\hat{s}]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathcal" style="margin-right:0.0894em;">E</span><span class="mopen">[</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">s</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mclose">]</span></span></span></span> 。</p>
+<p>之所以能接受这种“不像”的表示，是因为这套系统只回答几何问题：谁在谁的哪一侧、距离多远、转过去能看到谁。这些量由位置和朝向决定，与物体长什么样无关。代价是外观和遮挡类问题超出了状态的描述能力，后面会看到系统用一条路由规则把它们排除在外。</p>
+<p>Reasoner 通过写代码来操作场景（图 6），引擎返回打印结果和渲染图。操作分三组：</p>
+<p><img src="/blog/posts/7e2bbf7c/spatial-harness-engine-api.jpg" alt="暴露给 Reasoner 的引擎接口"></p>
+<ul>
+<li><strong>视角控制</strong>：把相机放到指定位姿，或按给定距离和角度移动、旋转。相机在调用之间保持位姿，所以“前进 3 再左转 90”被拆成两次调用逐步执行。</li>
+<li><strong>测量</strong>：返回当前相机位姿、相机到每个实体的距离、两台相机之间的运动（平移与旋转）。</li>
+<li><strong>渲染</strong>：返回当前视图，代理上标着名字和距离。</li>
+</ul>
+<p>渲染用 800×600 的 RGB 图、90° 水平视场，圆柱代理半径 0.3 米、高 1.5 米。这些尺寸只是为了看得清，不是对真实物体的测量。</p>
+<h3 id="交互推理">交互推理</h3>
+<p>场景就位之后，Reasoner 在循环里回答 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span></span></span></span> 。初始上下文 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">h_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 包含图像、问题、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>s</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{s}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">s</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span> 以及接口里每个操作的说明（用途、参数、返回值）。第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span> 步，Reasoner 读上下文，发出一个操作 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">a_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，收到反馈 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">f_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>——打印的结果，以及按需渲染的视图——它和操作一起被追加进上下文：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>a</mi><mi>t</mi></msub><mo>=</mo><mi mathvariant="script">R</mi><mo stretchy="false">(</mo><msub><mi>h</mi><mi>t</mi></msub><mo stretchy="false">)</mo><mo separator="true">,</mo><mspace width="2em"><msub><mi>f</mi><mi>t</mi></msub><mo>=</mo><mi mathvariant="script">E</mi><mo stretchy="false">[</mo><mover accent="true"><mi>s</mi><mo>^</mo></mover><mo stretchy="false">]</mo><mo stretchy="false">(</mo><msub><mi>a</mi><mi>t</mi></msub><mo stretchy="false">)</mo><mo separator="true">,</mo><mspace width="2em"><msub><mi>h</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><msub><mi>h</mi><mi>t</mi></msub><mo>⊕</mo><mo stretchy="false">(</mo><msub><mi>a</mi><mi>t</mi></msub><mo separator="true">,</mo><msub><mi>f</mi><mi>t</mi></msub><mo stretchy="false">)</mo><mi mathvariant="normal">.</mi></mspace></mspace></mrow><annotation encoding="application/x-tex">a_{t}=\mathcal{R}(h_{t}),\qquad f_{t}=\mathcal{E}[\hat{s}](a_{t}),\qquad h_{t+1}=h_{t}\oplus(a_{t},f_{t}).
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathcal">R</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathcal" style="margin-right:0.0894em;">E</span><span class="mopen">[</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">s</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mclose">]</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⊕</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mord">.</span></span></span></span></span></p>
+<p>在这个循环里，Reasoner 挑操作的标准是“它的结果能回答问题”。比如要判断往前走会不会更接近某实体，就在移动前后各量一次距离；要知道左转之后左边有什么，就执行转弯、再朝左渲染一张。每一步的结果证实或修正它此刻的判断，并决定下一步做什么。循环在它给出答案或者用完 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>max</mi><mo>⁡</mo></msub></mrow><annotation encoding="application/x-tex">T_{\max}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mop mtight"><span class="mtight">m</span><span class="mtight">a</span><span class="mtight">x</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 步（实验中为 5 步）时结束。</p>
+<p><img src="/blog/posts/7e2bbf7c/spatial-harness-trajectory.jpg" alt="一次完整的执行轨迹"></p>
+<p>图 2 是这个循环的一个完整例子。三张图由 90° 的相机旋转串起来，题目问“从 View 1 出发转 180°，你身后是什么”。Perceiver 先建状态并实例化（步骤 1 到 3），Reasoner 执行 180° 转身并渲染（步骤 4 到 6），画面里出现的是窗户——窗在前方，可题目问的是身后。它于是又转一次去看相反方向，引擎返回灰绿色的装饰墙，对应选项 C（步骤 7 到 10）。<strong>循环的意义不在“多看几眼”，而在每一步都有自己的场景轨迹</strong> ：转身之后场景没有变，变的只是相机；所以第二次转身仍然落回同一个场景，看到的东西可以直接比较。</p>
+<p>作者加了几条约束，让这个循环不至于退化成“不查就答”：<strong>答案只有在至少调用过一次引擎之后才会被接受</strong>；在拿到工具反馈之前，模型发出的“答案”会被退回，要求先查一次；最后一轮仍然允许不带工具作答，以便收尾。</p>
+<p>工具使用指南也写得很具体：先执行题目要求的移动或转向，再把相机朝向被问及的一侧截图；如果截图返回的可见物体列表为空、或没有任何选项里的物体，就换到相邻朝向再截一次；回答之前必须在思考里说出最新一次工具响应显示了什么，并据此作答——“距离相等本身不告诉你方向”。</p>
+<h3 id="路由">路由</h3>
+<p>并非所有问题都该走引擎。世界状态描述的是位置、朝向、相机位姿以及由它们导出的距离和方向；一个关于外观或遮挡的问题不在这个描述里，从状态里答不出来。所以在感知和推理之间有一个确定性的路由步骤，检查四件事：</p>
+<ol>
+<li>问题需要的信息类型（由文本通道识别）是否都在状态所描述的范围内；</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>s</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{s}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">s</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span> 能否在引擎里加载；</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi></mrow><annotation encoding="application/x-tex">O</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span></span></span></span> 中每个实体是否都在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>s</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{s}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">s</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span> 里；</li>
+<li>所需信息类型依赖的相机位姿分量是否已经测出。</li>
+</ol>
+<p>任何一项不通过，就不使用引擎，由 VLM 直接从图像和问题作答。反过来，如果文本通道没有识别出任何信息需求，问题仍走引擎路径——提取漏掉不应该让引擎失效。这条路由让系统<strong>在状态能表达的问题上使用模拟器</strong>。</p>
+<h2 id="实验">实验</h2>
+<h3 id="设置">设置</h3>
+<p>评测使用四个 benchmark：MindCube（1,050 道题，按相机运动分 Rotation、Among、Around 三组）、SAT（Ray et al., 2025；从合成划分里每个类别抽 100 题，共 500 题）、MMSI-Bench（Yang, S. et al., 2026；1,000 道多视图选择题）、SpatialRGPT-Bench (Cheng et al., 2024) 的定量划分（749 道需要数值估计的题）。前三个报准确率，最后一个报告落在容差内的比例：距离和尺寸在参考值的 0.75 到 1.25 倍之间算对，方向在十二小时制的时钟上差不超过一小时算对。</p>
+<p>对比的对象有三个：Base（同一个 VLM 不借助任何外部工具直接作答）、MindJourney（用视频世界模型沿 VLM 提出的轨迹生成视图）、pySpatial（让 VLM 写程序调用三维重建、相机位姿和新视角工具）。附录还加了 GCA。所有方法在同一次比较里用同一个 VLM；GT-map 设定下评了七个模型，端到端设定在 MindCube 上用四个，其余三个 benchmark 因为成本只用了两个 Qwen。</p>
+<p>评测分两种设定，这是全文最关键的设计：</p>
+<ul>
+<li><strong>GT-map 设定</strong>：给每个问题一份标注好的认知地图（物体和相机在 10×10 俯视网格上的位置与朝向）。Base 把地图当文本放进 prompt，Spatial Harness 把地图实例化进引擎。两者拿到的是同一份场景信息，这个设定比较的是 <em><strong>怎么用</strong></em> 这份信息，与场景估计好不好无关。</li>
+<li><strong>端到端设定</strong>：只给图像和问题。Spatial Harness 用 Perceiver 自己建状态。</li>
+</ul>
+<h3 id="在同一份地图上推理">在同一份地图上推理</h3>
+<p><img src="/blog/posts/7e2bbf7c/spatial-harness-gt-map.jpg" alt="去掉场景估计误差之后的比较"></p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>Base（无地图）</th>
+<th>Base（有地图）</th>
+<th>Spatial Harness（有地图）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qwen2.5-VL-7B</td>
+<td>35.59</td>
+<td>30.35</td>
+<td>56.51（+26.16）</td>
+</tr>
+<tr>
+<td>Qwen2.5-VL-32B</td>
+<td>40.16</td>
+<td>46.35</td>
+<td>83.78（+37.43）</td>
+</tr>
+<tr>
+<td>Qwen2.5-VL-72B</td>
+<td>41.46</td>
+<td>41.46</td>
+<td>84.22（+42.76）</td>
+</tr>
+<tr>
+<td>Qwen3.5-27B</td>
+<td>52.70</td>
+<td>71.81</td>
+<td><strong>98.25</strong>（+26.44）</td>
+</tr>
+<tr>
+<td>Kimi K2.5</td>
+<td>50.67</td>
+<td>81.27</td>
+<td>94.10（+12.83）</td>
+</tr>
+<tr>
+<td>GPT-5.4-mini</td>
+<td>44.25</td>
+<td>44.79</td>
+<td>82.86（+38.07）</td>
+</tr>
+<tr>
+<td>GLM-5V-Turbo</td>
+<td>64.06</td>
+<td>67.46</td>
+<td>89.68（+22.22）</td>
+</tr>
+</tbody>
+</table>
+<p>括号里是相对“有地图的 Base”的增益。这张表最值得注意的是 Base 那一列： <strong>把地图交给模型，并不总是帮忙</strong> 。Qwen2.5-VL-7B 从 35.59 掉到 30.35，Qwen2.5-VL-72B 则完全没变。地图是一份“10×10 网格、y 向下、每个对象带 facing”的结构化描述，模型要自己在这份描述上做几何推演：判断转身之后的方向、比较距离、把一个实体从一台相机的视野推算到另一台。这些事恰恰是语言模型不擅长的。</p>
+<p>一旦把同一份地图实例化进引擎，动作就换成了“把相机放到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>4</mn><mo separator="true">,</mo><mn>5</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[4,5]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">4</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">5</span><span class="mclose">]</span></span></span></span> 朝上、转 180°、截图”，后果由引擎算出来。Qwen3.5-27B 从 71.81 升到 98.25，Kimi 从 81.27 升到 94.10。<strong>同一份场景信息，换一种使用方式，差距可以有二十多个点</strong> ，这是全文对“表示是否可执行”最直接的一次检验。</p>
+<p>这里要说清一个边界：GT-map 条件只是 <em><strong>参考</strong></em> ，不是答案准确率的严格上界。地图本身仍可能有标注错误，引擎也只能按给定的地图算，论文自己也这么写。所以 98.25 应该读作“当场景信息已经正确给定时，这套推理接口能做到什么程度”。</p>
+<h3 id="端到端">端到端</h3>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>方法</th>
+<th>Rotation</th>
+<th>Among</th>
+<th>Around</th>
+<th>总体</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qwen2.5-VL-72B</td>
+<td>Base</td>
+<td>40.83</td>
+<td>41.06</td>
+<td>42.93</td>
+<td>41.46</td>
+</tr>
+<tr>
+<td></td>
+<td>pySpatial</td>
+<td>30.50</td>
+<td>55.50</td>
+<td>53.60</td>
+<td>50.29</td>
+</tr>
+<tr>
+<td></td>
+<td>Spatial Harness</td>
+<td>49.50</td>
+<td>58.00</td>
+<td>53.60</td>
+<td>55.33</td>
+</tr>
+<tr>
+<td>Qwen3.5-27B</td>
+<td>Base</td>
+<td>77.17</td>
+<td>41.72</td>
+<td>59.47</td>
+<td>52.70</td>
+</tr>
+<tr>
+<td></td>
+<td>pySpatial</td>
+<td>61.50</td>
+<td>59.00</td>
+<td>76.40</td>
+<td>63.62</td>
+</tr>
+<tr>
+<td></td>
+<td>Spatial Harness</td>
+<td>81.50</td>
+<td>68.00</td>
+<td>70.40</td>
+<td><strong>71.14</strong></td>
+</tr>
+<tr>
+<td>Kimi K2.5</td>
+<td>Base</td>
+<td>69.67</td>
+<td>42.78</td>
+<td>54.40</td>
+<td>50.67</td>
+</tr>
+<tr>
+<td></td>
+<td>pySpatial</td>
+<td>62.50</td>
+<td>65.17</td>
+<td>75.60</td>
+<td>67.14</td>
+</tr>
+<tr>
+<td></td>
+<td>Spatial Harness</td>
+<td>85.50</td>
+<td>68.17</td>
+<td>73.20</td>
+<td>72.67</td>
+</tr>
+<tr>
+<td>GPT-5.4-mini</td>
+<td>Base</td>
+<td>28.83</td>
+<td>42.72</td>
+<td>60.27</td>
+<td>44.25</td>
+</tr>
+<tr>
+<td></td>
+<td>pySpatial</td>
+<td>38.50</td>
+<td>56.33</td>
+<td>69.60</td>
+<td>56.10</td>
+</tr>
+<tr>
+<td></td>
+<td>Spatial Harness</td>
+<td>49.50</td>
+<td>59.83</td>
+<td>67.20</td>
+<td>59.62</td>
+</tr>
+</tbody>
+</table>
+<p>四个模型上 Spatial Harness 都是总体最好的，平均比最强的 baseline (pySpatial) 高 5.40 个点；Qwen3.5-27B 上比 Base 高 18.44、比 pySpatial 高 7.52。两个方法的差距在 Rotation 这一类上尤其明显：pySpatial 在 Qwen3.5-27B 上只有 61.50，低于 Base 的 77.17，而 Spatial Harness 是 81.50。</p>
+<p>原因不难猜，也是作者写明的：pySpatial 在一个 <em><strong>从像素重建出来的</strong></em> 场景上推理。Rotation 类问题里相机是原地转的，题面常常直接说明“View 2 相对 View 1 转了 90°”——这是只存在于问题文本、不存在于像素里的事实。重建派拿不到它，只能自己从两幅图去反推；Perceiver 把它当作约束写进 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">L</mi></mrow><annotation encoding="application/x-tex">\mathcal{L}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal">L</span></span></span></span> 和相机位姿里，后面的计算就都建立在正确的相对位姿上。这正好对应前面说的“把题面陈述的关系用来约束状态本身”。</p>
+<p>MindJourney 在 MindCube 上只比 Base 高 4.42 个点，在 Kimi 上甚至略低于 Base。这符合前面的分析：它生成的新视图不受显式场景约束，视图再多也不能保证一致性。</p>
+<p>另外三个 benchmark 的结果：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>方法</th>
+<th>SAT</th>
+<th>MMSI-Bench</th>
+<th>SpatialRGPT-Bench</th>
+<th>平均</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qwen2.5-VL-72B</td>
+<td>Base</td>
+<td>68.60</td>
+<td>29.60</td>
+<td>40.72</td>
+<td>46.31</td>
+</tr>
+<tr>
+<td></td>
+<td>pySpatial</td>
+<td>55.40</td>
+<td>33.20</td>
+<td>31.64</td>
+<td>40.08</td>
+</tr>
+<tr>
+<td></td>
+<td>Spatial Harness</td>
+<td>71.60</td>
+<td>29.00</td>
+<td><strong>84.11</strong></td>
+<td>61.57</td>
+</tr>
+<tr>
+<td>Qwen3.5-27B</td>
+<td>Base</td>
+<td>81.80</td>
+<td>33.40</td>
+<td>48.20</td>
+<td>54.47</td>
+</tr>
+<tr>
+<td></td>
+<td>pySpatial</td>
+<td>68.00</td>
+<td>36.70</td>
+<td>39.79</td>
+<td>48.16</td>
+</tr>
+<tr>
+<td></td>
+<td>Spatial Harness</td>
+<td><strong>83.20</strong></td>
+<td><strong>39.50</strong></td>
+<td><strong>83.31</strong></td>
+<td>68.67</td>
+</tr>
+</tbody>
+</table>
+<p>三处结果各自说明一件事。</p>
+<p><strong>SAT</strong> 大部分题目只给单张图。从一张图重建三维场景本来就难，pySpatial 因此比 Base 低了 13.20 和 13.80 个点；Spatial Harness 在两个模型上都是最好的（71.60 和 83.20）。这里的增益主要来自“给定同一份状态后算得对”，而不是重建得更准。</p>
+<p><strong>MMSI-Bench</strong> 是唯一没有全面胜出的一个。Qwen3.5-27B 从 33.40 升到 39.50，Qwen2.5-VL-72B 停在 Base 水平（29.00 对 29.60）。作者给的解释很具体：这个模型经常读错世界状态里的坐标，而且即便拿到引擎反馈，也没有真正在推理里采用它。这是一个 <strong>模型能力不足导致接口失效</strong> 的例子，值得和后面那个失败案例放在一起看。</p>
+<p><strong>SpatialRGPT-Bench</strong> 的分数从 40.72 和 48.20 直接跳到 84.11 和 83.31，是全文提升最大的一处。原因是这一支走的是另一条状态路径：不做检测，直接用题目给出的区域掩码，由 MoGe-2 把每个区域的像素反投到三维，状态里记下每个区域中心、竖直高度、水平宽度，以及区域之间的水平、竖直和表面距离，单位是米。Reasoner 拿到的是这些数值，引擎用盒子表示区域，操作从“网格步”换成“米”。定量问题本来就该由测量解决，这一支正好绕开了 VLM 对数值的弱项。</p>
+<h3 id="消融">消融</h3>
+<p><strong>状态从哪里来</strong> 。固定 Reasoner，只换地图的来源 (Qwen3.5-27B)：</p>
+<table>
+<thead>
+<tr>
+<th>地图来源</th>
+<th>Rotation</th>
+<th>Among</th>
+<th>Around</th>
+<th>总体</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VLM 直接生成</td>
+<td>54.00</td>
+<td>28.83</td>
+<td>61.20</td>
+<td>41.33</td>
+</tr>
+<tr>
+<td>Perceiver，去掉文本通道</td>
+<td>71.00</td>
+<td>63.00</td>
+<td>79.20</td>
+<td>68.38</td>
+</tr>
+<tr>
+<td>Perceiver，去掉视觉通道</td>
+<td>72.50</td>
+<td>49.67</td>
+<td>45.20</td>
+<td>52.95</td>
+</tr>
+<tr>
+<td>完整 Perceiver</td>
+<td>81.50</td>
+<td>68.00</td>
+<td>70.40</td>
+<td>71.14</td>
+</tr>
+<tr>
+<td>GT 地图（参考）</td>
+<td>96.83</td>
+<td>98.06</td>
+<td>99.87</td>
+<td>98.25</td>
+</tr>
+</tbody>
+</table>
+<p>最刺眼的一行是第一行：让 VLM 直接从图像和问题生成一张同格式的认知地图，只有 41.33%，比完整 Perceiver 低近 30 个点。这说明 <strong>结构化状态的好处不来自“写成 JSON”这件事本身，而来自估计方式</strong> ：把检测、深度、朝向、相对位姿分别交给专用模型，再由同一条编译流程拼起来，比让语言模型一次性“看着图写地图”可靠得多。这一批生成的地图里还有 237/1050 没通过格式检查，直接被退回给 VLM 直接作答。</p>
+<p>两条通道都必要，视觉通道更重要：去掉视觉通道（由 VLM 自己估几何字段）掉到 52.95，去掉文本通道（让 VLM 从图像里挑相关实体、丢掉陈述关系和相机位姿）掉到 68.38。文本通道的损失小一些，但它保住了 Rotation 这一类——那正是题面陈述相机运动的地方。</p>
+<p><img src="/blog/posts/7e2bbf7c/spatial-harness-channel-ablation.jpg" alt="两条通道内部的替换实验"></p>
+<p>再往里拆一层。在文本通道里去掉“相机与视角约束”，总体掉到 62.29，而 Rotation 从 81.50 掉到 48.00——掉得几乎对半，因为这一类的关键信息就是那句“转了 90°”。在视觉通道里，把相对位姿估计器换成 VLM 的损失最大（54.10），主要落在 Among 和 Around，这两类相机位置在变；换成 VLM 估朝向的损失最小（70.57），因为 1,050 题里只有 36 题依赖物体朝向。<strong>每个替换都掉点，说明各模块的分工共同贡献了性能收益</strong>。</p>
+<p><strong>反馈从哪里来</strong> 。这一组固定 GT 地图，只换 Reasoner 能拿到的反馈：</p>
+<table>
+<thead>
+<tr>
+<th>反馈条件</th>
+<th>Rotation</th>
+<th>Among</th>
+<th>Around</th>
+<th>总体</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base（直接读地图）</td>
+<td>83.83</td>
+<td>60.94</td>
+<td>88.27</td>
+<td>71.81</td>
+</tr>
+<tr>
+<td>多轮自我复查</td>
+<td>96.00</td>
+<td>66.67</td>
+<td>90.00</td>
+<td>77.81</td>
+</tr>
+<tr>
+<td>只有数值反馈</td>
+<td>93.00</td>
+<td>95.00</td>
+<td>99.20</td>
+<td>95.62</td>
+</tr>
+<tr>
+<td>只有渲染反馈</td>
+<td>95.00</td>
+<td>92.33</td>
+<td>96.00</td>
+<td>93.71</td>
+</tr>
+<tr>
+<td>Spatial Harness</td>
+<td>96.83</td>
+<td>98.06</td>
+<td>99.87</td>
+<td><strong>98.25</strong></td>
+</tr>
+</tbody>
+</table>
+<p>多轮自我复查只把 71.81 抬到 77.81，这一行是用来排除“多几轮就想明白了”的：增益不是来自轮数。而任何一类引擎反馈单独使用都能过 90%，两类合起来到 98.25。数值和渲染是互补的：数值给出精确的距离和方位，渲染给出“现在画面里有什么”，后者恰恰是“转身之后看见谁”这类问题的直接答案。</p>
+<h3 id="状态质量与敏感性">状态质量与敏感性</h3>
+<p>Perceiver 估计出来的地图，和 1,050 道题的标注地图比：99.52% 通过格式检查，名称对齐后能找回 72.37% 的标注实体，成对方向关系的一致率 73.10%，有标注朝向的实体朝向准确率 89.80%。</p>
+<p>这组数字说明瓶颈在哪： <strong>状态是“能用但不完整”</strong> 。端到端已经拿到最好的成绩，而 GT-map 条件下的 98.25 又说明，如果状态再准一些还有空间。缺掉的近三成实体，主要是被检测器漏掉、或只被位姿未知的相机看到的那些。</p>
+<p>论文还做了一次受控破坏：在 GT 地图上每次只改一个字段，看准确率怎么降。</p>
+<table>
+<thead>
+<tr>
+<th>破坏方式</th>
+<th>轻</th>
+<th>中</th>
+<th>重</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一个对象位置错</td>
+<td>1 格：92.13</td>
+<td>2 格：89.40</td>
+<td>3 格：87.78</td>
+</tr>
+<tr>
+<td>一台相机 yaw 错</td>
+<td>≤30°：98.10</td>
+<td>30°–90°：84.89</td>
+<td>90°–180°：76.67</td>
+</tr>
+<tr>
+<td>对象朝向错 90°</td>
+<td>1 个：96.06</td>
+<td>2 个：94.32</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>位置误差的影响相对温和（错三格还有 87.78），而 <strong>相机朝向错得越多掉得越狠</strong> 。这和前面的设计是一致的：所有观测都要靠相机位姿投影到共享坐标系，朝向一旦错，整张图的观测都会被转到错误的方向上。这也解释了为什么文本陈述的视角约束给了 0.95 的最高置信度——它是这条链上最便宜也最可靠的一环。</p>
+<p>附录还报告了三次重复的标准差，多数条件下很小，比如 Qwen3.5-27B 的 98.25 ± 0.15；Qwen2.5-VL-7B 的 Rotation 一类波动偏大（±4.31）。</p>
+<h2 id="价值与不足">价值与不足</h2>
+<p>这篇工作的核心是一个接口的分工： <strong>感知交给专用模型，推理交给引擎，语言模型只负责解析问题、决定下一步查什么、以及读回结果</strong> 。它和 VULCAN 那类“让 MLLM 调工具改场景”的工作放在一起看很有意思：VULCAN 里工具是用来 <em><strong>改</strong></em> 场景的，MLLM 的判断由评估 agent 和规则检测兜底；Spatial Harness 里工具是用来 <em><strong>读</strong></em> 一个已经声明的场景的，兜底换成了“后果必须由引擎算出来”。两者都把模型的输出空间从“直接给答案”收缩成“选择操作”。</p>
+<p>但它的保证有明确的范围，值得逐条说清。</p>
+<ul>
+<li><strong>引擎保证一致，不保证正确</strong> 。附录的失败案例很典型：Kimi K2.5 在第三轮里已经调用了转向左的截图，引擎返回了窗户（距离 3.2），而这正是正确答案所在的物体；但模型在最后一轮改口说“题目问的是火车自己的左边，不是相机的左边”，坚持选了 D（墙）。引擎的每一次调用都执行正确，答案仍然错。<u>可执行反馈只有被模型采纳，才真正进入答案</u>——这也是 MMSI-Bench 上 Qwen2.5-VL-72B 没有提升的同一条原因。</li>
+<li><strong>状态质量是上限</strong> 。72% 的实体找回率意味着近三成的题目从一开始就缺少对象；朝向相似度 89.80%、方向相似度 73.10% 也说明关系层面并不完美。作者把“用引擎渲染结果反过来检查状态”写成了下一步，目前还没有实现。</li>
+<li><strong>适用面由路由界定</strong> 。外观、遮挡、材质这类问题不在状态描述里，会被直接退回 VLM。SpatialRGPT 这类定量问题则使用米制状态和区域输入。</li>
+<li><strong>静态、单时刻</strong> 。世界状态只表示某一瞬间的几何，不能表达随时间变化的东西，比如视频里物体在动。作者把时间维写成了下一步：记录每一帧的实体和相机位姿，就能实例化任意时刻并测量两帧之间的变化。</li>
+<li><strong>表示是粗粒度的</strong> 。MindCube 这一支把一切压到 10×10 的网格上，距离以“格”计；代理几何是统一尺寸的圆柱。网格化让布局搜索变成一个可穷举的局部搜索，也让它与基准的认知地图格式对齐，代价是分辨率。细粒度的连续几何只在 SpatialRGPT 那一支出现。</li>
+<li><strong>成本没有报告</strong> 。每题最多 5 轮，每轮一次 VLM 调用，加上四个感知模型（其中一个要 A100）和每步一次引擎操作；论文没有给耗时或调用量。SAT 只取 500 题、其余 benchmark 只用两个模型，也说明评测成本不低。</li>
+</ul>
+<p>还有一点值得记下：这种“同一份状态、两种用法”的对照（表 1 与表 5）是整篇最有说服力的实验设计。它把“模型更会推理了”和“场景估得更准了”两个可能的解释分离开，让增益落在一个可以指认的机制上：由引擎计算状态变化后的结果。</p>
+<h2 id="总结">总结</h2>
+<p>Spatial Harness 的流程可以压成三步：</p>
+<ol>
+<li>Perceiver 把问题解析成实体、关系、视角和所需信息，把每张图的检测、深度、朝向和相机位姿合成为观察层，再按优先来源的相机位姿把观测投影到共享坐标系，得到布局 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">L</mi></mrow><annotation encoding="application/x-tex">\mathcal{L}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal">L</span></span></span></span> ；</li>
+<li>布局与陈述约束一起做一次局部搜索，让关系尽量满足、位置尽量贴近测量；</li>
+<li>Reasoner 把布局实例化进 MuJoCo，通过视角控制、测量和渲染把答案从几何里读出来，最多 5 轮。</li>
+</ol>
+<p>它在前几篇笔记的主线里占一个特别的位置：Nexus 关心“怎么把一个对象表示成能生成的东西”，Lucida 关心“让 VLM 通过可执行接口和视觉反馈去对齐”，VULCAN 关心“让 MLLM 调工具去改场景”，Spatial Harness 则把问题翻到另一面—— <em><strong>如果要回答的问题本身是关于几何的，那就不要把几何交给语言模型去想象</strong></em> 。状态是可检查的，后果是可计算的，剩下的难点回到了感知：状态建得准不准，以及模型愿不愿意听引擎的话。</p>
+<h2 id="参考">参考</h2>
+<ul>
+<li>Cao, C., Zhou, Z., Duan, S., Han, B., &amp; Li, H. (2026). Spatial Harness: Grounding spatial reasoning in executable world states with physics engines (arXiv:2611.11344v1). arXiv. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2611.11344">https://doi.org/10.48550/arXiv.2611.11344</a></li>
+<li>Wang, Q., Yin, B., Zhang, P., Zhang, J., Wang, K., Wang, Z., Zhang, J., Chandrasegaran, K., Liu, H., Krishna, R., Xie, S., Wu, J., Fei-Fei, L., &amp; Li, M. (2026). MindCube: Spatial mental modeling from limited views. In International Conference on Learning Representations (ICLR).</li>
+<li>Yang, Y., Liu, J., Zhang, Z., Zhou, S., Tan, R., Yang, J., Du, Y., &amp; Gan, C. (2025). MindJourney: Test-time scaling with world models for spatial reasoning. arXiv:2507.12508. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2507.12508">https://doi.org/10.48550/arXiv.2507.12508</a></li>
+<li>Liu, R., Wei, J., Gu, S. S., Wu, T.-Y., Vosoughi, S., Cui, C., Zhou, D., &amp; Dai, A. M. (2022). Mind’s Eye: Grounded language model reasoning through simulation. arXiv:2210.05359. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2210.05359">https://doi.org/10.48550/arXiv.2210.05359</a></li>
+<li>Luo, Z., Zhang, C., Yong, S., Dai, C., Wang, Q., Ran, H., Shi, G., Sycara, K., &amp; Xie, Y. (2026). pySpatial: Generating 3D visual programs for zero-shot spatial reasoning. arXiv:2603.00905. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2603.00905">https://doi.org/10.48550/arXiv.2603.00905</a></li>
+<li>Chen, B., Xu, Z., Kirmani, S., Ichter, B., Sadigh, D., Guibas, L., &amp; Xia, F. (2024). SpatialVLM: Endowing vision-language models with spatial reasoning capabilities. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR).</li>
+<li>Chen, Z., Lu, X., Zheng, Z., Li, P., He, L., Zhou, Y., Shao, J., Zhuang, B., &amp; Sheng, L. (2025). Geometrically-constrained agent for spatial reasoning. arXiv:2511.22659. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2511.22659">https://doi.org/10.48550/arXiv.2511.22659</a></li>
+<li>Ray, A., Duan, J., Brown, E. L., II, Tan, R., Bashkirova, D., Hendrix, R., Ehsani, K., Kembhavi, A., Plummer, B. A., Krishna, R., Zeng, K.-H., &amp; Saenko, K. (2025). SAT: Dynamic spatial aptitude training for multimodal language models. In Conference on Language Modeling (COLM).</li>
+<li>Yang, R., Zhu, Z., Li, Y., Huang, J., Yan, S., Zhou, S., Liu, Z., Li, X., Li, S., Wang, W., et al. (2025). Visual spatial tuning. arXiv:2511.05491. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2511.05491">https://doi.org/10.48550/arXiv.2511.05491</a></li>
+<li>Yang, S., Xu, R., Xie, Y., Yang, S., Li, M., Lin, J., Zhu, C., Chen, X., Duan, H., Yue, X., Lin, D., Wang, T., &amp; Pang, J. (2026). MMSI-Bench: A benchmark for multi-image spatial intelligence. In International Conference on Learning Representations (ICLR). arXiv:2505.23764</li>
+<li>Cherian, A., Corcodel, R., Jain, S., &amp; Romeres, D. (2026). LLMPhy: Parameter-identifiable physical reasoning combining large language models and physics engines. In International Conference on Artificial Intelligence and Statistics (AISTATS).</li>
+<li>Cheng, A.-C., Yin, H., Fu, Y., Guo, Q., Yang, R., Kautz, J., Wang, X., &amp; Liu, S. (2024). SpatialRGPT: Grounded spatial reasoning in vision-language models. In Advances in Neural Information Processing Systems (NeurIPS). arXiv:2406.01584</li>
+<li>Todorov, E., Erez, T., &amp; Tassa, Y. (2012). MuJoCo: A physics engine for model-based control. In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 5026–5033.</li>
+<li>Wang, R., Xu, S., Dong, Y., Deng, Y., Xiang, J., Lv, Z., Sun, G., Tong, X., &amp; Yang, J. (2025). MoGe-2: Accurate monocular geometry with metric scale and sharp details. arXiv:2507.02546. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2507.02546">https://doi.org/10.48550/arXiv.2507.02546</a></li>
+<li>Wang, S., Liu, S., Kuang, Y., Wei, X., Liu, Y., Li, Z., Man, Y., Chen, G., Tao, A., Liu, G., Kautz, J., Zhang, L., &amp; Yu, Z. (2026). LocateAnything: Fast and high-quality vision-language grounding with parallel box decoding. arXiv:2605.27365. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2605.27365">https://doi.org/10.48550/arXiv.2605.27365</a></li>
+<li>Wang, Z., Zhang, Z., Xu, J., Wang, J., Pang, T., Du, C., Zhao, H., &amp; Zhao, Z. (2026). Orient Anything V2: Unifying orientation and rotation understanding. arXiv:2601.05573. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2601.05573">https://doi.org/10.48550/arXiv.2601.05573</a></li>
+<li>Dong, S., Wang, S., Liu, S., Cai, L., Fan, Q., Kannala, J., &amp; Yang, Y. (2025). Reloc3r: Large-scale training of relative camera pose regression for generalizable, fast, and accurate visual localization. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 16739–16752.</li>
+<li>Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., &amp; Cao, Y. (2023). ReAct: Synergizing reasoning and acting in language models. In International Conference on Learning Representations (ICLR).</li>
+<li>Surís, D., Menon, S., &amp; Vondrick, C. (2023). ViperGPT: Visual inference via python execution for reasoning. In Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV).</li>
+<li>Zhang, Y., Li, M., Long, D., Zhang, X., Lin, H., Yang, B., Xie, P., Yang, A., Liu, D., Lin, J., Huang, F., &amp; Zhou, J. (2025). Qwen3 embedding: Advancing text embedding and reranking through foundation models. arXiv:2506.05176. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2506.05176">https://doi.org/10.48550/arXiv.2506.05176</a></li>
+</ul>
+<p>BibTeX 条目：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@misc&#123;cao2026spatialharness,</span><br><span class="line">  title         = &#123;Spatial Harness: Grounding Spatial Reasoning in Executable World States with Physics Engines&#125;,</span><br><span class="line">  author        = &#123;Cao, Chentao and Zhou, Zhanke and Duan, Sangni and Han, Bo and Li, Hang&#125;,</span><br><span class="line">  year          = &#123;2026&#125;,</span><br><span class="line">  eprint        = &#123;2611.11344&#125;,</span><br><span class="line">  archivePrefix = &#123;arXiv&#125;,</span><br><span class="line">  primaryClass  = &#123;cs.LG&#125;,</span><br><span class="line">  doi           = &#123;10.48550/arXiv.2611.11344&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>文中配图取自原论文 Fig. 1、Fig. 2、Fig. 3、Fig. 4、Fig. 5、Fig. 6 与 Fig. 7，版权归原作者。本文由 AI 协助生成初稿，尚待个人阅读修改。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://ziyuliu258.cn/blog">Derrick Liu</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://ziyuliu258.cn/blog/posts/7e2bbf7c/">https://ziyuliu258.cn/blog/posts/7e2bbf7c/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://ziyuliu258.cn/blog" target="_blank">Derrick Liu的个人博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">论文阅读笔记</a><a class="post-meta__tags" href="/blog/tags/Spatial-Reasoning/">Spatial Reasoning</a><a class="post-meta__tags" href="/blog/tags/Vision-Language-Models/">Vision-Language Models</a></div><div class="post-share"><div class="social-share" data-image="/blog/images/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/blog/vendor/extsrc/share.min.css" media="print" onload="this.media='all'"><script src="/blog/vendor/extsrc/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/blog/posts/db8dcf90/" title="论文阅读：LeRF"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;db8dcf90&#x2F;lerf-teaser.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-21</div><div class="info-item-2">论文阅读：LeRF</div></div><div class="info-2"><div class="info-item-1"> 引：本文由 UIUC、上海交大、UC Merced 与 Amazon AGI 的研究者完成。它要解决的是 VLM 的视角采择 (perspective taking)：问题是“从那个人的角度看，谁在他左边”，模型却总按相机视角回答。LeRF 让模型自己预测一个贴在被指对象身上的参考坐标系，再把它画回原图，把“心里转视角”变成“看图上的箭头”。   图来自原论文 Figure 1：左侧区分自我中心、他人中心与假想视角；右侧显示显式参考系能把“工人左边有几个人”答对。 背景 视角采择要求模型从相机之外的某个视点解释空间关系。论文区分三种情形：以相机为基准的 egocentric、以场景中某个实体为基准的 allocentric，以及以“想象自己坐在沙发上”这类虚拟观察者为基准的 hypothetical。三者共用同一个场景，只是参考系不同。 VLM 在这里有一种稳定的失败模式：它会把问题悄悄替换成相机视角下的问题。问“戴橙色手套的工人左边还有几个人”，Qwen3.5-9B 数的是画面左侧的两个人，答 2；正确答案是...</div></div></div></a><a class="pagination-related" href="/blog/posts/2e949ae7/" title="论文阅读：UI-TARS"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;2e949ae7&#x2F;ui-tars-overview.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-05</div><div class="info-item-2">论文阅读：UI-TARS</div></div><div class="info-2"><div class="info-item-1"> 引：UI-TARS 将 GUI agent 中的感知、动作选择和部分工作流程，放进一个接收截图、生成操作的 VLM。本文最值得关注的是它怎样构造训练数据：从界面元素理解到多步轨迹，再到模型亲自执行后产生的错误与纠正。尤其是 在失败之后的状态上训练恢复动作，直接关系到为什么离线 SFT 表现良好，仍可能无法完成真实交互任务。  背景 让模型操作电脑，至少要把三个问题接起来：看懂当前页面，确定下一步做什么，再把这个意图落到具体控件的坐标和动作上。例如“将文件另存为 PDF”，既涉及菜单与对话框的操作顺序，也涉及找到“文件”“导出”等按钮。 早期系统可以用规则描述每一步；后来常见的 agent framework 则用通用大模型，加上提示词、解析器、记忆和规划等模块来组织过程。UI-TARS 希望把更多任务经验通过训练写入模型参数，使同一个模型直接根据截图和历史产生动作。 作者用 native agent model...</div></div></div></a><a class="pagination-related" href="/blog/posts/76521c01/" title="论文阅读：VULCAN"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;76521c01&#x2F;vulcan-teaser.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-19</div><div class="info-item-2">论文阅读：VULCAN</div></div><div class="info-2"><div class="info-item-1"> 引：VULCAN 由 Stanford、Google 与 NYU 合作完成，第一作者 Zhengfei Kuang 在 Google 实习期间完成这项工作，谢赛宁 (Saining Xie) 是作者之一。论文要解决的是让多模态大模型在三维场景里 一步一步地 搬动物体。最值得看的是它的分工方式：MLLM 只负责理解指令、规划下一步和判断结果；“物体落到哪个三维坐标、会不会穿模、会不会悬空”交给视觉工具、约束优化器和规则检测；多步任务中前面走错导致后面无路可走的问题，则交给多个 agent 的协作和一个自适应回溯搜索来处理。   背景 人在整理房间时很自然地会拆步骤。比如要把餐桌挪到房间中央，我们会先把桌上的东西拿下来，再把挡路的椅子移开，最后才搬桌子。这里需要两种能力：一是对物理世界的常识，知道桌子一动上面的花瓶就会掉；二是多步规划，知道先做什么、后做什么，每一步之后的场景都还要是合理的。 近来的 MLLM 已经被用于 3D object arrangement，也就是在场景中移动、旋转或插入物体，得到一个合理的布局。但已有工作大多把它当成...</div></div></div></a><a class="pagination-related" href="/blog/posts/beaebfcb/" title="论文阅读：What matters when building vision-language models?（Idefics2）"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;beaebfcb&#x2F;idefics2-architecture.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-05</div><div class="info-item-2">论文阅读：What matters when building vision-language models?（Idefics2）</div></div><div class="info-2"><div class="info-item-1"> 引：Idefics2 最值得读的地方，是作者把构建 VLM 时经常一起变化的选择拆开比较：预训练主干怎样选，图像怎样进入语言模型，哪些参数需要适配，以及视觉 token 应该保留多少。最后得到的 8B 模型固然重要，但对自己训练模型更有帮助的是这些选择之间的联系，尤其是 架构、可训练参数和训练稳定性需要一起考虑。  背景 我们可以先把 VLM 想成三个部分：视觉编码器从图像提取特征，语言模型处理文本并生成回答，中间再放一组连接两个模态的参数。看起来只要选一个 ViT、一个 LLM，再接上 projector 就能开始训练，但每一步其实都有不同做法。 例如，图像特征可以作为独立信息源，让文本在若干层中通过 cross-attention 读取；也可以直接变成一串视觉 token，与文本拼在一起交给语言模型。两种方案新增的参数、占用的序列长度，以及对预训练主干的适配需求都不同。如果只比较最终模型，很难知道性能究竟来自架构还是训练配方。 作者因此先研究设计空间，再用实验中得到的选择训练...</div></div></div></a><a class="pagination-related" href="/blog/posts/fab21ae1/" title="论文阅读：PatchTST"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;fab21ae1&#x2F;Pasted%20image%2020260123175115.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-03</div><div class="info-item-2">论文阅读：PatchTST</div></div><div class="info-2"><div class="info-item-1">引言 时间序列预测在许多实际应用中具有重要意义，如能源预测、交通流量预测、气象预测等。随着深度学习技术的进步，基于Transformer的模型在时间序列预测中表现出了强大的能力。然而，传统Transformer模型存在计算复杂度高、内存消耗大等问题，尤其在长序列预测中效果不佳。PatchTST模型通过创新性的设计，解决了这些问题，提出了分块（Patching）和通道独立性（Channel-independence）的解决方案，显著提高了时间序列预测的效率和精度。 模型  Tip表示学习（Representation Learning），也常被称为特征学习（Feature Learning），是指让模型自动地从原始数据中发现和提取“特征”或“表示”的技术，而不是依靠人工手动设计规则 。 可以暂且认为，表示学习可分为以下三种：  有监督表示学习：在学习特征的同时，利用标签（如未来的真实值）来纠正模型，让特征直接服务于特定目标 。 自监督表示学习：不利用标签，通过数据自身的结构（如掩码 Patch）来学习特征 。这是本文的核心亮点。 迁移学习（Transfer...</div></div></div></a><a class="pagination-related no-cover" href="/blog/posts/df0c4c42/" title="论文阅读笔记更新计划"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-04</div><div class="info-item-2">论文阅读笔记更新计划</div></div><div class="info-2"><div class="info-item-1">由于笔者的大三生涯马上结束，也真正上手科研有了接近一年的时间，所以突发奇想，想要将自己以往和未来的论文阅读笔记在博客上同步一下。这也可以算是监督自己的一种方式，避免偷懒和懈怠。 此前我使用Obsidian管理个人笔记已有一段时间，所以我vibe coding了一个插件（工具）来实现从Obsidian到hexo博客的一键迁移，后续我也会更新这个工具的使用方法。 过去的接近一年时间里，我一直在做关于时间序列预测的工作，虽然说也是三天打鱼两天晒网，但是磨洋工一年下来，总归还是有点收获。当然我的论文阅读范围并不局限于这一方向，基本是想读什么就读什么。或许读者能从我的笔记中获得一些帮助，那就是极好的事情。 </div></div></div></a></div></div><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Derrick Liu</div><div class="author-info-description">An undergraduate majoring in CS.</div><div class="site-data"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">40</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ziyuliu258"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><button class="social-icon" type="button" data-copy="ZiyuLiu123456" title="点击复制" aria-label="ZiyuLiu123456"><i class="fab fa-weixin" style="color: #07c160;"></i></button><a class="social-icon" href="mailto:lzy1102@stu.xjtu.edu.cn" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="toc-number">1.1.</span> <span class="toc-text">相关工作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%AF%E6%89%A7%E8%A1%8C%E4%B8%96%E7%95%8C%E7%8A%B6%E6%80%81"><span class="toc-number">2.</span> <span class="toc-text">可执行世界状态</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%AE%9A%E4%B9%89"><span class="toc-number">2.1.</span> <span class="toc-text">问题定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%96%E7%95%8C%E7%8A%B6%E6%80%81%E7%9A%84%E4%B8%A4%E5%B1%82"><span class="toc-number">2.2.</span> <span class="toc-text">世界状态的两层</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Perceiver"><span class="toc-number">3.</span> <span class="toc-text">Perceiver</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E6%9C%AC%E9%80%9A%E9%81%93"><span class="toc-number">3.1.</span> <span class="toc-text">文本通道</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%86%E8%A7%89%E9%80%9A%E9%81%93"><span class="toc-number">3.2.</span> <span class="toc-text">视觉通道</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E8%AF%91"><span class="toc-number">3.3.</span> <span class="toc-text">编译</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%83%E5%B1%80%E4%BC%98%E5%8C%96"><span class="toc-number">3.4.</span> <span class="toc-text">布局优化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reasoner"><span class="toc-number">4.</span> <span class="toc-text">Reasoner</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%8A%E5%BC%95%E6%93%8E%E5%BD%93%E4%BD%9C%E5%B7%A5%E5%85%B7"><span class="toc-number">4.1.</span> <span class="toc-text">把引擎当作工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%A4%E4%BA%92%E6%8E%A8%E7%90%86"><span class="toc-number">4.2.</span> <span class="toc-text">交互推理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1"><span class="toc-number">4.3.</span> <span class="toc-text">路由</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C"><span class="toc-number">5.</span> <span class="toc-text">实验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE"><span class="toc-number">5.1.</span> <span class="toc-text">设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8%E5%90%8C%E4%B8%80%E4%BB%BD%E5%9C%B0%E5%9B%BE%E4%B8%8A%E6%8E%A8%E7%90%86"><span class="toc-number">5.2.</span> <span class="toc-text">在同一份地图上推理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AB%AF%E5%88%B0%E7%AB%AF"><span class="toc-number">5.3.</span> <span class="toc-text">端到端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E8%9E%8D"><span class="toc-number">5.4.</span> <span class="toc-text">消融</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8A%B6%E6%80%81%E8%B4%A8%E9%87%8F%E4%B8%8E%E6%95%8F%E6%84%9F%E6%80%A7"><span class="toc-number">5.5.</span> <span class="toc-text">状态质量与敏感性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%B7%E5%80%BC%E4%B8%8E%E4%B8%8D%E8%B6%B3"><span class="toc-number">6.</span> <span class="toc-text">价值与不足</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">8.</span> <span class="toc-text">参考</span></a></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url(/blog/images/bg2.jpg);"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Derrick Liu</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/ziyuliu258/hexo-theme-liquid">Liquid</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="bg-toggle" type="button" title="切换纯色或图片背景"><i class="fas fa-image"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js?v=dab4b6aa0210"></script><script defer src="/blog/js/liquid-glass.js?v=b98445d26ed4"></script><script defer src="/blog/js/aside-motion.js?v=bc00aa983ae7"></script><script defer src="/blog/js/background-toggle.js?v=635d3669f3da"></script><link rel="stylesheet" href="/blog/css/reading-mode.css?v=cd3f35d21ff8"><script defer src="/blog/js/reading-guide.js?v=6073bfd60b6b"></script><script defer src="/blog/js/reading-mode.js?v=c59ca3f32e3a"></script><script defer src="/blog/js/article-export.js?v=b45ce5886a6c"></script><script src="/blog/vendor/extsrc/turndown.js"></script><script src="/blog/vendor/extsrc/turndown-plugin-gfm.js"></script><script defer src="/blog/js/copy-markdown.js?v=7ed3c3d4196f"></script><script src="/blog/js/tw_cn.js"></script><script defer src="/blog/js/image-viewer.js?v=43011cd2eca9"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex, #card-toc .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-category":"Announcements","data-mapping":"pathname","data-strict":"1","data-lang":"zh-CN","data-input-position":"top","data-reactions-enabled":"1","data-emit-metadata":"0"}
+  const siteRoot = "/blog/"
+  const texts = {"loading":"评论区加载中…","error":"评论区暂时无法加载。","retry":"重试"}
+
+  // PJAX can execute this script before location.pathname changes. The new
+  // page's canonical link has already been swapped at that point.
+  const getPathnameTerm = () => {
+    const canonical = document.querySelector('link[rel="canonical"]')
+    const url = canonical ? new URL(canonical.href, location.href) : new URL(location.href)
+    const pathname = (url.origin === location.origin ? url.pathname : location.pathname).replace(/\/index\.html$/, '/')
+    const relative = pathname.startsWith(siteRoot) ? '/' + pathname.slice(siteRoot.length) : pathname
+    return relative.length < 2 ? 'index' : relative.slice(1).replace(/\.\w+$/, '')
+  }
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'noborder_dark' : 'noborder_light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : (!option || !option['data-mapping'] || option['data-mapping'] === 'pathname')
+        ? { 'data-mapping': 'specific', 'data-term': getPathnameTerm() }
+        : { 'data-mapping': option['data-mapping'] }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'ziyuliu258/ziyuliu258.github.io',
+      'data-repo-id': 'R_kgDONzQxiw',
+      'data-category-id': 'DIC_kwDONzQxi84DJPXY',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const wrap = el.querySelector('#giscus-wrap')
+    if (!wrap || wrap.dataset.giscusStarted === 'true') return
+    wrap.dataset.giscusStarted = 'true'
+    let attempts = 0
+    let timer
+    const message = document.createElement('div')
+    message.className = 'giscus-load-message'
+    message.setAttribute('role', 'status')
+    message.textContent = texts.loading
+    wrap.appendChild(message)
+
+    const retry = () => {
+      if (!wrap.isConnected) return
+      clearTimeout(timer)
+      wrap.querySelectorAll('script, .giscus').forEach(node => node.remove())
+      message.replaceChildren(document.createTextNode(texts.error))
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.textContent = texts.retry
+      button.addEventListener('click', () => { attempts = 0; start() })
+      message.appendChild(button)
+    }
+    const start = () => {
+      if (!wrap.isConnected) return
+      clearTimeout(timer)
+      wrap.querySelectorAll('script, .giscus').forEach(node => node.remove())
+      attempts++
+      message.textContent = texts.loading
+      const scriptElement = createScriptElement(giscusConfig)
+      scriptElement.onerror = () => {
+        clearTimeout(timer)
+        if (attempts < 2) timer = setTimeout(start, 1500)
+        else retry()
+      }
+      wrap.appendChild(scriptElement)
+      timer = setTimeout(() => {
+        if (!wrap.isConnected) return
+        const frame = wrap.querySelector('iframe.giscus-frame')
+        if (frame && !frame.classList.contains('giscus-frame--loading')) {
+          message.remove()
+        } else if (attempts < 2) {
+          start()
+        } else {
+          retry()
+        }
+      }, 20000)
+      scriptElement.onload = () => {
+        const frame = wrap.querySelector('iframe.giscus-frame')
+        if (frame) frame.addEventListener('load', () => { clearTimeout(timer); message.remove() }, { once: true })
+      }
+    }
+    start()
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else setTimeout(loadGiscus, 0)
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"]):not([href="https://ziyuliu258.cn/profile/"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      pjax.loadUrl('/blog/404.html')
+    }
+  })
+})()</script><script defer src="/blog/js/site-statistics.js?v=6049b5963362"></script><script defer src="/blog/js/music-player.js?v=950889c08414"></script></div></body></html>

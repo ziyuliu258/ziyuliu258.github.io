@@ -12,7 +12,25 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-11-20T18:49:52.848Z</updated>
+  <updated>2026-11-21T17:56:01.136Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="Spatial Reasoning" scheme="https://ziyuliu258.cn/blog/tags/Spatial-Reasoning/"/>
+    <category term="Vision-Language Models" scheme="https://ziyuliu258.cn/blog/tags/Vision-Language-Models/"/>
+    <id>https://ziyuliu258.cn/blog/posts/7e2bbf7c/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/7e2bbf7c/"/>
+    <published>2026-11-21T11:24:39.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：Spatial Harness 由香港浸会大学 TMLR Group 与 ByteDance Seed 合作完成（Chentao Cao、Zhanke Zhou 等，通讯作者 Bo Han），发表于 NeurIPS]]>
+    </summary>
+    <title>论文阅读：Spatial Harness</title>
+    <updated>2026-11-21T17:56:01.136Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -26,10 +44,10 @@
     <published>2026-11-20T18:45:34.000Z</published>
     <summary>
       <![CDATA[<blockquote>
-<p>引：本文来自 NVIDIA（Bowen Wen、Wei Yang、Jan Kautz、Stan Birchfield），CVPR 2024。它想用<strong>一个模型</strong>同时解决四件事：新物体的 6D]]>
+<p>引：本文来自 NVIDIA (Bowen Wen, Wei Yang, Jan Kautz, Stan Birchfield)，CVPR 2024。它想用<strong>一个模型</strong>同时解决四件事：新物体的 6D]]>
     </summary>
     <title>论文阅读：FoundationPose</title>
-    <updated>2026-11-20T18:49:52.848Z</updated>
+    <updated>2026-11-21T17:56:33.839Z</updated>
   </entry>
   <entry>
     <author>
@@ -37,8 +55,8 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="VLM" scheme="https://ziyuliu258.cn/blog/tags/VLM/"/>
     <category term="Robotic Manipulation" scheme="https://ziyuliu258.cn/blog/tags/Robotic-Manipulation/"/>
+    <category term="VLM" scheme="https://ziyuliu258.cn/blog/tags/VLM/"/>
     <id>https://ziyuliu258.cn/blog/posts/3ffc8c7f/</id>
     <link href="https://ziyuliu258.cn/blog/posts/3ffc8c7f/"/>
     <published>2026-11-20T17:02:00.000Z</published>
@@ -47,7 +65,7 @@
 <p>引：本文由 Georgia Tech 的 Xuanyou Chen、Jinyu Chen 与 Glen Chou 完成。它要解决的是机器人操作里最别扭的一步：目标用语言说不清，用图能画出来，但规划器只接受六自由度位姿。VerifLM]]>
     </summary>
     <title>论文阅读：VerifLM</title>
-    <updated>2026-11-20T17:00:20.495Z</updated>
+    <updated>2026-11-21T17:56:01.142Z</updated>
   </entry>
   <entry>
     <author>
@@ -62,10 +80,10 @@
     <published>2026-11-20T16:16:00.000Z</published>
     <summary>
       <![CDATA[<blockquote>
-<p>引：本文由 UIUC、上海交大、UC Merced 与 Amazon AGI 的研究者完成。它要解决的是 VLM 的<strong>视角采择（perspective]]>
+<p>引：本文由 UIUC、上海交大、UC Merced 与 Amazon AGI 的研究者完成。它要解决的是 VLM 的<strong>视角采择 (perspective]]>
     </summary>
     <title>论文阅读：LeRF</title>
-    <updated>2026-11-20T16:18:50.997Z</updated>
+    <updated>2026-11-21T17:56:01.118Z</updated>
   </entry>
   <entry>
     <author>
@@ -73,8 +91,8 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="3D Vision" scheme="https://ziyuliu258.cn/blog/tags/3D-Vision/"/>
     <category term="Object Pose Estimation" scheme="https://ziyuliu258.cn/blog/tags/Object-Pose-Estimation/"/>
+    <category term="3D Vision" scheme="https://ziyuliu258.cn/blog/tags/3D-Vision/"/>
     <id>https://ziyuliu258.cn/blog/posts/9ca2403e/</id>
     <link href="https://ziyuliu258.cn/blog/posts/9ca2403e/"/>
     <published>2026-11-20T16:16:00.000Z</published>
@@ -83,7 +101,7 @@
 <p>引：本文由香港科技大学、深圳 Loop Area Institute、香港大学与清华的研究者完成。它处理的是“把生成出来的物体放回场景”这一步：给定一张 RGB]]>
     </summary>
     <title>论文阅读：ScenePlacer</title>
-    <updated>2026-11-20T16:18:50.997Z</updated>
+    <updated>2026-11-21T16:49:25.055Z</updated>
   </entry>
   <entry>
     <author>
@@ -101,7 +119,7 @@
 <p>引：Spatial Foundry]]>
     </summary>
     <title>论文阅读：Spatial Foundry</title>
-    <updated>2026-11-20T11:18:57.200Z</updated>
+    <updated>2026-11-21T17:56:01.134Z</updated>
   </entry>
   <entry>
     <author>
@@ -119,7 +137,7 @@
 <p>引：BlenderFORGE 研究如何让多模态大模型在 Blender 中反复观察、执行代码和检查结果，直到把场景改成目标状态。论文的重点是将已有 3D 资产转化为编辑任务，再用可执行环境和可验证奖励训练交互式编辑]]>
     </summary>
     <title>论文阅读：BlenderFORGE</title>
-    <updated>2026-11-20T10:38:08.232Z</updated>
+    <updated>2026-11-21T17:56:01.109Z</updated>
   </entry>
   <entry>
     <author>
@@ -134,10 +152,10 @@
     <published>2026-11-19T13:29:27.000Z</published>
     <summary>
       <![CDATA[<blockquote>
-<p>引：VULCAN 由 Stanford、Google 与 NYU 合作完成，第一作者 Zhengfei Kuang 在 Google 实习期间完成这项工作，谢赛宁（Saining Xie）是作者之一。论文要解决的是让多模态大模型在三维场景里]]>
+<p>引：VULCAN 由 Stanford、Google 与 NYU 合作完成，第一作者 Zhengfei Kuang 在 Google 实习期间完成这项工作，谢赛宁 (Saining Xie) 是作者之一。论文要解决的是让多模态大模型在三维场景里]]>
     </summary>
     <title>论文阅读：VULCAN</title>
-    <updated>2026-11-20T10:39:20.630Z</updated>
+    <updated>2026-11-21T17:56:33.839Z</updated>
   </entry>
   <entry>
     <author>
@@ -152,10 +170,12 @@
     <published>2026-11-15T13:50:09.000Z</published>
     <summary>
       <![CDATA[<blockquote>
-<p>引：NeRF]]>
+<p>引：NeRF 用一个连续函数表示场景中任意位置的密度和颜色，再通过体渲染将沿相机射线采样的结果组合成图像。它用多张已知相机的照片，直接优化一个能解释这些照片的场景表示。</p>
+</blockquote>
+<h2]]>
     </summary>
     <title>论文阅读：NeRF</title>
-    <updated>2026-11-20T10:38:55.323Z</updated>
+    <updated>2026-11-21T16:44:59.407Z</updated>
   </entry>
   <entry>
     <author>
@@ -170,10 +190,10 @@
     <published>2026-11-15T13:43:05.000Z</published>
     <summary>
       <![CDATA[<blockquote>
-<p>引：3D Gaussian]]>
+<p>引：3D Gaussian Splatting (3DGS)]]>
     </summary>
     <title>论文阅读：3D Gaussian Splatting for Real-Time Radiance Field Rendering</title>
-    <updated>2026-11-20T10:38:55.315Z</updated>
+    <updated>2026-11-21T17:56:01.107Z</updated>
   </entry>
   <entry>
     <author>
@@ -188,10 +208,12 @@
     <published>2026-11-15T13:43:04.000Z</published>
     <summary>
       <![CDATA[<blockquote>
-<p>引：VGGT 将相机、深度、点图和跨视图跟踪放进同一个前馈模型。它最有意思的地方不是给某一个几何任务增加专用模块，而是让多张图像的 token]]>
+<p>引：VGGT 将相机、深度、点图和跨视图跟踪放进同一个前馈模型。它让多张图像的 token 在帧内和帧间交替交流，再用多个相互关联的几何任务共同训练这一特征。</p>
+</blockquote>
+<h2]]>
     </summary>
     <title>论文阅读：VGGT</title>
-    <updated>2026-11-20T10:38:55.333Z</updated>
+    <updated>2026-11-21T17:56:33.839Z</updated>
   </entry>
   <entry>
     <author>
@@ -206,7 +228,7 @@
 <p>原文：<a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/">What are Diffusion Models?</a>，作者 Lilian]]>
     </summary>
     <title>转载：What are Diffusion Models?</title>
-    <updated>2026-11-14T19:32:26.413Z</updated>
+    <updated>2026-11-21T12:31:53.003Z</updated>
   </entry>
   <entry>
     <author>
@@ -222,7 +244,7 @@
 <p>一直以来，我觉得 <em>“必须守在电脑前用规范的Markdown语法编辑个人博客”</em> 是一件荒谬的事，一个好的博客管理方式应该类似于<strong>“随身记”</strong>]]>
     </summary>
     <title>在手机上管理Hexo博客？</title>
-    <updated>2026-11-14T13:13:48.477Z</updated>
+    <updated>2026-11-21T12:31:52.995Z</updated>
   </entry>
   <entry>
     <author>
@@ -241,7 +263,7 @@
 <p>引：VIMA 把“按语言操作”“达到目标图像”“观看一次示范”“根据图片学习新概念”等任务，统一为 <strong>文字与图像交错的 multimodal prompt</strong>。模型再将画面拆成 object tokens，用]]>
     </summary>
     <title>论文阅读：VIMA</title>
-    <updated>2026-11-20T10:39:32.992Z</updated>
+    <updated>2026-11-21T17:56:33.840Z</updated>
   </entry>
   <entry>
     <author>
@@ -260,7 +282,7 @@
 <p>引：<span class="katex"><span class="katex-mathml"><math]]>
     </summary>
     <title>论文阅读：$\pi_0$</title>
-    <updated>2026-11-20T10:40:13.015Z</updated>
+    <updated>2026-11-21T16:45:49.975Z</updated>
   </entry>
   <entry>
     <author>
@@ -278,7 +300,7 @@
 <p>引：DAgger 研究的问题很直接： <strong>策略做出的动作会改变下一次看到的输入，那么只在专家走过的状态上训练，为什么能保证策略独立执行时也表现良好？</strong>]]>
     </summary>
     <title>论文阅读：DAgger</title>
-    <updated>2026-11-20T10:38:50.722Z</updated>
+    <updated>2026-11-21T16:44:59.419Z</updated>
   </entry>
   <entry>
     <author>
@@ -286,8 +308,8 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="GUI Agent" scheme="https://ziyuliu258.cn/blog/tags/GUI-Agent/"/>
     <category term="Vision-Language Models" scheme="https://ziyuliu258.cn/blog/tags/Vision-Language-Models/"/>
+    <category term="GUI Agent" scheme="https://ziyuliu258.cn/blog/tags/GUI-Agent/"/>
     <category term="SFT" scheme="https://ziyuliu258.cn/blog/tags/SFT/"/>
     <id>https://ziyuliu258.cn/blog/posts/2e949ae7/</id>
     <link href="https://ziyuliu258.cn/blog/posts/2e949ae7/"/>
@@ -297,7 +319,7 @@
 <p>引：UI-TARS 将 GUI agent 中的感知、动作选择和部分工作流程，放进一个接收截图、生成操作的 VLM。本文最值得关注的是它怎样构造训练数据：从界面元素理解到多步轨迹，再到模型亲自执行后产生的错误与纠正。尤其是]]>
     </summary>
     <title>论文阅读：UI-TARS</title>
-    <updated>2026-11-20T10:39:32.993Z</updated>
+    <updated>2026-11-21T16:49:25.055Z</updated>
   </entry>
   <entry>
     <author>
@@ -315,7 +337,7 @@
 <p>引：Idefics2 最值得读的地方，是作者把构建 VLM 时经常一起变化的选择拆开比较：预训练主干怎样选，图像怎样进入语言模型，哪些参数需要适配，以及视觉 token 应该保留多少。最后得到的 8B]]>
     </summary>
     <title>论文阅读：What matters when building vision-language models?（Idefics2）</title>
-    <updated>2026-11-20T10:39:17.681Z</updated>
+    <updated>2026-11-21T17:56:33.840Z</updated>
   </entry>
   <entry>
     <author>
@@ -332,7 +354,7 @@
 <p>引：Edward Hu、Yelong Shen 等人在这篇文章中提出 LoRA。全量微调会为每个下游任务保存一整份与预训练模型同样大的参数；LoRA 改为冻结预训练权重，只训练插在权重旁边的低秩分解。以 GPT-3 175B]]>
     </summary>
     <title>论文阅读：LoRA</title>
-    <updated>2026-11-20T10:37:29.343Z</updated>
+    <updated>2026-11-21T16:45:49.975Z</updated>
   </entry>
   <entry>
     <author>
@@ -350,24 +372,6 @@
 <p>引：Minghan Qin、Yuang Wang、Xiuyu Yang 等人提出 Lucida，从真实室内场景的多视角观测中恢复完整、可独立编辑的物体资产，并将它们放回原来的位置。本文保留“解析、生成、摆放”的三阶段流程，最值得关注的是最后的]]>
     </summary>
     <title>论文阅读：Lucida</title>
-    <updated>2026-11-20T10:38:31.167Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="Embodied Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Embodied-Intelligence/"/>
-    <category term="VLA" scheme="https://ziyuliu258.cn/blog/tags/VLA/"/>
-    <id>https://ziyuliu258.cn/blog/posts/a666fbaf/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/a666fbaf/"/>
-    <published>2026-10-29T16:35:11.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>引：Moo Jin Kim、Karl Pertsch、Siddharth Karamcheti 等人在这篇文章中提出 OpenVLA，将已有的视觉语言模型微调为机器人控制策略。模型接收一张图像和一条指令，将七维机器人动作转换为离散]]>
-    </summary>
-    <title>论文阅读：OpenVLA</title>
-    <updated>2026-11-20T10:39:19.452Z</updated>
+    <updated>2026-11-21T17:56:33.841Z</updated>
   </entry>
 </feed>
