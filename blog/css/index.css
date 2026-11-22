@@ -4569,6 +4569,10 @@ figure.highlight pre .javascript .function {
   max-width: 100%;
   height: auto;
 }
+.mermaid-wrap > svg[aria-roledescription^="flowchart"] .node > rect {
+  rx: 8px;
+  ry: 8px;
+}
 .utterances,
 .fb-comments iframe {
   width: 100% !important;
