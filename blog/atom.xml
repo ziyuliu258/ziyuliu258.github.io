@@ -12,7 +12,7 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-11-21T17:56:01.136Z</updated>
+  <updated>2026-11-22T06:37:50.968Z</updated>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -29,7 +29,7 @@
 <p>引：Spatial Harness 由香港浸会大学 TMLR Group 与 ByteDance Seed 合作完成（Chentao Cao、Zhanke Zhou 等，通讯作者 Bo Han），发表于 NeurIPS]]>
     </summary>
     <title>论文阅读：Spatial Harness</title>
-    <updated>2026-11-21T17:56:01.136Z</updated>
+    <updated>2026-11-22T06:37:50.968Z</updated>
   </entry>
   <entry>
     <author>
@@ -55,8 +55,8 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="VLM" scheme="https://ziyuliu258.cn/blog/tags/VLM/"/>
     <category term="Robotic Manipulation" scheme="https://ziyuliu258.cn/blog/tags/Robotic-Manipulation/"/>
+    <category term="VLM" scheme="https://ziyuliu258.cn/blog/tags/VLM/"/>
     <id>https://ziyuliu258.cn/blog/posts/3ffc8c7f/</id>
     <link href="https://ziyuliu258.cn/blog/posts/3ffc8c7f/"/>
     <published>2026-11-20T17:02:00.000Z</published>
