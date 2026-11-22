@@ -130,14 +130,10 @@
   transform: translateX(0);
 }
 
-@media screen and (max-width: 1300px) {
-  #article-container h1::before,
-  #article-container h2::before,
-  #article-container h3::before,
-  #article-container h4::before,
-  #article-container h5::before,
-  #article-container h6::before {
-    content: none;
+@media screen and (max-width: 768px) {
+  #article-container :is(h1, h2, h3, h4, h5, h6)::before {
+    right: calc(100% + 2px);
+    font-size: 0.5em;
   }
 }
 
