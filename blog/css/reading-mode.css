@@ -46,12 +46,6 @@ body.read-mode #post-info .post-title {
   color: var(--font-color);
 }
 .read-mode #music-dock { display: none !important; }
-.read-mode #article-container a:not(.headerlink) { color: #767676; }
-.read-mode #article-container a:not(.headerlink):hover,
-.read-mode #article-container a:not(.headerlink):focus-visible { color: #333; }
-[data-theme='dark'] .read-mode #article-container a:not(.headerlink) { color: #969696; }
-[data-theme='dark'] .read-mode #article-container a:not(.headerlink):hover,
-[data-theme='dark'] .read-mode #article-container a:not(.headerlink):focus-visible { color: #ddd; }
 .read-mode #reading-toc {
   position: fixed;
   left: 32px;

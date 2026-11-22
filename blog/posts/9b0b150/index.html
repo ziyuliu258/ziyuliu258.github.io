@@ -1,0 +1,565 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>论文阅读：Spatial-Interactor | Derrick Liu的个人博客</title><meta name="author" content="Derrick Liu,1209830516abc@gmail.com"><meta name="copyright" content="Derrick Liu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="相机向右转时，一把静止的椅子也会在画面里向左移动。Spatial-Interactor 把这个观察用在了视觉语言模型的训练上。先让模型从相邻画面推断 谁动了、怎么动的，再给它一整段录像，让它把这些变化按顺序接起来，判断最后走到了哪里（Yao et al., 2026）。   原论文图 1。L1、L2、L3 是三类训练题。前两类用于第一阶段的监督微调，第三类用于第二阶段的长轨迹训练。 背景 一段房">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文阅读：Spatial-Interactor">
+<meta property="og:url" content="https://ziyuliu258.cn/blog/posts/9b0b150/index.html">
+<meta property="og:site_name" content="Derrick Liu的个人博客">
+<meta property="og:description" content="相机向右转时，一把静止的椅子也会在画面里向左移动。Spatial-Interactor 把这个观察用在了视觉语言模型的训练上。先让模型从相邻画面推断 谁动了、怎么动的，再给它一整段录像，让它把这些变化按顺序接起来，判断最后走到了哪里（Yao et al., 2026）。   原论文图 1。L1、L2、L3 是三类训练题。前两类用于第一阶段的监督微调，第三类用于第二阶段的长轨迹训练。 背景 一段房">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg">
+<meta property="article:published_time" content="2026-11-22T09:08:00.000Z">
+<meta property="article:modified_time" content="2026-11-22T09:33:14.664Z">
+<meta property="article:author" content="Derrick Liu">
+<meta property="article:tag" content="论文阅读笔记">
+<meta property="article:tag" content="空间推理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "论文阅读：Spatial-Interactor",
+  "url": "https://ziyuliu258.cn/blog/posts/9b0b150/",
+  "image": "https://ziyuliu258.cn/blog/images/avatar.jpg",
+  "datePublished": "2026-11-22T09:08:00.000Z",
+  "dateModified": "2026-11-22T09:33:14.664Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Derrick Liu",
+      "url": "https://ziyuliu258.cn/blog/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/blog/images/avatar.jpg"><link rel="canonical" href="https://ziyuliu258.cn/blog/posts/9b0b150/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="https://bsz.iirose.cn" crossorigin=""/><link rel="preconnect" href="https://giscus.app" crossorigin=""/><link rel="stylesheet" href="/blog/css/index.css?v=46275ea400f2"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="/blog/css/image-viewer.css?v=2059977d432b"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":1,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    enable: true,
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'viewer',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: false,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '论文阅读：Spatial-Interactor',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post',
+  liquid: {"glass":{"enable":true,"refraction":true},"background":{"toggle":true,"image":"/blog/images/bg2.jpg","avif":"/blog/images/bg2.avif","light":"#f6f6f6","dark":"#1e1e1e"},"stats":{"enable":true,"api":"https://bsz.iirose.cn/api","siteUv":true,"sitePv":true,"pagePv":true,"note":"新统计服务从启用时开始计数","local":"本地预览不计入访问统计","loading":"正在获取统计数据","error":"统计暂时不可用，刷新页面后重试"},"music":{"enable":true,"pageUrl":"/blog/music/","playlistUrl":"/blog/music/playlist.json","i18n":{"dockLabel":"全局音乐播放器","expand":"展开音乐播放器","collapse":"收起音乐播放器","collapseShort":"收起","previous":"上一首","next":"下一首","play":"播放","pause":"暂停","volume":"音量","seek":"播放进度","playlist":"歌单","title":"音乐","loading":"正在加载歌单…","selectTrack":"请选择歌曲","playFailed":"暂时无法播放，请在网易云收听。","preview":"此曲仅提供试听。","trackFailed":"这首歌暂时无法播放，请在网易云收听。","emptyPlaylist":"当前歌单暂无可直接播放的歌曲，请在网易云收听。","loadFailed":"歌单加载失败，请稍后刷新页面重试。"}},"comments":{"giscus":{"loading":"评论区加载中…","error":"评论区暂时无法加载。","retry":"重试"}}}
+}
+</script><script>(function () {
+  try {
+    var saved = window.btf && btf.saveToLocal ? btf.saveToLocal.get('blog-bg-mode') : undefined
+    if (saved === 'image') return
+    var bg = (window.GLOBAL_CONFIG_SITE.liquid || {}).background || {}
+    var night = document.documentElement.getAttribute('data-theme') === 'dark'
+    document.documentElement.style.setProperty('--solid-bg', night ? bg.dark : bg.light)
+    document.documentElement.style.setProperty('--solid-fg', night ? 'rgba(255, 255, 255, 0.82)' : '#2c3138')
+    document.documentElement.classList.add('solid-bg')
+  } catch (error) {}
+})()</script><link rel="stylesheet" href="/blog/css/liquid.css?v=4a9ed66406fa"><link rel="preload" as="image" href="/blog/images/bg2.avif" type="image/avif"><style>#web_bg[style*="/blog/images/bg2.jpg"], #page-header[style*="/blog/images/bg2.jpg"], #footer[style*="/blog/images/bg2.jpg"] {
+  background-image: image-set(url("/blog/images/bg2.avif") type("image/avif"), url("/blog/images/bg2.jpg") type("image/jpeg")) !important;
+}</style><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/blog/atom.xml" title="Derrick Liu的个人博客" type="application/atom+xml">
+</head><body><div id="web_bg" style="background-image: url(/blog/images/bg2.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">47</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">39</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> More</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/blog/images/bg2.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/blog/"></a><button class="nav-back" id="nav-back" type="button" title="返回上一页" aria-label="返回上一页"><i class="fas fa-chevron-left"></i></button><a class="nav-page-title" href="#"><span class="site-name">论文阅读：Spatial-Interactor</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> More</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">论文阅读：Spatial-Interactor</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-22T09:08:00.000Z" title="发表于 2026-11-22 17:08:00">2026-11-22</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-22T09:33:14.664Z" title="更新于 2026-11-22 17:33:14">2026-11-22</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">4.4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>13分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv" title="新统计服务从启用时开始计数" aria-live="polite">—</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>相机向右转时，一把静止的椅子也会在画面里向左移动。Spatial-Interactor 把这个观察用在了视觉语言模型的训练上。先让模型从相邻画面推断 <strong>谁动了、怎么动的</strong>，再给它一整段录像，让它把这些变化按顺序接起来，判断最后走到了哪里（Yao et al., 2026）。</p>
+</blockquote>
+<p><img src="/blog/posts/9b0b150/overview.png" alt="Spatial-Interactor 的训练流程"></p>
+<p><em>原论文图 1。L1、L2、L3 是三类训练题。前两类用于第一阶段的监督微调，第三类用于第二阶段的长轨迹训练。</em></p>
+<h2 id="背景">背景</h2>
+<p>一段房间录像可以用来问两种很不同的问题。「沙发旁边有什么？」也许只看其中一帧就能回答；「从门口走到沙发旁，中途向哪边拐过弯？」则需要知道哪些画面在前、哪些在后。如果训练题大多只问第一类，即使给模型看了整段视频，答题时也用不上中间发生的变化。</p>
+<p>作者先做了两个诊断。把同一批视频帧打乱，原始模型的成绩变化很小；把沿途几个片段里发生的变化用文字告诉模型，它回答长轨迹题的表现又有所提高（原文图 2）。这就给出了两个训练目标：先学会从画面里读出一次变化，再学会把连续几次变化用到同一道题里。</p>
+<h2 id="方法">方法</h2>
+<p>Spatial-Interactor 对已有视觉语言模型做两阶段后训练。第一阶段，输入动作前后的观测和问题，模型学习推断动作或动作造成的结果。第二阶段，输入完整轨迹和问题，模型自己生成推理与答案。两个阶段之间传递的是 <strong>微调后的模型参数</strong>。图 1 中的三级课程描述的是训练样本，并不要求模型在答一道题时依次调用三个模块。</p>
+<h3 id="状态转移">状态转移</h3>
+<p>假设我们想教模型辨认一次右转。手里只有两张照片时，可以请人对照两张照片里同一扇窗的位置，判断相机往哪边转了。如果照片来自一次有记录的模拟器交互，事情就容易了：程序刚刚执行了右转，执行前后的画面也都保留下来。这三样东西合在一起，恰好构成一条可以出题的记录。</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi mathvariant="script">T</mi><mo>=</mo><mo stretchy="false">(</mo><msub><mi>δ</mi><mn>1</mn></msub><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>δ</mi><mrow><mi>T</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo><mo separator="true">,</mo><mspace width="2em"><msub><mi>δ</mi><mi>t</mi></msub><mo>=</mo><mo stretchy="false">(</mo><msub><mi>O</mi><mi>t</mi></msub><mo separator="true">,</mo><msub><mi>a</mi><mi>t</mi></msub><mo separator="true">,</mo><msub><mi>O</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo></mspace></mrow><annotation encoding="application/x-tex">\mathcal{T}=(\delta_1,\ldots,\delta_{T-1}),\qquad \delta_t=(O_t,a_t,O_{t+1})
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal" style="margin-right:0.2542em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0379em;">δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0379em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0379em;">δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0379em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.1389em;">T</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0379em;">δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0379em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span></p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">T</mi></mrow><annotation encoding="application/x-tex">\mathcal{T}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal" style="margin-right:0.2542em;">T</span></span></span></span> 是按时间排列的轨迹，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span></span></span></span> 是观测数，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\delta_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0379em;">δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0379em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 是相邻两次观测间的一次状态转移。</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>O</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">O_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>O</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">O_{t+1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8917em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span> 是变化前后的两次观测。</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">a_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 是连接两次观测的动作或事件，例如相机右转、打开柜门。</li>
+</ul>
+<p>给模型看前后画面，问「相机往哪边转了」，记录中的动作就能用来确定答案。把连续记录按时间排列，又能问出单张照片回答不了的问题，例如整条路一共转了几次弯。</p>
+<h3 id="三级课程与数据构造">三级课程与数据构造</h3>
+<p>LSI-108K 收录了 107,518 条问答。作者按两个维度划分这些题：画面变化来自外界还是观察者，答案依赖一段局部变化还是整条路线。</p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th style="text-align:right">问答数</th>
+<th>已知观测与待推断的量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L1 外界状态变化</td>
+<td style="text-align:right">15,109</td>
+<td>给出大致固定视角下的观测，推断物体移动、开合或操作顺序</td>
+</tr>
+<tr>
+<td>L2 观察者位姿变化</td>
+<td style="text-align:right">69,487</td>
+<td>给出同一环境的不同视角，推断相机运动或跨视角的位置关系</td>
+</tr>
+<tr>
+<td>L3 长轨迹整合</td>
+<td style="text-align:right">22,922</td>
+<td>给出完整相机轨迹，推断总路程、起终点位移、转弯区间或重访位置</td>
+</tr>
+</tbody>
+</table>
+<p>这些问题的答案从哪里来？在模拟场景中，执行一次移动或物体操作时可以同时保存动作、状态和画面。真实数据提供的记录则各不相同，例如相机轨迹带有位姿，机器人轨迹可带有末端执行器状态。作者根据记录里的几何量或动作日志先算出目标，再用模板生成问答。例如，把沿途每一步的移动距离相加，可以得到路程；只比较起点与终点，则得到端点位移。即使两道题用了完全相同的视频，一条绕回原地的路线也会有正的路程和接近零的端点位移。</p>
+<p><img src="/blog/posts/9b0b150/dataset.png" alt="LSI-108K 的数据构造流程"></p>
+<p><em>原论文图 4。交互记录提供答案依据，筛选环节检查变化幅度、轨迹连续性及画面是否足以作答。</em></p>
+<p>这里还有一道视觉筛选。日志可能精确记录了柜门打开，但如果柜门始终在镜头外，人看视频也答不出来。作者用冻结的视觉语言模型排除这类样本，答案仍取自原始记录。这个筛选模型与后面为长视频写分段描述的模型承担不同任务。</p>
+<h3 id="局部状态建模">局部状态建模</h3>
+<p>假设椅子后面有一扇窗，两张照片都拍到了它。我们用窗框作参照，看椅子相对它的位置有没有变化。如果两张照片里的窗框位置基本相同，椅子却从窗户右边移到了左边，合理的解释是椅子被挪动了。这是 <strong>L1</strong> 关注的情形：视角大致固定，模型要识别 <em>外界状态</em> 的变化。</p>
+<p>现在把椅子固定住，拿着相机向右转。椅子和窗户会一起向画面左侧移动，右侧原本看不见的墙进入画面。此时题目可以问「拍摄者往哪边转了」，也可以让模型在新视角中找到刚才那扇窗。这属于 <strong>L2</strong>，要推断的是 <em>观察者位姿</em> 的变化。两类题放在一起有一个好处：同样是椅子出现在画面左边，比较椅子和窗框的相对位置，有助于判断是椅子动了，还是拍摄者转了身。</p>
+<p>第一阶段用 L1、L2 样本和公开空间问答进行监督微调。输入是画面和问题，目标是对应的参考回答。现在模型有机会学会辨认某一次转弯了，但要回答整条路线的问题，还有一步。</p>
+<h3 id="长轨迹整合">长轨迹整合</h3>
+<p>举个简化的 L3 例子。拍摄者向前走，原地右转 90°，向前走一段，再原地左转 90°。问：结束时和出发时朝向相同吗？我们可以在纸上画一个箭头，第一次转弯把箭头顺时针转过直角，第二次再转回来。两段直走改变了位置，最终朝向却和出发时相同。</p>
+<p>如果模型回答「最后面向右侧」，我们可以猜它漏掉了最后一次左转。但训练程序手里只有一个错误答案，从这个结果看不出到底漏掉了哪段。作者为此加入了 <strong>过程监督</strong>。读图 6 时，可以先顺着学生这条线看它怎样做题，再看教师多拿到了什么信息。</p>
+<p><img src="/blog/posts/9b0b150/opd.png" alt="分段标注与同前缀蒸馏"></p>
+<p><em>原论文图 6。标注模型为视频生成分段描述，学生生成自己的推理，教师在同一段推理上提供逐 token 的反馈。</em></p>
+<p>把图 6 展开看，先有一次离线标注，再有一个反复执行的训练循环。循环从上一阶段监督微调好的模型开始，每轮先让它独立做题，保存回答，再用两路反馈更新它。</p>
+<ol>
+<li><strong>离线准备视频描述。</strong> 每段长视频均匀取 32 帧，切成四个连续区间。冻结的标注模型只看画面，写下各段的可见变化，四段文字按时间拼成一份描述。同一视频的不同题共用这份描述。它留给后面的教师使用。</li>
+<li><strong>学生先完成作答。</strong> 把视频和问题交给当前模型，对同一道题采样 8 份完整回答，每份都包含推理和最终答案。比如两份回答都提到第一次右转，一份注意到了最后的左转，另一份漏掉了。这些回答保存下来，接下来两路反馈都用它们。</li>
+<li><strong>过程反馈逐位置计算。</strong> 取其中一份已经写完的回答，考察推理中一个位置。假设此前的文字是「走过桌边后，镜头向」。学生根据视频、问题和这段文字给可能的下一个 token 分配概率；教师读到完全相同的位置，还能看到离线描述中的「镜头转向左侧」。教师是本轮更新前的模型副本，参数暂时固定。若额外线索让教师给“左”更高概率，这个差异就为学生提供了训练信号。对每份回答的推理位置做同样的比较，就得到过程损失。实际训练比较的是 token 概率分布，最终答案字段单独评分。</li>
+<li><strong>结果反馈按整份回答计算。</strong> 用标准答案检查这 8 份回答的结论，再计入格式奖励。对同一道题，GRPO 根据各份回答相对于组内平均水平的奖励，调整学生今后生成相应回答的概率。</li>
+<li><strong>更新学生，开始下一轮。</strong> 将两路信号与参考模型的约束合起来，只更新学生参数。下一轮用更新后的策略重新采样回答，并从该轮更新前的参数取得新的教师快照。这样，教师每次评价的都是当前学生实际生成的推理前缀，这就是 <em>on-policy</em> 的含义。</li>
+</ol>
+<p>一次参数更新用到的三项写成原文式（2）：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi mathvariant="script">L</mi><mrow><mi mathvariant="normal">O</mi><mi mathvariant="normal">P</mi><mi mathvariant="normal">D</mi></mrow></msub><mo>=</mo><msub><mi mathvariant="script">L</mi><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">w</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></msub><mo>+</mo><mi>β</mi><msub><mi mathvariant="script">L</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">L</mi><mtext>-</mtext><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">f</mi></mrow></msub><mo>+</mo><msub><mi>λ</mi><mi>t</mi></msub><msub><mi mathvariant="script">L</mi><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow></msub><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">\mathcal{L}_{\mathrm{OPD}}=\mathcal{L}_{\mathrm{answer}}+\beta\mathcal{L}_{\mathrm{KL\text{-}ref}}+\lambda_t\mathcal{L}_{\mathrm{process}}.
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathcal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">OPD</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathcal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">answer</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="mord"><span class="mord mathcal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">KL</span><span class="mord text mtight"><span class="mord mtight">-</span></span><span class="mord mathrm mtight" style="margin-right:0.0778em;">ref</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">λ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathcal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">process</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord">.</span></span></span></span></span></p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="script">L</mi><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">w</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\mathcal{L}_{\mathrm{answer}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathcal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">answer</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 根据同一道题的多份回答计算组内相对奖励，让获得较高任务与格式奖励的回答在更新时得到更高权重。</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="script">L</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">L</mi><mtext>-</mtext><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">f</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\mathcal{L}_{\mathrm{KL\text{-}ref}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathcal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">KL</span><span class="mord text mtight"><span class="mord mtight">-</span></span><span class="mord mathrm mtight" style="margin-right:0.0778em;">ref</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 约束当前策略相对冻结的第一阶段模型的偏移，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span></span></span></span> 控制约束强度。这个参考模型看普通输入。</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="script">L</mi><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\mathcal{L}_{\mathrm{process}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathcal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">process</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> 在学生已经写出的同一前缀上，用教师到学生方向的 KL 散度比较下一 token 的概率分布。比较取教师概率最高的一组候选，只作用于推理位置。<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\lambda_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">λ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 控制这项监督随训练进度变化的权重。</li>
+</ul>
+<p>回到刚才的路线题。学生如果正确写出了第二次左转，却把最终朝向答错，答案奖励会反映这个错误；如果它碰巧选对了答案，中间推理位置仍然可以从教师那里得到不同的续写分布。教师每轮取更新前的策略快照，参考模型则一直固定在第一阶段结束时。前者提供过程目标，后者限制参数更新带来的行为偏移。</p>
+<h3 id="推理">推理</h3>
+<p>测试时给学生一段新录像和问题，学生直接生成推理与答案。例如问「是否经过两次同一扇门」，模型要在相隔较远的两段画面中辨认出同一扇门。离线标注器、分段文字、教师分支和用于计算奖励的参考答案都只在构造数据或训练时使用。</p>
+<h2 id="实验">实验</h2>
+<h3 id="数据与设置">数据与设置</h3>
+<p>作者在四个 Qwen 视觉语言基座上做实验。第一阶段使用全部 84,596 条 L1/L2 样本及约 8 万条公开空间问答。第二阶段使用 10,712 条 L3 RoomTour 样本和 10,783 条长轨迹 VSTI-Bench 样本。两个阶段均冻结视觉编码器，更新多模态投影层和语言模型。评测中的视频题取 32 个有序帧，多视图题使用题目给出的全部视图。</p>
+<h3 id="主结果与跨基准迁移">主结果与跨基准迁移</h3>
+<p>表 1 汇总 VSI-Bench、MindCube、VSTI-Bench 和 SPBench-MV 四项测评。分类题看准确率，数值题采用相对误差相关指标，综合分取四个基准得分的平均值，越高越好。8B 模型的综合分由 48.4 升到 65.9，但增益分布很不均匀：MindCube 从 29.4 到 88.4，VSTI-Bench 从 43.3 到 47.1。只看平均值，会高估某些任务的改善程度。</p>
+<p>部分公开训练题和主测评来自同一基准家族。为检验换来源之后还能保留多少收益，作者另用四个未进入训练混合物的基准测试。表 2 中，四个基座的跨基准综合分比训练前高 4.3 至 10.6 分；在各自的监督微调模型上继续做 OPD，额外提高 1.0 至 1.4 分。</p>
+<h3 id="训练消融">训练消融</h3>
+<p>以 Qwen2.5-VL-7B 为例，原文表 3 给出了四个主测评的综合分。最后两行都从同一个完整微调模型出发，使用相同的长轨迹题和答案奖励，因此可以单独观察加入教师反馈带来的变化。</p>
+<table>
+<thead>
+<tr>
+<th>训练设置</th>
+<th style="text-align:right">综合分</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>原始模型</td>
+<td style="text-align:right">35.1</td>
+</tr>
+<tr>
+<td>用公开空间问答微调</td>
+<td style="text-align:right">56.0</td>
+</tr>
+<tr>
+<td>微调中加入 L1、L2</td>
+<td style="text-align:right">58.4</td>
+</tr>
+<tr>
+<td>完整微调后，用答案奖励做 GRPO</td>
+<td style="text-align:right">59.2</td>
+</tr>
+<tr>
+<td>完整微调后，加入过程蒸馏做 OPD</td>
+<td style="text-align:right">60.1</td>
+</tr>
+</tbody>
+</table>
+<p>从 35.1 到 60.1，最大的一步来自公开空间问答微调。作者提出的两处设计可以分别看：加上局部变化题后，综合分再提高 2.4 分；长轨迹阶段加入教师反馈，比只用答案奖励高 0.9 分。把后一组对照拆到具体题型，路线规划从 28.9 到 34.0，相机位移从 33.5 到 36.6。这两类题都需要把沿途的变化带到最后，和设计过程监督的动机对得上。</p>
+<h3 id="时序与闭环交互">时序与闭环交互</h3>
+<p>还有一个很直观的检验：保持视频里的帧完全相同，只打乱播放顺序。两个基座模型分别降了 0.9 和 0.8 分，经过完整训练的对应模型分别降了 6.6 和 7.0 分。每帧里拍到的东西都一样，变的是帧的先后顺序。这说明训练后的回答更依赖时间顺序。图 11 给出了一个具体例子：两幅画面都拍到了同一个纸箱。对照纸箱与周围物体在两幅画面中的位置，可以判断相机往哪边转了。7B 基座把方向答反，训练后的模型答对。图 12 把这个思路延伸到一段视频：相机持续向右移动，办公室里固定物体在画面中呈现横向视差。比较这些视觉参照物在连续几帧中的相对位移，可以把相机向右平移与向前移动区分开。</p>
+<p>在闭环任务中，模型执行一个动作，环境返回新观测，下一步决策要用到这次变化。WalkerBench Standard-100 上，7B 模型的总体成功率从 7% 升到 14%，但距离与可见性两个子任务的成功率仍为零（表 4）。在 ESI-Bench 选出的八类交互题上，总体成功率从 32.9% 升到 41.2%（表 5）。把视频问答学到的变化线索用于连续决策有可见收益，要求精确几何判断时仍会失败。</p>
+<h2 id="核心点和不足">核心点和不足</h2>
+<p>这篇工作的一个取舍，是把 <strong>可核验的目标</strong> 和 <strong>帮助推理的中间信息</strong> 分开构造。相机位姿可以给出精确的端点位移，适合给最终答案打分；「经过纸箱后镜头向左转」保留了推理时容易漏用的视觉线索，适合让教师指导学生。后者来自视觉模型对片段的描述，精度受抽帧和描述质量影响。两种信号解决的是不同粒度的问题。</p>
+<p>帧序打乱实验也留下了一个可以继续检验的问题。打乱会同时破坏路线顺序和画面连续性，模型检测到突兀的视角跳变就可能改变答案。更有区分力的对照可以让拍摄者沿两条连续路线经过同一组固定物体，但改变转弯的次序，专门检查正确答案随路线改变的成对题目。</p>
+<h2 id="总结">总结</h2>
+<p>从一次右转到一整条路线，Spatial-Interactor 重用了同一种训练材料。在局部，动作记录使两幅图之间的差异有了可以核验的解释；在长轨迹上，连续片段提供了途中发生过哪些变化的线索。训练时让教师多看这些线索，并在学生实际写到的位置上给反馈，最终要交给学生独立完成的，正是从一连串画面里找出相关变化、再把它们组合起来的过程。</p>
+<h2 id="参考">参考</h2>
+<p>Yao, K., Wang, X., Pan, M., Hu, X., Li, J., Wang, W., Dahlmeier, D., Chen, J., Shen, Y., Zhang, X., Yin, J., Zhuang, Y., &amp; Zhang, W. (2026). Spatial-Interactor: Learning spatial reasoning through interaction with the observable physical world. arXiv:2609.23038. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2609.23038">doi:10.48550/arXiv.2609.23038</a>.</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://ziyuliu258.cn/blog">Derrick Liu</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://ziyuliu258.cn/blog/posts/9b0b150/">https://ziyuliu258.cn/blog/posts/9b0b150/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://ziyuliu258.cn/blog" target="_blank">Derrick Liu的个人博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">论文阅读笔记</a><a class="post-meta__tags" href="/blog/tags/%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86/">空间推理</a></div><div class="post-share"><div class="social-share" data-image="/blog/images/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/blog/vendor/extsrc/share.min.css" media="print" onload="this.media='all'"><script src="/blog/vendor/extsrc/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/blog/posts/fab21ae1/" title="论文阅读：PatchTST"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;fab21ae1&#x2F;Pasted%20image%2020260123175115.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-03</div><div class="info-item-2">论文阅读：PatchTST</div></div><div class="info-2"><div class="info-item-1">引言 时间序列预测在许多实际应用中具有重要意义，如能源预测、交通流量预测、气象预测等。随着深度学习技术的进步，基于Transformer的模型在时间序列预测中表现出了强大的能力。然而，传统Transformer模型存在计算复杂度高、内存消耗大等问题，尤其在长序列预测中效果不佳。PatchTST模型通过创新性的设计，解决了这些问题，提出了分块（Patching）和逐通道独立建模（Channel-independence）的解决方案，显著提高了时间序列预测的效率和精度。 模型  Tip表示学习（Representation Learning），也常被称为特征学习（Feature Learning），是指让模型自动地从原始数据中发现和提取“特征”或“表示”的技术，而不是依靠人工手动设计规则 。 可以暂且认为，表示学习可分为以下三种：  有监督表示学习：在学习特征的同时，利用标签（如未来的真实值）来纠正模型，让特征直接服务于特定目标 。 自监督表示学习：不利用标签，通过数据自身的结构（如掩码 Patch）来学习特征 。这是本文的核心亮点。 迁移学习（Transfer...</div></div></div></a><a class="pagination-related no-cover" href="/blog/posts/df0c4c42/" title="论文阅读笔记更新计划"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-04</div><div class="info-item-2">论文阅读笔记更新计划</div></div><div class="info-2"><div class="info-item-1">Note2026年11月12日更新： 这是一个outdated post，因为随着AI的强大，根本没有任何用skill/工具来是实现笔记迁移的必要，并且我的论文阅读方式也发生了很大变化，所以此帖也就失去它的价值了，工具我也早已不用了。新时代来了。  由于笔者的大三生涯马上结束，也真正上手科研有了接近一年的时间，所以突发奇想，想要将自己以往和未来的论文阅读笔记在博客上同步一下。这也可以算是监督自己的一种方式，避免偷懒和懈怠。 此前我使用Obsidian管理个人笔记已有一段时间，所以我vibe coding了一个插件（工具）来实现从Obsidian到hexo博客的一键迁移，后续我也会更新这个工具的使用方法。 过去的接近一年时间里，我一直在做关于时间序列预测的工作，虽然说也是三天打鱼两天晒网，但是磨洋工一年下来，总归还是有点收获。当然我的论文阅读范围并不局限于这一方向，基本是想读什么就读什么。或许读者能从我的笔记中获得一些帮助，那就是极好的事情。 </div></div></div></a><a class="pagination-related" href="/blog/posts/c79a8e2/" title="论文阅读：3D Gaussian Splatting for Real-Time Radiance Field Rendering"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;c79a8e2&#x2F;pipeline.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-15</div><div class="info-item-2">论文阅读：3D Gaussian Splatting for Real-Time Radiance Field Rendering</div></div><div class="info-2"><div class="info-item-1"> 引：3D Gaussian Splatting (3DGS) 用一组可以优化位置、形状、透明度和颜色的三维高斯表示场景，再将它们投影到屏幕上进行快速混合。论文把表示、增密策略和光栅化一起设计，让场景能够从照片中重建，也能够实时渲染新视角。  背景 给定一个静态场景的多张照片以及拍摄这些照片的相机参数，新视角合成希望生成从其他位置看到的图像。NeRF 将场景表示成连续的辐射场：沿每条相机射线采样，得到不同位置的密度与颜色，再把它们累积成像素颜色。这样可以表达复杂的外观，但对许多射线和采样点求值会带来计算开销。后续方法通过网格、哈希编码等加速，但表示与采样方式仍影响质量和速度。 3DGS 选择一组显式的三维高斯作为场景元素。我们可以把每个高斯想象成一个有方向、有大小的模糊椭球：它有三维位置，也有随观察方向变化的颜色和透明度。渲染时不必沿每条射线逐点查询整个场，而是把这些椭球投影到图像上，只处理会影响画面的元素。 论文的三个关键设计是：可微的各向异性高斯表示、与参数优化交替进行的自适应增密，以及按 tile...</div></div></div></a><a class="pagination-related" href="/blog/posts/f585d098/" title="论文阅读：DAgger"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;f585d098&#x2F;dagger-algorithm.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-05</div><div class="info-item-2">论文阅读：DAgger</div></div><div class="info-2"><div class="info-item-1"> 引：DAgger 研究的问题很直接： 策略做出的动作会改变下一次看到的输入，那么只在专家走过的状态上训练，为什么能保证策略独立执行时也表现良好？ 作者让当前策略参与收集状态，再由专家为这些状态提供动作标签，把模仿学习转成一系列可以复用监督学习器的训练问题。它的核心改进是训练数据的获取方式。  背景 普通的 behavior cloning，可以理解为从示范中学习一个“观测到动作”的映射。比如专家沿赛道驾驶，我们记录每张画面和对应的方向盘值，再训练模型预测方向盘。 这个训练过程本身没有问题，但部署后的输入分布会变。模型可能在一个弯道上转得稍晚，车向赛道边缘偏了一点；接下来看到的画面就不同于专家正常过弯时的画面。如果专家示范里没有这样的状态，模型也就没有学过此时应该怎样把车拉回来。 于是一次动作误差不只影响当前输出，还会影响后续的输入。继续增加几圈非常相似的完美驾驶示范，未必能够补上这个缺口。这个问题与模型容量过大造成的过拟合有关联，但二者并不相同：即使模型很好地拟合了专家分布，它也可能没有见过自己偏离之后的状态。 DAgger 的全称是 Dataset...</div></div></div></a><a class="pagination-related" href="/blog/posts/4318b9d/" title="论文阅读：BlenderFORGE"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;4318b9d&#x2F;teaser.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-20</div><div class="info-item-2">论文阅读：BlenderFORGE</div></div><div class="info-2"><div class="info-item-1"> 引：BlenderFORGE 研究如何让多模态大模型在 Blender 中反复观察、执行代码和检查结果，直到把场景改成目标状态。论文的重点是将已有 3D 资产转化为编辑任务，再用可执行环境和可验证奖励训练交互式编辑 agent。   图 1：BlenderFORGE 从场景扰动中构造编辑任务，使模型学习视觉变化与 3D 编辑操作之间的对应关系。 背景 给定一个室内场景和一张目标图片，我们希望模型把椅子移到目标位置。对人来说，这可能只是选择椅子、拖动并检查结果；对多模态大模型来说，这个过程涉及几个连续的判断：先从场景描述和图片中找到对象，判断目标与当前状态的差异，再生成可执行的 Blender Python 代码，并观察执行后的场景，决定是否继续修改。 已有的 3D 编辑方法可以直接操作 mesh、NeRF 等表示；另一类工作则让大模型通过代码或工具操作 Blender。这类 agent 通常在推理时生成候选编辑，再利用渲染反馈进行筛选和修正。BlenderFORGE...</div></div></div></a><a class="pagination-related" href="/blog/posts/57f7e4a5/" title="论文阅读：FoundationPose"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;57f7e4a5&#x2F;fp-four-tasks.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-21</div><div class="info-item-2">论文阅读：FoundationPose</div></div><div class="info-2"><div class="info-item-1"> 引：本文来自 NVIDIA (Bowen Wen, Wei Yang, Jan Kautz, Stan Birchfield)，CVPR 2024。它想用一个模型同时解决四件事：新物体的 6D 位姿估计与位姿跟踪，以及每条任务线下的基于模型（给 CAD）与无模型（给少量参考图）两种设定。它通过“渲染—比较”统一这些任务：只要能把物体渲染出来，四个任务就退化成同一个位姿优化加同一个打分问题。   图来自原论文 Figure 1：两条输入路线（参考图 / CAD 模型）分别通向位姿估计与位姿跟踪，右下角极坐标图是四个子任务上相对已有方法的比较。 背景 把物体位姿写成从物体坐标系到相机坐标系的刚体变换，这件事在工业界早就能做准，前提是训练时见过这个实例。这类 instance-level 方法要么用带纹理的 CAD 模型渲染训练数据，要么在测试实例上重新训练，代价是遇到没见过的物体就失效。 放宽一层是 category-level，允许测试时是新实例，但必须属于训练过的类别。再放宽就是本文关注的 novel...</div></div></div></a></div></div><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Derrick Liu</div><div class="author-info-description">An undergraduate majoring in CS.</div><div class="site-data"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">47</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">39</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ziyuliu258"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><button class="social-icon" type="button" data-copy="ZiyuLiu123456" title="点击复制" aria-label="ZiyuLiu123456"><i class="fab fa-weixin" style="color: #07c160;"></i></button><a class="social-icon" href="mailto:lzy1102@stu.xjtu.edu.cn" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8A%B6%E6%80%81%E8%BD%AC%E7%A7%BB"><span class="toc-number">2.1.</span> <span class="toc-text">状态转移</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E7%BA%A7%E8%AF%BE%E7%A8%8B%E4%B8%8E%E6%95%B0%E6%8D%AE%E6%9E%84%E9%80%A0"><span class="toc-number">2.2.</span> <span class="toc-text">三级课程与数据构造</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B1%80%E9%83%A8%E7%8A%B6%E6%80%81%E5%BB%BA%E6%A8%A1"><span class="toc-number">2.3.</span> <span class="toc-text">局部状态建模</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%95%BF%E8%BD%A8%E8%BF%B9%E6%95%B4%E5%90%88"><span class="toc-number">2.4.</span> <span class="toc-text">长轨迹整合</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E7%90%86"><span class="toc-number">2.5.</span> <span class="toc-text">推理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C"><span class="toc-number">3.</span> <span class="toc-text">实验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E4%B8%8E%E8%AE%BE%E7%BD%AE"><span class="toc-number">3.1.</span> <span class="toc-text">数据与设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E7%BB%93%E6%9E%9C%E4%B8%8E%E8%B7%A8%E5%9F%BA%E5%87%86%E8%BF%81%E7%A7%BB"><span class="toc-number">3.2.</span> <span class="toc-text">主结果与跨基准迁移</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E6%B6%88%E8%9E%8D"><span class="toc-number">3.3.</span> <span class="toc-text">训练消融</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%B6%E5%BA%8F%E4%B8%8E%E9%97%AD%E7%8E%AF%E4%BA%A4%E4%BA%92"><span class="toc-number">3.4.</span> <span class="toc-text">时序与闭环交互</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E7%82%B9%E5%92%8C%E4%B8%8D%E8%B6%B3"><span class="toc-number">4.</span> <span class="toc-text">核心点和不足</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">6.</span> <span class="toc-text">参考</span></a></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url(/blog/images/bg2.jpg);"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Derrick Liu</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/ziyuliu258/hexo-theme-liquid">Liquid</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="bg-toggle" type="button" title="切换纯色或图片背景"><i class="fas fa-image"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js?v=dab4b6aa0210"></script><script defer src="/blog/js/liquid-glass.js?v=b98445d26ed4"></script><script defer src="/blog/js/aside-motion.js?v=bc00aa983ae7"></script><script defer src="/blog/js/background-toggle.js?v=635d3669f3da"></script><link rel="stylesheet" href="/blog/css/reading-mode.css?v=a087d96fccad"><script defer src="/blog/js/reading-guide.js?v=4a444c1f3094"></script><script defer src="/blog/js/reading-mode.js?v=c5b16cad640b"></script><script defer src="/blog/js/article-export.js?v=2612c8cebbe2"></script><script src="/blog/vendor/extsrc/turndown.js"></script><script src="/blog/vendor/extsrc/turndown-plugin-gfm.js"></script><script defer src="/blog/js/copy-markdown.js?v=7ed3c3d4196f"></script><script src="/blog/js/tw_cn.js"></script><script defer src="/blog/js/image-viewer.js?v=43011cd2eca9"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex, #card-toc .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script><script>(() => {
+  let library
+  let renderPass = 0
+
+  const runMermaid = async diagrams => {
+    const pass = ++renderPass
+    if (!window.mermaid) {
+      try {
+        await (library ||= btf.getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'))
+      } catch (error) {
+        library = undefined
+        console.error('Could not load Mermaid', error)
+        return
+      }
+    }
+
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+    for (const [index, diagram] of diagrams.entries()) {
+      if (pass !== renderPass || !diagram.isConnected) return
+      const source = diagram.firstElementChild
+      try {
+        const definition = `%%{init:{ 'theme':'${theme}'}}%%\n${source.textContent}`
+        const result = await mermaid.render(`mermaid-${pass}-${index}`, definition)
+        if (pass !== renderPass || !diagram.isConnected) return
+        diagram.querySelector(':scope > svg')?.remove()
+        diagram.insertAdjacentHTML('beforeend', typeof result === 'string' ? result : result.svg)
+        result.bindFunctions?.(diagram)
+        source.hidden = true
+      } catch (error) {
+        console.error('Could not render Mermaid diagram', error)
+      }
+    }
+  }
+
+  const codeToMermaid = () => {
+    const blocks = document.querySelectorAll('#article-container pre > code.mermaid, #article-container pre > code.language-mermaid')
+    blocks.forEach(code => {
+      const source = code.parentElement
+      const diagram = document.createElement('div')
+      diagram.className = 'mermaid-wrap'
+      source.classList.add('mermaid-src')
+      source.replaceWith(diagram)
+      diagram.append(source)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const diagrams = document.querySelectorAll('#article-container .mermaid-wrap')
+    if (!diagrams.length) return
+
+    const render = () => runMermaid(diagrams)
+    btf.addGlobalFn('themeChange', render, 'mermaid')
+    render()
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-category":"Announcements","data-mapping":"pathname","data-strict":"1","data-lang":"zh-CN","data-input-position":"top","data-reactions-enabled":"1","data-emit-metadata":"0"}
+  const siteRoot = "/blog/"
+  const texts = {"loading":"评论区加载中…","error":"评论区暂时无法加载。","retry":"重试"}
+
+  // PJAX can execute this script before location.pathname changes. The new
+  // page's canonical link has already been swapped at that point.
+  const getPathnameTerm = () => {
+    const canonical = document.querySelector('link[rel="canonical"]')
+    const url = canonical ? new URL(canonical.href, location.href) : new URL(location.href)
+    const pathname = (url.origin === location.origin ? url.pathname : location.pathname).replace(/\/index\.html$/, '/')
+    const relative = pathname.startsWith(siteRoot) ? '/' + pathname.slice(siteRoot.length) : pathname
+    return relative.length < 2 ? 'index' : relative.slice(1).replace(/\.\w+$/, '')
+  }
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'noborder_dark' : 'noborder_light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : (!option || !option['data-mapping'] || option['data-mapping'] === 'pathname')
+        ? { 'data-mapping': 'specific', 'data-term': getPathnameTerm() }
+        : { 'data-mapping': option['data-mapping'] }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'ziyuliu258/ziyuliu258.github.io',
+      'data-repo-id': 'R_kgDONzQxiw',
+      'data-category-id': 'DIC_kwDONzQxi84DJPXY',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const wrap = el.querySelector('#giscus-wrap')
+    if (!wrap || wrap.dataset.giscusStarted === 'true') return
+    wrap.dataset.giscusStarted = 'true'
+    let attempts = 0
+    let timer
+    const message = document.createElement('div')
+    message.className = 'giscus-load-message'
+    message.setAttribute('role', 'status')
+    message.textContent = texts.loading
+    wrap.appendChild(message)
+
+    const retry = () => {
+      if (!wrap.isConnected) return
+      clearTimeout(timer)
+      wrap.querySelectorAll('script, .giscus').forEach(node => node.remove())
+      message.replaceChildren(document.createTextNode(texts.error))
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.textContent = texts.retry
+      button.addEventListener('click', () => { attempts = 0; start() })
+      message.appendChild(button)
+    }
+    const start = () => {
+      if (!wrap.isConnected) return
+      clearTimeout(timer)
+      wrap.querySelectorAll('script, .giscus').forEach(node => node.remove())
+      attempts++
+      message.textContent = texts.loading
+      const scriptElement = createScriptElement(giscusConfig)
+      scriptElement.onerror = () => {
+        clearTimeout(timer)
+        if (attempts < 2) timer = setTimeout(start, 1500)
+        else retry()
+      }
+      wrap.appendChild(scriptElement)
+      timer = setTimeout(() => {
+        if (!wrap.isConnected) return
+        const frame = wrap.querySelector('iframe.giscus-frame')
+        if (frame && !frame.classList.contains('giscus-frame--loading')) {
+          message.remove()
+        } else if (attempts < 2) {
+          start()
+        } else {
+          retry()
+        }
+      }, 20000)
+      scriptElement.onload = () => {
+        const frame = wrap.querySelector('iframe.giscus-frame')
+        if (frame) frame.addEventListener('load', () => { clearTimeout(timer); message.remove() }, { once: true })
+      }
+    }
+    start()
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else setTimeout(loadGiscus, 0)
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"]):not([href="https://ziyuliu258.cn/profile/"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    $bodyClassList.remove('read-mode')
+    document.querySelector('.exit-readmode')?.remove()
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      pjax.loadUrl('/blog/404.html')
+    }
+  })
+})()</script><script defer src="/blog/js/site-statistics.js?v=6049b5963362"></script><script defer src="/blog/js/music-player.js?v=950889c08414"></script></div></body></html>

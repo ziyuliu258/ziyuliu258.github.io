@@ -1,25 +1,23 @@
 /* 独立文档导出：PDF 交给浏览器排版，HTML 内嵌图片，Word 生成真正的 DOCX。 */
 (() => {
   'use strict'
-  const article = document.getElementById('article-container')
-  if (!article) return
-  const title = () => {
+  const getTitle = () => {
     const heading = document.querySelector('#post-info .post-title')?.cloneNode(true)
     if (!heading) return document.title
     heading.querySelectorAll('.katex').forEach(node => node.replaceWith(document.createTextNode(node.querySelector('.katex-html')?.textContent || node.querySelector('annotation')?.textContent || node.textContent)))
     return heading.textContent.trim()
   }
-  const filename = () => title().replace(/[\\/:*?"<>|\x00-\x1f]/g, '-').slice(0, 140)
+  const filename = title => title.replace(/[\\/:*?"<>|\x00-\x1f]/g, '-').slice(0, 140)
   const escape = text => String(text).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch])
-  const download = (blob, extension) => {
+  const download = (blob, name) => {
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = filename() + extension
+    link.download = name
     link.click()
     setTimeout(() => URL.revokeObjectURL(url), 60000)
   }
-  const cloneArticle = () => {
+  const cloneArticle = (article, sourceUrl) => {
     const clone = article.cloneNode(true)
     clone.removeAttribute('style')
     clone.querySelectorAll('.headerlink,.highlight-tools,.copy-notice,script,button,.code-expand-btn').forEach(node => node.remove())
@@ -28,9 +26,9 @@
       pre.textContent = (figure.querySelector('td.code pre') || figure).textContent
       figure.replaceWith(pre)
     })
-    clone.querySelectorAll('a[href]').forEach(link => { link.href = new URL(link.getAttribute('href'), location.href).href })
+    clone.querySelectorAll('a[href]').forEach(link => { link.href = new URL(link.getAttribute('href'), sourceUrl).href })
     clone.querySelectorAll('img').forEach(img => {
-      img.src = new URL(img.dataset.src || img.getAttribute('src'), location.href).href
+      img.src = new URL(img.dataset.src || img.getAttribute('src'), sourceUrl).href
       img.removeAttribute('srcset')
       img.removeAttribute('loading')
     })
@@ -50,8 +48,7 @@
   const styles = `body{max-width:860px;margin:40px auto;padding:0 24px;color:#292929;background:#fff;font:16px/1.9 Georgia,"Noto Serif SC",serif}h1,h2,h3,h4,h5,h6{line-height:1.45;break-after:avoid}h1{font-size:28px}h2{font-size:23px;margin-top:1.6em}h3{font-size:20px}img,svg{max-width:100%;height:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f5f5;padding:16px;font:13px/1.6 monospace}code{font-family:monospace}blockquote{margin-left:0;padding-left:16px;border-left:3px solid #ccc;color:#555}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:6px 10px}a{color:inherit}math{font-size:1.1em}math[display=block]{display:block;margin:1.3em 0}figure{margin:1.4em 0}.source{font:12px/1.5 sans-serif;color:#777}@page{size:A4;margin:20mm}@media print{body{margin:0;padding:0;max-width:none}a{text-decoration:none}img,pre,tr{break-inside:avoid}}`
   // 浏览器页眉页脚占用 @page 的页边距；设为零，在文档内保留可重复的留白。
   const printStyles = `#export-layout>thead,#export-layout>tfoot{display:none}#export-layout>tbody>tr>td{border:0;padding:0}#export-layout{border:0}@page{margin:0}@media print{body{padding:0 20mm}#export-layout>thead{display:table-header-group}#export-layout>tfoot{display:table-footer-group}#export-layout>thead>tr>td,#export-layout>tfoot>tr>td{height:16mm;border:0;padding:0}#export-layout>tbody>tr{break-inside:auto}#export-layout>tbody>tr>td{vertical-align:top}h1{margin-top:0}}`
-  const makeHTML = async () => {
-    const clone = cloneArticle()
+  const makeHTML = async (clone, title, sourceUrl) => {
     let missing = 0
     await Promise.all([...clone.querySelectorAll('img')].map(async img => {
       try { img.src = await dataURL(await fetchImage(img.src)) } catch { missing++ }
@@ -65,7 +62,7 @@
       const math = node.querySelector('math')
       if (math) node.replaceWith(math)
     })
-    const html = '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escape(title()) + '</title><style>' + styles + printStyles + '</style></head><body><table id="export-layout" role="presentation"><thead><tr><td></td></tr></thead><tbody><tr><td><h1>' + escape(title()) + '</h1><p class="source">源网址：' + escape(location.href.split('#')[0]) + '</p><article>' + clone.innerHTML + '</article></td></tr></tbody><tfoot><tr><td></td></tr></tfoot></table></body></html>'
+    const html = '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escape(title) + '</title><style>' + styles + printStyles + '</style></head><body><table id="export-layout" role="presentation"><thead><tr><td></td></tr></thead><tbody><tr><td><h1>' + escape(title) + '</h1><p class="source">源网址：' + escape(sourceUrl) + '</p><article>' + clone.innerHTML + '</article></td></tr></tbody><tfoot><tr><td></td></tr></tfoot></table></body></html>'
     return { html, missing }
   }
   let docxPromise
@@ -80,9 +77,8 @@
     })
     return docxPromise
   }
-  const makeWord = async () => {
+  const makeWord = async (clone, title, sourceUrl, name) => {
     const d = await loadDocx()
-    const clone = cloneArticle()
     let missing = 0
     let mathFallbacks = 0
     // 将常见 MathML 结构转换为 Word 原生可编辑公式；复杂结构保留 LaTeX。
@@ -178,21 +174,27 @@
       }
       return result
     }
-    const doc = new d.Document({ creator: document.querySelector('meta[name="author"]')?.content || '', title: title(), styles: { default: { document: { run: { font: '宋体', size: 24 }, paragraph: { spacing: { line: 360 } } } }, headings: { heading1: { run: { color: '292929' } }, heading2: { run: { color: '292929' } }, heading3: { run: { color: '292929' } } } }, sections: [{ children: [new d.Paragraph({ text: title(), heading: d.HeadingLevel.TITLE }), new d.Paragraph({ text: '源网址：' + location.href.split('#')[0] }), ...await blocks(clone)] }] })
-    download(await d.Packer.toBlob(doc), '.docx')
+    const doc = new d.Document({ creator: document.querySelector('meta[name="author"]')?.content || '', title, styles: { default: { document: { run: { font: '宋体', size: 24 }, paragraph: { spacing: { line: 360 } } } }, headings: { heading1: { run: { color: '292929' } }, heading2: { run: { color: '292929' } }, heading3: { run: { color: '292929' } } } }, sections: [{ children: [new d.Paragraph({ text: title, heading: d.HeadingLevel.TITLE }), new d.Paragraph({ text: '源网址：' + sourceUrl }), ...await blocks(clone)] }] })
+    download(await d.Packer.toBlob(doc), name + '.docx')
     return 'Word 已生成' + (mathFallbacks ? '，' + mathFallbacks + ' 个复杂公式保留为 LaTeX' : '（含可编辑公式）') + (missing ? '，' + missing + ' 张图片未能嵌入' : '')
   }
   window.liquidExportArticle = async format => {
+    const article = document.querySelector('#post > #article-container')
+    if (!article) throw new Error('找不到当前文章')
+    const title = getTitle()
+    const name = filename(title)
+    const sourceUrl = location.href.split('#')[0]
     if (format === 'markdown') {
       if (!window.liquidArticleMarkdown) throw new Error('Markdown 组件尚未加载')
-      const markdown = '# ' + title() + '\n\n' + window.liquidArticleMarkdown(article) + '\n'
-      download(new Blob([markdown], { type: 'text/markdown;charset=utf-8' }), '.md')
+      const markdown = '# ' + title + '\n\n' + window.liquidArticleMarkdown(article) + '\n'
+      download(new Blob([markdown], { type: 'text/markdown;charset=utf-8' }), name + '.md')
       return 'Markdown 已生成（图片使用原文链接）'
     }
-    if (format === 'word') return makeWord()
-    const { html, missing } = await makeHTML()
+    const clone = cloneArticle(article, sourceUrl)
+    if (format === 'word') return makeWord(clone, title, sourceUrl, name)
+    const { html, missing } = await makeHTML(clone, title, sourceUrl)
     if (format === 'html') {
-      download(new Blob([html], { type: 'text/html;charset=utf-8' }), '.html')
+      download(new Blob([html], { type: 'text/html;charset=utf-8' }), name + '.html')
       return missing ? 'HTML 已生成，' + missing + ' 张图片保留在线链接' : 'HTML 已生成（图片已嵌入）'
     }
     if (format === 'pdf') {

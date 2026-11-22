@@ -329,28 +329,6 @@ html.solid-bg[data-theme='dark'] .layout .pagination > *:not(.space) {
   background-color: #1e1e1e;
 }
 
-/* 正文链接改成素灰，悬停略深。 */
-#article-container a,
-#post .post-copyright .post-copyright-info a {
-  color: #6f6f6f;
-  text-decoration-color: rgba(111, 111, 111, 0.45);
-}
-
-#article-container a:hover,
-#post .post-copyright .post-copyright-info a:hover {
-  color: #2b2b2b;
-}
-
-[data-theme='dark'] #article-container a,
-[data-theme='dark'] #post .post-copyright .post-copyright-info a {
-  color: #b6b6b6;
-}
-
-[data-theme='dark'] #article-container a:hover,
-[data-theme='dark'] #post .post-copyright .post-copyright-info a:hover {
-  color: #f2f2f2;
-}
-
 /* 版权框、标签和框内链接改成跟随正文颜色，不再用浅蓝色。 */
 #post .post-copyright,
 #post .post-copyright .post-copyright-meta,

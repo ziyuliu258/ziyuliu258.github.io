@@ -12,7 +12,43 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-11-22T06:37:50.968Z</updated>
+  <updated>2026-11-22T09:51:15.084Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="3D Reconstruction" scheme="https://ziyuliu258.cn/blog/tags/3D-Reconstruction/"/>
+    <category term="Object Pose Estimation" scheme="https://ziyuliu258.cn/blog/tags/Object-Pose-Estimation/"/>
+    <category term="Robotic Manipulation" scheme="https://ziyuliu258.cn/blog/tags/Robotic-Manipulation/"/>
+    <id>https://ziyuliu258.cn/blog/posts/7a994451/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/7a994451/"/>
+    <published>2026-11-22T09:47:51.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：如果桌上放着一个没有 CAD 的连接器，单图生成模型可以补出它的背面，但也可能在插口边缘多生成一块材料。OV-PEAR 先把生成的模型缩放并对齐到机器人工作空间，再用多视角深度验证哪些体素该留下。这里最值得看的，是]]>
+    </summary>
+    <title>论文阅读：OV-PEAR</title>
+    <updated>2026-11-22T09:51:15.084Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="空间推理" scheme="https://ziyuliu258.cn/blog/tags/%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86/"/>
+    <id>https://ziyuliu258.cn/blog/posts/9b0b150/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/9b0b150/"/>
+    <published>2026-11-22T09:08:00.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>相机向右转时，一把静止的椅子也会在画面里向左移动。Spatial-Interactor 把这个观察用在了视觉语言模型的训练上。先让模型从相邻画面推断]]>
+    </summary>
+    <title>论文阅读：Spatial-Interactor</title>
+    <updated>2026-11-22T09:33:14.664Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -29,7 +65,7 @@
 <p>引：Spatial Harness 由香港浸会大学 TMLR Group 与 ByteDance Seed 合作完成（Chentao Cao、Zhanke Zhou 等，通讯作者 Bo Han），发表于 NeurIPS]]>
     </summary>
     <title>论文阅读：Spatial Harness</title>
-    <updated>2026-11-22T06:37:50.968Z</updated>
+    <updated>2026-11-22T09:18:30.402Z</updated>
   </entry>
   <entry>
     <author>
@@ -47,7 +83,7 @@
 <p>引：本文来自 NVIDIA (Bowen Wen, Wei Yang, Jan Kautz, Stan Birchfield)，CVPR 2024。它想用<strong>一个模型</strong>同时解决四件事：新物体的 6D]]>
     </summary>
     <title>论文阅读：FoundationPose</title>
-    <updated>2026-11-21T17:56:33.839Z</updated>
+    <updated>2026-11-22T11:46:00.399Z</updated>
   </entry>
   <entry>
     <author>
@@ -109,24 +145,6 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="3D Dataset" scheme="https://ziyuliu258.cn/blog/tags/3D-Dataset/"/>
-    <category term="Spatial Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Spatial-Intelligence/"/>
-    <id>https://ziyuliu258.cn/blog/posts/c537def8/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/c537def8/"/>
-    <published>2026-11-20T09:39:21.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>引：Spatial Foundry]]>
-    </summary>
-    <title>论文阅读：Spatial Foundry</title>
-    <updated>2026-11-21T17:56:01.134Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
     <category term="3D Generation" scheme="https://ziyuliu258.cn/blog/tags/3D-Generation/"/>
     <category term="Agent" scheme="https://ziyuliu258.cn/blog/tags/Agent/"/>
     <id>https://ziyuliu258.cn/blog/posts/4318b9d/</id>
@@ -155,7 +173,7 @@
 <p>引：VULCAN 由 Stanford、Google 与 NYU 合作完成，第一作者 Zhengfei Kuang 在 Google 实习期间完成这项工作，谢赛宁 (Saining Xie) 是作者之一。论文要解决的是让多模态大模型在三维场景里]]>
     </summary>
     <title>论文阅读：VULCAN</title>
-    <updated>2026-11-21T17:56:33.839Z</updated>
+    <updated>2026-11-22T09:18:30.402Z</updated>
   </entry>
   <entry>
     <author>
@@ -308,8 +326,8 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="GUI Agent" scheme="https://ziyuliu258.cn/blog/tags/GUI-Agent/"/>
     <category term="Vision-Language Models" scheme="https://ziyuliu258.cn/blog/tags/Vision-Language-Models/"/>
+    <category term="GUI Agent" scheme="https://ziyuliu258.cn/blog/tags/GUI-Agent/"/>
     <category term="SFT" scheme="https://ziyuliu258.cn/blog/tags/SFT/"/>
     <id>https://ziyuliu258.cn/blog/posts/2e949ae7/</id>
     <link href="https://ziyuliu258.cn/blog/posts/2e949ae7/"/>
@@ -319,7 +337,7 @@
 <p>引：UI-TARS 将 GUI agent 中的感知、动作选择和部分工作流程，放进一个接收截图、生成操作的 VLM。本文最值得关注的是它怎样构造训练数据：从界面元素理解到多步轨迹，再到模型亲自执行后产生的错误与纠正。尤其是]]>
     </summary>
     <title>论文阅读：UI-TARS</title>
-    <updated>2026-11-21T16:49:25.055Z</updated>
+    <updated>2026-11-22T09:18:30.403Z</updated>
   </entry>
   <entry>
     <author>
@@ -355,23 +373,5 @@
     </summary>
     <title>论文阅读：LoRA</title>
     <updated>2026-11-21T16:45:49.975Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="3D Generation" scheme="https://ziyuliu258.cn/blog/tags/3D-Generation/"/>
-    <category term="Embodied Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Embodied-Intelligence/"/>
-    <id>https://ziyuliu258.cn/blog/posts/32a3a35f/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/32a3a35f/"/>
-    <published>2026-10-29T17:03:48.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>引：Minghan Qin、Yuang Wang、Xiuyu Yang 等人提出 Lucida，从真实室内场景的多视角观测中恢复完整、可独立编辑的物体资产，并将它们放回原来的位置。本文保留“解析、生成、摆放”的三阶段流程，最值得关注的是最后的]]>
-    </summary>
-    <title>论文阅读：Lucida</title>
-    <updated>2026-11-21T17:56:33.841Z</updated>
   </entry>
 </feed>
