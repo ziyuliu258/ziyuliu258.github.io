@@ -12,7 +12,7 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-11-22T09:51:15.084Z</updated>
+  <updated>2026-11-22T14:00:58.082Z</updated>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -30,7 +30,7 @@
 <p>引：如果桌上放着一个没有 CAD 的连接器，单图生成模型可以补出它的背面，但也可能在插口边缘多生成一块材料。OV-PEAR 先把生成的模型缩放并对齐到机器人工作空间，再用多视角深度验证哪些体素该留下。这里最值得看的，是]]>
     </summary>
     <title>论文阅读：OV-PEAR</title>
-    <updated>2026-11-22T09:51:15.084Z</updated>
+    <updated>2026-11-22T14:00:58.082Z</updated>
   </entry>
   <entry>
     <author>
@@ -270,8 +270,8 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="Embodied Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Embodied-Intelligence/"/>
     <category term="Imitation Learning" scheme="https://ziyuliu258.cn/blog/tags/Imitation-Learning/"/>
+    <category term="Embodied Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Embodied-Intelligence/"/>
     <category term="Multimodal Learning" scheme="https://ziyuliu258.cn/blog/tags/Multimodal-Learning/"/>
     <id>https://ziyuliu258.cn/blog/posts/bfa59942/</id>
     <link href="https://ziyuliu258.cn/blog/posts/bfa59942/"/>
@@ -326,8 +326,8 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="Vision-Language Models" scheme="https://ziyuliu258.cn/blog/tags/Vision-Language-Models/"/>
     <category term="GUI Agent" scheme="https://ziyuliu258.cn/blog/tags/GUI-Agent/"/>
+    <category term="Vision-Language Models" scheme="https://ziyuliu258.cn/blog/tags/Vision-Language-Models/"/>
     <category term="SFT" scheme="https://ziyuliu258.cn/blog/tags/SFT/"/>
     <id>https://ziyuliu258.cn/blog/posts/2e949ae7/</id>
     <link href="https://ziyuliu258.cn/blog/posts/2e949ae7/"/>

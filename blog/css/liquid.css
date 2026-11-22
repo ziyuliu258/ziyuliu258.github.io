@@ -455,6 +455,7 @@ html.solid-bg:not([data-theme='dark']) #page-header #post-meta a,
 html.solid-bg:not([data-theme='dark']) #page-header #nav,
 html.solid-bg:not([data-theme='dark']) #page-header #nav a,
 html.solid-bg:not([data-theme='dark']) #page-header #nav span.site-page,
+html.solid-bg:not([data-theme='dark']) #page-header #nav button.site-page,
 html.solid-bg:not([data-theme='dark']) #page-header #blog-info,
 html.solid-bg:not([data-theme='dark']) #page-header #toggle-menu,
 html.solid-bg:not([data-theme='dark']) #footer,
@@ -465,6 +466,7 @@ html.solid-bg:not([data-theme='dark']) #footer a {
 
 html.solid-bg:not([data-theme='dark']) #page-header #nav a:hover,
 html.solid-bg:not([data-theme='dark']) #page-header #nav span.site-page:hover,
+html.solid-bg:not([data-theme='dark']) #page-header #nav button.site-page:hover,
 html.solid-bg:not([data-theme='dark']) #page-header #toggle-menu:hover {
   color: var(--solid-fg, #2c3138);
 }
