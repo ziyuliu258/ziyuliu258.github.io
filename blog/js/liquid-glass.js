@@ -710,6 +710,13 @@
     `
     const fsSrc = `
       precision highp float;
+      #define PI 3.14159265359
+
+      // Exact dispersion refractive indices from iyinchao/liquid-glass-studio (fragment-main.glsl)
+      const float N_R = 0.98;
+      const float N_G = 1.00;
+      const float N_B = 1.02;
+
       uniform sampler2D uTex;
       uniform vec4 uCanvasRect;
       uniform vec4 uBgRect;
@@ -717,6 +724,10 @@
       uniform float uDark;
       uniform vec4 uLens; // x, w, alpha, velNorm (-1..1)
       varying vec2 vUv;
+
+      float safeAsin(float x) {
+        return asin(clamp(x, -1.0, 1.0));
+      }
 
       float sdCapsule(vec2 p, vec2 b, float r) {
         vec2 q = abs(p) - b + vec2(r);
@@ -736,27 +747,61 @@
         return n * s;
       }
 
-      // kube.io Convex Squircle height profile: h(t) = (1 - (1 - t)^4)^(1/4)
-      vec2 squircleProfile(float t) {
-        float u = clamp(1.0 - t, 0.0, 0.955);
-        float u3 = u * u * u;
-        float u4 = u3 * u;
-        float inside = max(1.0 - u4, 1e-4);
-        float h = pow(inside, 0.25);
-        float dhdt = u3 / pow(inside, 0.75);
-        return vec2(h, dhdt);
+      float vec2ToAngle(vec2 v) {
+        if (dot(v, v) < 1e-10) return 0.0;
+        float a = atan(v.y, v.x);
+        if (a < 0.0) a += 2.0 * PI;
+        return a;
       }
 
-      float snellDisp(float t, float bezelW, float thickness, float ior) {
-        if (t >= 1.0) return 0.0;
-        vec2 prof = squircleProfile(t);
-        float h = prof.x;
-        float slope = prof.y;
-        float thetaI = atan(slope);
-        float sinT = sin(thetaI) / ior;
-        float thetaT = asin(clamp(sinT, -0.99, 0.99));
-        float totalH = h * bezelW + thickness;
-        return totalH * tan(thetaI - thetaT);
+      // Perceptual sRGB <-> LCH color space stack (exact port of iyinchao/liquid-glass-studio lib/color.glsl)
+      float uncompandSRGB(float a) {
+        a = clamp(a, 0.0, 1.0);
+        return a > 0.04045 ? pow((a + 0.055) / 1.055, 2.4) : a / 12.92;
+      }
+
+      float compandRGB(float a) {
+        a = max(a, 0.0);
+        return a <= 0.0031308 ? 12.92 * a : 1.055 * pow(a, 0.41666666666) - 0.055;
+      }
+
+      float xyzToLabF(float x) {
+        x = max(x, 0.0);
+        return x > 0.00885645167 ? pow(x, 0.333333333) : 7.78703703704 * x + 0.13793103448;
+      }
+
+      float labToXyzF(float x) {
+        return x > 0.206897 ? x * x * x : 0.12841854934 * (x - 0.137931034);
+      }
+
+      vec3 srgbToLch(vec3 srgb) {
+        vec3 rgb = vec3(uncompandSRGB(srgb.r), uncompandSRGB(srgb.g), uncompandSRGB(srgb.b));
+        vec3 xyz = vec3(
+          dot(rgb, vec3(0.4124, 0.3576, 0.1805)),
+          dot(rgb, vec3(0.2126, 0.7152, 0.0722)),
+          dot(rgb, vec3(0.0193, 0.1192, 0.9505))
+        );
+        vec3 w = vec3(0.95045592705, 1.0, 1.08905775076);
+        vec3 s = xyz / w;
+        vec3 f = vec3(xyzToLabF(s.x), xyzToLabF(s.y), xyzToLabF(s.z));
+        vec3 lab = vec3(116.0 * f.y - 16.0, 500.0 * (f.x - f.y), 200.0 * (f.y - f.z));
+        float C = sqrt(dot(lab.yz, lab.yz));
+        float H = C > 1e-5 ? atan(lab.z, lab.y) * 57.2957795131 : 0.0;
+        return vec3(lab.x, C, H);
+      }
+
+      vec3 lchToSrgb(vec3 lch) {
+        float rad = lch.z * 0.01745329251;
+        vec3 lab = vec3(lch.x, lch.y * cos(rad), lch.y * sin(rad));
+        float fy = (lab.x + 16.0) / 116.0;
+        vec3 w = vec3(0.95045592705, 1.0, 1.08905775076);
+        vec3 xyz = w * vec3(labToXyzF(fy + lab.y / 500.0), labToXyzF(fy), labToXyzF(fy - lab.z / 200.0));
+        vec3 rgb = vec3(
+          dot(xyz, vec3( 3.2406255, -1.5372080, -0.4986286)),
+          dot(xyz, vec3(-0.9689307,  1.8757561,  0.0415175)),
+          dot(xyz, vec3( 0.0557101, -0.2040211,  1.0569959))
+        );
+        return clamp(vec3(compandRGB(rgb.r), compandRGB(rgb.g), compandRGB(rgb.b)), 0.0, 1.0);
       }
 
       vec3 sampleBgRaw(vec2 vpPos) {
@@ -764,83 +809,107 @@
         return texture2D(uTex, uv).rgb * (1.0 - uVeil);
       }
 
-      // Crisp crystal interior + silky anti-aliased bevel (prevents 1px streaking along steep refraction edge)
-      vec3 sampleBg(vec2 vpPos, float bevelAA) {
-        if (bevelAA <= 0.05) return sampleBgRaw(vpPos);
-        vec3 c = sampleBgRaw(vpPos) * 0.40;
-        c += sampleBgRaw(vpPos + vec2(bevelAA, 0.0)) * 0.15;
-        c += sampleBgRaw(vpPos - vec2(bevelAA, 0.0)) * 0.15;
-        c += sampleBgRaw(vpPos + vec2(0.0, bevelAA)) * 0.15;
-        c += sampleBgRaw(vpPos - vec2(0.0, bevelAA)) * 0.15;
+      // Subtle 9-tap optical blur (equivalent to iyinchao blurRadius ~ 1.5px, crystal clear not frosted)
+      vec3 sampleBgSoft(vec2 vpPos, float r) {
+        if (r <= 0.05) return sampleBgRaw(vpPos);
+        vec3 c = sampleBgRaw(vpPos) * 0.25;
+        c += sampleBgRaw(vpPos + vec2( r, 0.0)) * 0.125;
+        c += sampleBgRaw(vpPos + vec2(-r, 0.0)) * 0.125;
+        c += sampleBgRaw(vpPos + vec2(0.0,  r)) * 0.125;
+        c += sampleBgRaw(vpPos + vec2(0.0, -r)) * 0.125;
+        float d = r * 0.7071;
+        c += sampleBgRaw(vpPos + vec2( d,  d)) * 0.0625;
+        c += sampleBgRaw(vpPos + vec2(-d,  d)) * 0.0625;
+        c += sampleBgRaw(vpPos + vec2( d, -d)) * 0.0625;
+        c += sampleBgRaw(vpPos + vec2(-d, -d)) * 0.0625;
         return c;
       }
 
-      vec3 saturateColor(vec3 c, float sat) {
-        float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
-        return mix(vec3(l), c, sat);
-      }
-
-      vec3 shadeGlass(
+      // Exact port of iyinchao/liquid-glass-studio STEP 9 optical pipeline:
+      // 1) Bounded Snell edge refraction: thetaI = asin((1 - d/T)^2), edgeFactor = -tan(thetaT - thetaI)
+      // 2) Subtle R/G/B chromatic dispersion (N_R=0.98, N_G=1.00, N_B=1.02)
+      // 3) Tight 5th-power Fresnel rim (lives strictly in outermost 0..3px, never a puffy 3D bubble)
+      // 4) Dual-peak directional LCH glare (boosts L & C of actual refracted color, not flat white paint)
+      // 5) Hairline 1px dark silhouette accent on the shadow arc
+      vec3 shadeLiquidGlass(
         vec2 px, vec2 center, vec2 halfSize, float radius,
-        float bezelW, float thickness, float dispGain, float chromaSpread,
-        float specBoost, float glintShift, float centerMag
+        float refThickness, float refFactor, float refDispPx, float refDispersion,
+        float fresnelRange, float fresnelHardness, float fresnelStrength,
+        float glareRange, float glareHardness, float glareFactor,
+        float glareConvergence, float glareOppositeFactor, float glareAngleOff,
+        float blurPx, vec4 tint
       ) {
         vec2 rel = px - center;
         float d = sdCapsule(rel, halfSize, radius);
-        float depth = max(-d, 0.0);
+        float nmerged = max(-d, 0.0);
         vec2 outN = sdCapsuleNormal(rel, halfSize, radius);
-        float t = clamp(depth / bezelW, 0.0, 1.0);
+        vec2 vpBase = uCanvasRect.xy + px;
 
-        float dispR = snellDisp(t, bezelW, thickness, 1.44 - chromaSpread) * dispGain;
-        float dispG = snellDisp(t, bezelW, thickness, 1.52) * dispGain;
-        float dispB = snellDisp(t, bezelW, thickness, 1.60 + chromaSpread) * dispGain;
+        float edgeFactor = 0.0;
+        if (nmerged < refThickness) {
+          float xR = 1.0 - nmerged / refThickness;
+          float thetaI = safeAsin(xR * xR);
+          float thetaT = safeAsin(sin(thetaI) / refFactor);
+          edgeFactor = -tan(thetaT - thetaI);
+        }
 
-        // Subtle convex center magnification for realistic water-drop lens feel
-        vec2 magOffset = -rel * centerMag;
-        vec2 vpBase = uCanvasRect.xy + px + magOffset;
-        float bevelAA = (1.0 - t) * (1.0 - t) * 1.45;
+        vec3 refracted;
+        if (edgeFactor <= 0.0001) {
+          refracted = sampleBgSoft(vpBase, blurPx);
+        } else {
+          vec2 offset = -outN * edgeFactor * refDispPx;
+          refracted.r = sampleBgSoft(vpBase + offset * (1.0 - (N_R - 1.0) * refDispersion), blurPx).r;
+          refracted.g = sampleBgSoft(vpBase + offset * (1.0 - (N_G - 1.0) * refDispersion), blurPx).g;
+          refracted.b = sampleBgSoft(vpBase + offset * (1.0 - (N_B - 1.0) * refDispersion), blurPx).b;
+        }
 
-        vec3 col;
-        col.r = sampleBg(vpBase - outN * dispR, bevelAA).r;
-        col.g = sampleBg(vpBase - outN * dispG, bevelAA).g;
-        col.b = sampleBg(vpBase - outN * dispB, bevelAA).b;
+        vec3 outCol = mix(refracted, tint.rgb, tint.a * 0.8);
 
-        col = saturateColor(col, 1.38);
-        col *= (uDark > 0.5 ? 1.04 : 1.05);
+        if (nmerged < refThickness) {
+          // 1) Razor-tight 5th-power Fresnel rim (outermost 0..3px only)
+          float fRatio = 500.0 / fresnelRange;
+          float fBase = 1.0 - (nmerged / 1500.0) * (fRatio * fRatio) + fresnelHardness;
+          float fresnelFactor = clamp(pow(max(fBase, 0.0), 5.0), 0.0, 1.0);
 
-        // Crystal clarity: only a subtle top sky reflection, zero matte milkiness
-        float topGrad = 1.0 - clamp((rel.y + halfSize.y) / (2.0 * halfSize.y), 0.0, 1.0);
-        col += vec3(1.0) * (uDark > 0.5 ? 0.022 : 0.042) * smoothstep(0.55, 1.0, topGrad);
+          if (fresnelFactor > 0.001) {
+            vec3 fTintLCH = srgbToLch(mix(vec3(1.0), tint.rgb, tint.a * 0.5));
+            fTintLCH.x = clamp(fTintLCH.x + 20.0 * fresnelFactor * fresnelStrength, 0.0, 100.0);
+            outCol = mix(outCol, lchToSrgb(fTintLCH), fresnelFactor * fresnelStrength * 0.7);
+          }
 
-        // 3D normal on Convex Squircle surface for physical Fresnel + directional speculars
-        vec2 prof = squircleProfile(t);
-        float slope = t < 1.0 ? prof.y : 0.0;
-        vec3 surfN = normalize(vec3(outN * slope, 1.0));
-        vec3 viewDir = vec3(0.0, 0.0, 1.0);
-        float ndotv = max(dot(surfN, viewDir), 0.0);
-        float fresnel = pow(1.0 - ndotv, 2.8);
+          // 2) Dual-peak directional LCH Glare (top-left primary + bottom-right opposite peak)
+          float gRatio = 500.0 / glareRange;
+          float gBase = 1.0 - (nmerged / 1500.0) * (gRatio * gRatio) + glareHardness;
+          float glareGeo = clamp(pow(max(gBase, 0.0), 5.0), 0.0, 1.0);
 
-        vec3 light1 = normalize(vec3(-0.36 + glintShift, -0.84, 0.42));
-        vec3 light2 = normalize(vec3(0.40 + glintShift * 0.5, 0.80, 0.44));
-        vec3 half1 = normalize(light1 + viewDir);
-        vec3 half2 = normalize(light2 + viewDir);
-        float spec1 = pow(max(dot(surfN, half1), 0.0), 22.0);
-        float spec2 = pow(max(dot(surfN, half2), 0.0), 26.0) * 0.55;
+          if (glareGeo > 0.001) {
+            // Flip Y to match WebGL bottom-up normal angle convention from iyinchao/liquid-glass-studio
+            vec2 glN = vec2(outN.x, -outN.y);
+            float gAng = (vec2ToAngle(glN) - PI * 0.25 + glareAngleOff) * 2.0;
+            bool isFarside = (gAng > PI * 1.5 && gAng < PI * 3.5) || (gAng < -PI * 0.5);
+            float gAngFactor = (0.5 + sin(gAng) * 0.5) * (isFarside ? 1.2 * glareOppositeFactor : 1.2) * glareFactor;
+            gAngFactor = clamp(pow(max(gAngFactor, 0.0), 0.1 + glareConvergence * 2.0), 0.0, 1.0);
 
-        // Directional top-left & antipodal bottom-right glass rim (carved crystal, not a soap-bubble ring)
-        float rimMask = 1.0 - smoothstep(0.0, 1.8, depth);
-        float rimDir = 0.12 + 0.88 * max(dot(outN, normalize(vec2(-0.42 + glintShift, -0.90))), 0.0);
-        float rimAnti = 0.48 * max(dot(outN, normalize(vec2(0.42 + glintShift, 0.90))), 0.0);
-        float rimLight = rimMask * (rimDir + rimAnti);
+            float glareWeight = gAngFactor * glareGeo;
+            if (glareWeight > 0.001) {
+              vec3 gLCH = srgbToLch(mix(refracted, tint.rgb, tint.a * 0.5));
+              gLCH.x = clamp(gLCH.x + 150.0 * glareWeight, 0.0, 120.0);
+              gLCH.y += 30.0 * glareWeight;
+              outCol = mix(outCol, lchToSrgb(gLCH), glareWeight);
+            }
+          }
+        }
 
-        // Subtle dark TIR edge right inside the specular rim for genuine thick glass depth
-        float tirBand = smoothstep(0.9, 2.8, depth) * (1.0 - smoothstep(2.8, 6.2, depth));
-        col *= (1.0 - tirBand * 0.20);
+        // 3) Hairline 1px dark silhouette accent on shadow arc (iyinchao darkEdgeWidth = 1px)
+        float darkMask = 1.0 - smoothstep(0.4, 1.25, nmerged);
+        if (darkMask > 0.001) {
+          vec2 glN = vec2(outN.x, -outN.y);
+          float gAng = (vec2ToAngle(glN) - PI * 0.25 + glareAngleOff) * 2.0;
+          float shadowArc = 1.0 - (0.5 + sin(gAng) * 0.5);
+          outCol *= 1.0 - darkMask * shadowArc * (uDark > 0.5 ? 0.18 : 0.28);
+        }
 
-        float totalSpec = (fresnel * 0.30 + spec1 * 0.78 + spec2 * 0.44 + rimLight * 0.54) * specBoost;
-        col += vec3(1.0) * totalSpec * (uDark > 0.5 ? 0.62 : 0.88);
-
-        return col;
+        return outCol;
       }
 
       void main() {
@@ -853,7 +922,18 @@
         float outerAlpha = 1.0 - smoothstep(-0.7, 0.7, dOuter);
         if (outerAlpha <= 0.002) discard;
 
-        vec3 col = shadeGlass(px, halfSize, halfSize, radius, 16.0, 8.0, 1.05, 0.045, 0.92, 0.0, 0.0);
+        vec4 baseTint = uDark > 0.5 ? vec4(0.06, 0.07, 0.09, 0.10) : vec4(1.0, 1.0, 1.0, 0.04);
+        float outerGlare = uDark > 0.5 ? 0.56 : 0.78;
+        float outerFresnel = uDark > 0.5 ? 0.14 : 0.18;
+
+        vec3 col = shadeLiquidGlass(
+          px, halfSize, halfSize, radius,
+          15.0, 1.40, 22.0, 7.0,
+          28.0, 0.18, outerFresnel,
+          28.0, 0.18, outerGlare,
+          0.52, 0.80, 0.0,
+          1.4, baseTint
+        );
 
         float lensAlpha = uLens.z;
         if (lensAlpha > 0.004) {
@@ -862,23 +942,23 @@
           float lensR = 18.0;
           float dLens = sdCapsule(px - lensCenter, lensHalf, lensR);
 
-          // Soft contact shadow cast onto the outer glass bar by the raised hover droplet
-          float dShadow = sdCapsule(px - (lensCenter + vec2(0.0, 2.2)), lensHalf, lensR);
-          float shadow = (1.0 - smoothstep(-1.0, 7.5, dShadow)) * smoothstep(-0.5, 1.5, dLens) * lensAlpha;
-          col *= (1.0 - shadow * 0.30);
+          // Whisper-soft ambient shadow beneath the raised hover glass pill
+          float dShadow = sdCapsule(px - (lensCenter + vec2(0.0, 1.6)), lensHalf, lensR);
+          float shadow = (1.0 - smoothstep(-0.5, 6.0, dShadow)) * smoothstep(-0.4, 1.2, dLens) * lensAlpha;
+          col *= (1.0 - shadow * 0.15);
 
           float lensMask = (1.0 - smoothstep(-0.65, 0.65, dLens)) * lensAlpha;
           if (lensMask > 0.002) {
             float speed = abs(uLens.w);
-            float glintShift = uLens.w * 0.50;
-            vec3 lensCol = shadeGlass(
+            float glareTilt = -uLens.w * 0.45;
+            vec4 lensTint = uDark > 0.5 ? vec4(1.0, 1.0, 1.0, 0.04) : vec4(1.0, 1.0, 1.0, 0.06);
+            vec3 lensCol = shadeLiquidGlass(
               px, lensCenter, lensHalf, lensR,
-              13.5, 11.5,
-              1.25 + speed * 0.55,
-              0.075 + speed * 0.17,
-              1.18,
-              glintShift,
-              0.045
+              13.0, 1.44, 26.0 + speed * 14.0, 7.5 + speed * 11.0,
+              25.0, 0.20, uDark > 0.5 ? 0.18 : 0.22,
+              25.0, 0.20, uDark > 0.5 ? 0.68 : 0.88,
+              0.50, 0.80, glareTilt,
+              1.0, lensTint
             );
             col = mix(col, lensCol, lensMask);
           }
