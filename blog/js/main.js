@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const highlightShrinkClass = isHighlightShrink === true ? 'closed' : ''
     const highlightShrinkEle = isHighlightShrink !== undefined ? '<i class="fas fa-angle-down expand"></i>' : ''
     const highlightCopyEle = highlightCopy ? '<div class="copy-notice"></div><i class="fas fa-paste copy-button"></i>' : ''
-    const highlightMacStyleEle = '<div class="macStyle"><div class="mac-close"></div><div class="mac-minimize"></div><div class="mac-maximize"></div></div>'
+    const highlightMacStyleEle = highlightMacStyle ? '<div class="macStyle"><div class="mac-close"></div><div class="mac-minimize"></div><div class="mac-maximize"></div></div>' : ''
     const highlightFullpageEle = highlightFullpage ? '<i class="fa-solid fa-up-right-and-down-left-from-center fullpage-button"></i>' : ''
 
     const alertInfo = (ele, text) => {
@@ -162,7 +162,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isShowTool) {
         const hlTools = document.createElement('div')
         hlTools.className = `highlight-tools ${highlightShrinkClass}`
-        hlTools.innerHTML = highlightMacStyleEle + highlightShrinkEle + lang + highlightCopyEle + highlightFullpageEle
+        hlTools.innerHTML = highlightMacStyle
+          ? highlightMacStyleEle + highlightShrinkEle + lang + highlightCopyEle + highlightFullpageEle
+          : lang + highlightCopyEle + highlightFullpageEle + highlightShrinkEle
         btf.addEventListenerPjax(hlTools, 'click', highlightToolsFn)
         fragment.appendChild(hlTools)
       }
@@ -187,13 +189,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return
       }
 
-      if (isPrismjs) {
-        langName = item.getAttribute('data-language') || 'Code'
+      const rawLang = item.getAttribute('data-language')
+      if (rawLang) {
+        langName = rawLang
+      } else if (isPrismjs) {
+        langName = 'Code'
       } else {
         langName = item.getAttribute('class').split(' ')[1]
         if (langName === 'plain' || langName === undefined) langName = 'Code'
       }
-      createEle(`<div class="code-lang">${langName}</div>`, item)
+      const safeLang = String(langName).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]))
+      createEle(`<div class="code-lang">${safeLang}</div>`, item)
     })
   }
 

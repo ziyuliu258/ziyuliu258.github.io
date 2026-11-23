@@ -298,6 +298,118 @@ html.solid-bg[data-theme='dark'] .layout .pagination > *:not(.space) {
   background: rgba(255, 255, 255, 0.14);
 }
 
+/* 代码块：在内置 light 主题基础上微调为朴素中性灰，并补齐黑夜语法配色。 */
+:root {
+  --hl-color: #24292f;
+  --hl-bg: #f6f6f7;
+  --hltools-bg: #efefeff2;
+  --hltools-color: rgba(36, 41, 47, 0.62);
+  --hlnumber-bg: #f6f6f7;
+  --hlnumber-color: rgba(36, 41, 47, 0.34);
+  --hlscrollbar-bg: rgba(0, 0, 0, 0.16);
+  --hlexpand-bg: linear-gradient(180deg, rgba(246, 246, 247, 0.55), rgba(246, 246, 247, 0.96));
+}
+
+[data-theme='dark'] {
+  --hl-color: rgba(255, 255, 255, 0.86);
+  --hl-bg: #222224;
+  --hltools-bg: #29292c;
+  --hltools-color: rgba(255, 255, 255, 0.56);
+  --hlnumber-bg: #222224;
+  --hlnumber-color: rgba(255, 255, 255, 0.32);
+  --hlscrollbar-bg: rgba(255, 255, 255, 0.18);
+  --hlexpand-bg: linear-gradient(180deg, rgba(34, 34, 36, 0.55), rgba(34, 34, 36, 0.96));
+}
+
+#article-container figure.highlight,
+.container figure.highlight {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+[data-theme='dark'] #article-container figure.highlight,
+[data-theme='dark'] .container figure.highlight {
+  border-color: rgba(255, 255, 255, 0.09);
+}
+
+#article-container .highlight-tools,
+.container .highlight-tools {
+  height: 36px;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme='dark'] #article-container .highlight-tools,
+[data-theme='dark'] .container .highlight-tools {
+  border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+#article-container .highlight-tools .code-lang,
+.container .highlight-tools .code-lang {
+  font-family: "JetBrains Mono", "Consolas", monospace;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-transform: none;
+  padding: 0;
+}
+
+#article-container .highlight-tools i,
+.container .highlight-tools i {
+  opacity: 0.72;
+}
+
+#article-container .highlight-tools i:hover,
+.container .highlight-tools i:hover {
+  color: var(--hl-color);
+  opacity: 1;
+}
+
+[data-theme='dark'] figure.highlight pre .comment {
+  color: #8b949e;
+}
+
+[data-theme='dark'] figure.highlight pre .keyword,
+[data-theme='dark'] figure.highlight pre .title,
+[data-theme='dark'] figure.highlight pre .tag {
+  color: #79c0ff;
+}
+
+[data-theme='dark'] figure.highlight pre .variable,
+[data-theme='dark'] figure.highlight pre .attribute,
+[data-theme='dark'] figure.highlight pre .regexp,
+[data-theme='dark'] figure.highlight pre .tag .name,
+[data-theme='dark'] figure.highlight pre .css .class {
+  color: #ff7b72;
+}
+
+[data-theme='dark'] figure.highlight pre .number,
+[data-theme='dark'] figure.highlight pre .preprocessor,
+[data-theme='dark'] figure.highlight pre .literal,
+[data-theme='dark'] figure.highlight pre .params,
+[data-theme='dark'] figure.highlight pre .constant,
+[data-theme='dark'] figure.highlight pre .command {
+  color: #ffa657;
+}
+
+[data-theme='dark'] figure.highlight pre .built_in {
+  color: #e3b341;
+}
+
+[data-theme='dark'] figure.highlight pre .string,
+[data-theme='dark'] figure.highlight pre .value,
+[data-theme='dark'] figure.highlight pre .header,
+[data-theme='dark'] figure.highlight pre .special,
+[data-theme='dark'] figure.highlight pre .formula {
+  color: #7ee787;
+}
+
+[data-theme='dark'] figure.highlight pre .function,
+[data-theme='dark'] figure.highlight pre .meta,
+[data-theme='dark'] figure.highlight pre .tag .attr {
+  color: #d2a8ff;
+}
+
 /* 引用块改成 GitHub 式的纯竖线，去掉圆角和彩色底。 */
 #article-container blockquote,
 .post-content blockquote {
