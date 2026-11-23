@@ -12,7 +12,26 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-11-22T14:00:58.082Z</updated>
+  <updated>2026-11-23T14:34:36.037Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="Spatial Reasoning" scheme="https://ziyuliu258.cn/blog/tags/Spatial-Reasoning/"/>
+    <category term="VLM" scheme="https://ziyuliu258.cn/blog/tags/VLM/"/>
+    <category term="Benchmark" scheme="https://ziyuliu258.cn/blog/tags/Benchmark/"/>
+    <id>https://ziyuliu258.cn/blog/posts/e6712a81/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/e6712a81/"/>
+    <published>2026-11-23T14:31:40.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：SpaceAct 由 Tencent HY 团队完成（Chenglong Shi、Zekai Yuan 等），是一个面向三维时空推理的交互式评测基准，配套提出了统一的主动感知智能体框架]]>
+    </summary>
+    <title>论文阅读：SpaceAct</title>
+    <updated>2026-11-23T14:34:36.037Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -326,8 +345,8 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="GUI Agent" scheme="https://ziyuliu258.cn/blog/tags/GUI-Agent/"/>
     <category term="Vision-Language Models" scheme="https://ziyuliu258.cn/blog/tags/Vision-Language-Models/"/>
+    <category term="GUI Agent" scheme="https://ziyuliu258.cn/blog/tags/GUI-Agent/"/>
     <category term="SFT" scheme="https://ziyuliu258.cn/blog/tags/SFT/"/>
     <id>https://ziyuliu258.cn/blog/posts/2e949ae7/</id>
     <link href="https://ziyuliu258.cn/blog/posts/2e949ae7/"/>
@@ -356,22 +375,5 @@
     </summary>
     <title>论文阅读：What matters when building vision-language models?（Idefics2）</title>
     <updated>2026-11-21T17:56:33.840Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="LLM" scheme="https://ziyuliu258.cn/blog/tags/LLM/"/>
-    <id>https://ziyuliu258.cn/blog/posts/daada0d9/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/daada0d9/"/>
-    <published>2026-10-30T19:17:46.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>引：Edward Hu、Yelong Shen 等人在这篇文章中提出 LoRA。全量微调会为每个下游任务保存一整份与预训练模型同样大的参数；LoRA 改为冻结预训练权重，只训练插在权重旁边的低秩分解。以 GPT-3 175B]]>
-    </summary>
-    <title>论文阅读：LoRA</title>
-    <updated>2026-11-21T16:45:49.975Z</updated>
   </entry>
 </feed>
