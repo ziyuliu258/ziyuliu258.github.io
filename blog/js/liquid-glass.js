@@ -13,7 +13,7 @@
   if (window.__blogLiquidGlass) return
   window.__blogLiquidGlass = true
 
-  const selector = '#aside-content .card-widget'
+  const selector = '#aside-content .card-widget, .nav-pill-glass, .nav-bar-glass'
 
   const pointer = matchMedia('(hover: hover) and (pointer: fine)')
   const reducedTransparency = matchMedia('(prefers-reduced-transparency: reduce)')
@@ -24,6 +24,8 @@
   const refracting = glassConfig.refraction !== false && chromium && CSS.supports('backdrop-filter', 'url("#glass")') && 'ResizeObserver' in window
   // Cache shared SVG filters and specular overlays by geometry signature so 10 post cards only build 1 filter!
   const sharedFilters = new Map()
+  const sharedBarMaps = new Map()
+  let barFilterNode = null
   const surfaceSignature = new WeakMap()
   const ns = 'http://www.w3.org/2000/svg'
   let definitions
@@ -146,7 +148,7 @@
       snellLUT[i] = Math.tan(thetaI - thetaT) / maxEdgeMag
     }
 
-    const dispScale = Math.min(0.5, 480 / w, 240 / h)
+    const dispScale = h <= 80 ? Math.min(1.0, 560 / w, 120 / h) : Math.min(0.5, 480 / w, 240 / h)
     const dispCanvas = document.createElement('canvas')
     dispCanvas.width = Math.max(1, Math.ceil(w * dispScale))
     dispCanvas.height = Math.max(1, Math.ceil(h * dispScale))
@@ -191,7 +193,54 @@
     const scaleR = 2.0 * (maxDisplacePx + maxChromaPx)
     const scaleB = 2.0 * Math.max(0, maxDisplacePx - maxChromaPx)
 
-    if (chromaStrength > 0.01) {
+    if (chromaStrength > 0.01 && h <= 80) {
+      // Compact top capsule: true 3-channel R/G/B prism dispersion (tiny area, static at top)
+      const dispR = svgElement('feDisplacementMap', {
+        in: 'SourceGraphic',
+        in2: 'edge-map',
+        scale: scaleR.toFixed(1),
+        xChannelSelector: 'R',
+        yChannelSelector: 'G',
+        result: 'disp-r'
+      })
+      const matR = svgElement('feColorMatrix', {
+        in: 'disp-r',
+        type: 'matrix',
+        values: '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0',
+        result: 'ch-r'
+      })
+      const dispG = svgElement('feDisplacementMap', {
+        in: 'SourceGraphic',
+        in2: 'edge-map',
+        scale: scaleG.toFixed(1),
+        xChannelSelector: 'R',
+        yChannelSelector: 'G',
+        result: 'disp-g'
+      })
+      const matG = svgElement('feColorMatrix', {
+        in: 'disp-g',
+        type: 'matrix',
+        values: '0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0',
+        result: 'ch-g'
+      })
+      const dispB = svgElement('feDisplacementMap', {
+        in: 'SourceGraphic',
+        in2: 'edge-map',
+        scale: scaleB.toFixed(1),
+        xChannelSelector: 'R',
+        yChannelSelector: 'G',
+        result: 'disp-b'
+      })
+      const matB = svgElement('feColorMatrix', {
+        in: 'disp-b',
+        type: 'matrix',
+        values: '0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0',
+        result: 'ch-b'
+      })
+      const blendRG = svgElement('feBlend', { in: 'ch-r', in2: 'ch-g', mode: 'screen', result: 'ch-rg' })
+      const blendRGB = svgElement('feBlend', { in: 'ch-rg', in2: 'ch-b', mode: 'screen' })
+      filter.append(image, dispR, matR, dispG, matG, dispB, matB, blendRG, blendRGB)
+    } else if (chromaStrength > 0.01) {
       // Lightweight 2-pass R vs GB chromatic dispersion (cuts SVG filter nodes in half vs 3-pass)
       const dispR = svgElement('feDisplacementMap', {
         in: 'SourceGraphic',
@@ -308,10 +357,130 @@
     return shared
   }
 
+  // Ultra-lightweight 1D vertical bottom-lip refraction + chromatic dispersion for full-width scrolled nav bar:
+  // Generates a single 1px x H strip (60 pixels total) once and stretches horizontally on resize in O(1).
+  function getOrUpdateBarFilter(w, h, refractThickness, refractIOR, refractScale, chromaStrength) {
+    if (!definitions) {
+      const svg = svgElement('svg', { width: 0, height: 0, 'aria-hidden': 'true', focusable: 'false' })
+      svg.style.cssText = 'position:fixed;pointer-events:none;overflow:hidden'
+      definitions = svgElement('defs', {})
+      svg.append(definitions)
+      document.body.append(svg)
+    }
+
+    const mapKey = [h, refractThickness, refractIOR, refractScale, chromaStrength].join(':')
+    let mapEntry = sharedBarMaps.get(mapKey)
+    if (!mapEntry) {
+      const thetaI0 = Math.asin(1.0)
+      const thetaT0 = Math.asin(Math.min(1.0 / refractIOR, 1.0))
+      const maxEdgeMag = Math.max(Math.tan(thetaI0 - thetaT0), 1e-4)
+      const maxDisplacePx = maxEdgeMag * refractScale
+      const maxChromaPx = chromaStrength * refractThickness * 0.35
+
+      const stripCanvas = document.createElement('canvas')
+      stripCanvas.width = 1
+      stripCanvas.height = Math.max(1, h)
+      const ctx = stripCanvas.getContext('2d')
+      const pixels = ctx.createImageData(1, stripCanvas.height)
+      const data32 = new Uint32Array(pixels.data.buffer)
+      data32.fill(0xff808080)
+
+      for (let row = 0; row < stripCanvas.height; row++) {
+        const depthFromBottom = stripCanvas.height - 0.5 - row
+        if (depthFromBottom >= 0 && depthFromBottom < refractThickness) {
+          const t = depthFromBottom / refractThickness
+          const sinThetaI = (1.0 - t) * (1.0 - t)
+          const thetaI = Math.asin(Math.min(Math.max(sinThetaI, 0.0), 1.0))
+          const thetaT = Math.asin(Math.min(Math.max(sinThetaI / refractIOR, 0.0), 1.0))
+          const normMag = Math.tan(thetaI - thetaT) / maxEdgeMag
+          const vy = -normMag
+          const idx = row * 4
+          pixels.data[idx] = 128
+          pixels.data[idx + 1] = Math.min(255, Math.max(0, (128 + 127 * vy + 0.5) | 0))
+        }
+      }
+      ctx.putImageData(pixels, 0, 0)
+      mapEntry = {
+        url: stripCanvas.toDataURL(),
+        scaleR: (2.0 * (maxDisplacePx + maxChromaPx)).toFixed(1),
+        scaleB: (2.0 * Math.max(0, maxDisplacePx - maxChromaPx)).toFixed(1)
+      }
+      sharedBarMaps.set(mapKey, mapEntry)
+    }
+
+    if (!barFilterNode) {
+      const id = 'blog-glass-bar'
+      const filter = svgElement('filter', {
+        id,
+        x: '0',
+        y: '0',
+        width: w,
+        height: h,
+        filterUnits: 'userSpaceOnUse',
+        primitiveUnits: 'userSpaceOnUse',
+        'color-interpolation-filters': 'sRGB'
+      })
+      const image = svgElement('feImage', {
+        x: '0',
+        y: '0',
+        width: w,
+        height: h,
+        result: 'bar-map',
+        preserveAspectRatio: 'none'
+      })
+      const dispR = svgElement('feDisplacementMap', {
+        in: 'SourceGraphic',
+        in2: 'bar-map',
+        scale: mapEntry.scaleR,
+        xChannelSelector: 'R',
+        yChannelSelector: 'G',
+        result: 'bar-disp-r'
+      })
+      const matR = svgElement('feColorMatrix', {
+        in: 'bar-disp-r',
+        type: 'matrix',
+        values: '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0',
+        result: 'bar-ch-r'
+      })
+      const dispGB = svgElement('feDisplacementMap', {
+        in: 'SourceGraphic',
+        in2: 'bar-map',
+        scale: mapEntry.scaleB,
+        xChannelSelector: 'R',
+        yChannelSelector: 'G',
+        result: 'bar-disp-gb'
+      })
+      const matGB = svgElement('feColorMatrix', {
+        in: 'bar-disp-gb',
+        type: 'matrix',
+        values: '0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0',
+        result: 'bar-ch-gb'
+      })
+      const blend = svgElement('feBlend', { in: 'bar-ch-r', in2: 'bar-ch-gb', mode: 'screen' })
+      filter.append(image, dispR, matR, dispGB, matGB, blend)
+      definitions.append(filter)
+      barFilterNode = { id, filter, image, dispR, dispGB, mapKey: '' }
+    }
+
+    barFilterNode.filter.setAttribute('width', w)
+    barFilterNode.filter.setAttribute('height', h)
+    barFilterNode.image.setAttribute('width', w)
+    barFilterNode.image.setAttribute('height', h)
+    if (barFilterNode.mapKey !== mapKey) {
+      barFilterNode.image.setAttribute('href', mapEntry.url)
+      barFilterNode.image.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', mapEntry.url)
+      barFilterNode.dispR.setAttribute('scale', mapEntry.scaleR)
+      barFilterNode.dispGB.setAttribute('scale', mapEntry.scaleB)
+      barFilterNode.mapKey = mapKey
+    }
+    return barFilterNode
+  }
+
   function updateRefraction(surface) {
     const rootClass = document.documentElement.classList
-    if (rootClass.contains('aside-motion') || rootClass.contains('aside-glass-pause')) return
+    if (rootClass.contains('aside-motion') || rootClass.contains('aside-glass-pause') || rootClass.contains('solid-bg')) return
     if (!pointer.matches || reducedTransparency.matches) {
+      surfaceSignature.delete(surface)
       surface.style.removeProperty('--glass-backdrop')
       surface.style.removeProperty('--glass-spec-image')
       surface.removeAttribute('data-shader-glass')
@@ -327,6 +496,7 @@
     const radius = Number.parseFloat(style.borderTopLeftRadius) || 0
 
     if (!refractScale || !rect.width || !rect.height || rect.height > 900) {
+      surfaceSignature.delete(surface)
       surface.style.removeProperty('--glass-backdrop')
       surface.style.removeProperty('--glass-spec-image')
       surface.removeAttribute('data-shader-glass')
@@ -335,10 +505,19 @@
 
     const w = Math.max(1, Math.round(rect.width))
     const h = Math.max(1, Math.round(rect.height))
-    const signature = [w, h, radius, refractThickness, refractIOR, refractScale, chromaStrength, specStrength].join(':')
+    const isNavBar = surface.classList.contains('nav-bar-glass')
+    const signature = [isNavBar ? 'bar' : 'card', w, h, radius, refractThickness, refractIOR, refractScale, chromaStrength, specStrength].join(':')
 
     if (surfaceSignature.get(surface) === signature) return
     surfaceSignature.set(surface, signature)
+
+    if (isNavBar) {
+      const bar = getOrUpdateBarFilter(w, h, refractThickness, refractIOR, refractScale, chromaStrength)
+      surface.style.setProperty('--glass-backdrop', `blur(var(--glass-blur)) saturate(var(--glass-saturate, 190%)) url("#${bar.id}")`)
+      surface.style.removeProperty('--glass-spec-image')
+      surface.setAttribute('data-shader-glass', '1')
+      return
+    }
 
     const shared = getOrBuildSharedFilter(w, h, radius, refractThickness, refractIOR, refractScale, chromaStrength, specStrength)
     surface.style.setProperty('--glass-backdrop', `blur(var(--glass-blur)) saturate(var(--glass-saturate, 165%)) url("#${shared.id}")`)
@@ -369,6 +548,12 @@
     if (!resize) return
     document.querySelectorAll('.liquid-glass').forEach(surface => updateRefraction(surface))
   })
+  if (resize && 'MutationObserver' in window) {
+    new MutationObserver(() => {
+      if (document.documentElement.classList.contains('solid-bg')) return
+      document.querySelectorAll('.liquid-glass').forEach(surface => updateRefraction(surface))
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+  }
   document.addEventListener('pjax:complete', initialize)
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialize, { once: true })
   else initialize()
