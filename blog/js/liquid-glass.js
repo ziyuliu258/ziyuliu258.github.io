@@ -1223,15 +1223,28 @@
       }
     }
 
-    const aimAt = item => {
+    const getVisibleItems = () =>
+      Array.from(menus.querySelectorAll(itemSelector)).filter(el => el.getBoundingClientRect().width > 0)
+
+    const findNearestItem = clientX => {
+      const items = getVisibleItems()
+      let best = null
+      let bestDist = Infinity
+      for (const el of items) {
+        const r = el.getBoundingClientRect()
+        const cx = r.left + r.width * 0.5
+        const d = Math.abs(clientX - cx)
+        if (d < bestDist) {
+          bestDist = d
+          best = el
+        }
+      }
+      return best
+    }
+
+    const aimAtRect = (nextX, nextW) => {
       if (!isEligible()) return
       if (hideTimer) { clearTimeout(hideTimer); hideTimer = 0 }
-      const mRect = menus.getBoundingClientRect()
-      const tRect = item.getBoundingClientRect()
-      if (!tRect.width) return
-      const padX = window.innerWidth <= 768 ? 8 : 10
-      const nextX = (tRect.left - mRect.left) - padX
-      const nextW = tRect.width + padX * 2
 
       if (!active && curAlpha < 0.05) {
         active = true
@@ -1252,6 +1265,31 @@
           rafId = requestAnimationFrame(tick)
         }
       }
+    }
+
+    const aimAt = item => {
+      if (!isEligible() || !item) return
+      const mRect = menus.getBoundingClientRect()
+      const tRect = item.getBoundingClientRect()
+      if (!tRect.width) return
+      const padX = window.innerWidth <= 768 ? 10 : 10
+      const nextW = Math.max(36, tRect.width + padX * 2)
+      const nextX = (tRect.left - mRect.left) + (tRect.width - nextW) * 0.5
+      aimAtRect(nextX, nextW)
+    }
+
+    const aimAtTouchX = clientX => {
+      if (!isEligible()) return
+      const mRect = menus.getBoundingClientRect()
+      if (!mRect.width) return
+      const nearest = findNearestItem(clientX)
+      const tRect = nearest ? nearest.getBoundingClientRect() : null
+      const padX = 10
+      const nextW = tRect ? Math.max(36, tRect.width + padX * 2) : 38
+      const padEdge = 4
+      const rawX = (clientX - mRect.left) - nextW * 0.5
+      const nextX = Math.max(padEdge, Math.min(mRect.width - nextW - padEdge, rawX))
+      aimAtRect(nextX, nextW)
     }
 
     const hideLens = (delay = 140) => {
@@ -1277,20 +1315,63 @@
       if (navWebGL && navWebGL.isReady()) navWebGL.setLens(curX, curW, 0, 0)
     }
 
+    let touchPointerId = null
+    let touchStartX = 0
+    let touchDragging = false
+    let suppressClickUntil = 0
+
     menus.addEventListener('pointerover', event => {
       if (event.pointerType === 'touch') return
       const item = event.target.closest(itemSelector)
       if (item) aimAt(item)
     }, { signal })
     menus.addEventListener('pointerdown', event => {
-      if (event.pointerType !== 'touch') return
-      const item = event.target.closest(itemSelector)
+      if (event.pointerType !== 'touch' || !isEligible()) return
+      touchPointerId = event.pointerId
+      touchStartX = event.clientX
+      touchDragging = false
+      const item = event.target.closest(itemSelector) || findNearestItem(event.clientX)
       if (item) aimAt(item)
     }, { passive: true, signal })
-    menus.addEventListener('pointerup', event => {
-      if (event.pointerType === 'touch') hideLens(220)
+    menus.addEventListener('pointermove', event => {
+      if (event.pointerType !== 'touch' || event.pointerId !== touchPointerId) return
+      if (!touchDragging && Math.abs(event.clientX - touchStartX) > 6) {
+        touchDragging = true
+        try { menus.setPointerCapture(event.pointerId) } catch (e) {}
+      }
+      if (touchDragging) {
+        aimAtTouchX(event.clientX)
+      }
     }, { passive: true, signal })
-    menus.addEventListener('pointercancel', () => hideLens(80), { passive: true, signal })
+
+    const endTouchDrag = event => {
+      if (event.pointerId !== touchPointerId) return
+      const wasDragging = touchDragging
+      touchPointerId = null
+      touchDragging = false
+      try {
+        if (menus.hasPointerCapture && menus.hasPointerCapture(event.pointerId)) {
+          menus.releasePointerCapture(event.pointerId)
+        }
+      } catch (e) {}
+      if (wasDragging) {
+        suppressClickUntil = performance.now() + 300
+        const nearest = findNearestItem(event.clientX)
+        if (nearest) aimAt(nearest)
+        hideLens(320)
+      } else {
+        hideLens(220)
+      }
+    }
+
+    menus.addEventListener('pointerup', endTouchDrag, { passive: true, signal })
+    menus.addEventListener('pointercancel', endTouchDrag, { passive: true, signal })
+    menus.addEventListener('click', event => {
+      if (performance.now() < suppressClickUntil) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+    }, { capture: true, signal })
 
     menus.addEventListener('pointerleave', () => hideLens(140), { signal })
     menus.addEventListener('focusin', event => {
