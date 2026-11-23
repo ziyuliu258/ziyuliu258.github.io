@@ -527,7 +527,9 @@
     }
 
     const shared = getOrBuildSharedFilter(w, h, radius, refractThickness, refractIOR, refractScale, chromaStrength, specStrength)
-    surface.style.setProperty('--glass-backdrop', `blur(var(--glass-blur)) saturate(var(--glass-saturate, 165%)) url("#${shared.id}")`)
+    const blurVal = Number.parseFloat(style.getPropertyValue('--glass-blur'))
+    const blurPart = Number.isFinite(blurVal) && blurVal <= 0 ? '' : 'blur(var(--glass-blur)) '
+    surface.style.setProperty('--glass-backdrop', `${blurPart}saturate(var(--glass-saturate, 165%)) url("#${shared.id}")`)
     surface.style.setProperty('--glass-spec-image', shared.specUrl)
     surface.setAttribute('data-shader-glass', '1')
   }
