@@ -387,11 +387,16 @@ html.solid-bg[data-theme='dark'] .layout .pagination > *:not(.space) {
 }
 
 /* 纯色背景由右下角按钮切换。页眉、页面和页脚共用一个颜色，滤镜遮罩一并去掉。 */
+html.solid-bg body,
 html.solid-bg #web_bg,
 html.solid-bg #page-header,
 html.solid-bg #footer {
   background-color: var(--solid-bg, #efefef) !important;
   background-image: none !important;
+}
+
+html.solid-bg #page-header {
+  transition: none;
 }
 
 html.solid-bg #web_bg::before,
@@ -804,7 +809,9 @@ html.solid-bg:not([data-theme='dark']) .type-404 .error-content:hover {
     0 2px 6px -1px rgba(15, 23, 42, 0.07);
 }
 
-html.solid-bg .liquid-glass::after {
+/* 纯色模式与黑夜模式下都不再给侧栏单独绘制白色发光高光边，保持与主栏卡片完全一致。 */
+html.solid-bg .liquid-glass::after,
+[data-theme='dark'] #aside-content .card-widget.liquid-glass::after {
   content: none;
 }
 
