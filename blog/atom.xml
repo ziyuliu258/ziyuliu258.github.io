@@ -12,7 +12,7 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-11-23T14:34:36.037Z</updated>
+  <updated>2026-11-23T14:34:48.314Z</updated>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -30,7 +30,7 @@
 <p>引：SpaceAct 由 Tencent HY 团队完成（Chenglong Shi、Zekai Yuan 等），是一个面向三维时空推理的交互式评测基准，配套提出了统一的主动感知智能体框架]]>
     </summary>
     <title>论文阅读：SpaceAct</title>
-    <updated>2026-11-23T14:34:36.037Z</updated>
+    <updated>2026-11-23T14:34:48.314Z</updated>
   </entry>
   <entry>
     <author>
@@ -345,8 +345,8 @@
       <email>1209830516abc@gmail.com</email>
     </author>
     <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="Vision-Language Models" scheme="https://ziyuliu258.cn/blog/tags/Vision-Language-Models/"/>
     <category term="GUI Agent" scheme="https://ziyuliu258.cn/blog/tags/GUI-Agent/"/>
+    <category term="Vision-Language Models" scheme="https://ziyuliu258.cn/blog/tags/Vision-Language-Models/"/>
     <category term="SFT" scheme="https://ziyuliu258.cn/blog/tags/SFT/"/>
     <id>https://ziyuliu258.cn/blog/posts/2e949ae7/</id>
     <link href="https://ziyuliu258.cn/blog/posts/2e949ae7/"/>

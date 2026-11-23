@@ -98,7 +98,6 @@ body.read-mode #post-info .post-title {
   height: 10px;
   border-left: 1px solid var(--hr-border);
   border-bottom: 1px solid var(--hr-border);
-  border-bottom-left-radius: 7px;
 }
 #reading-toc a:hover,
 #reading-toc a[aria-current] { opacity: 1; }
