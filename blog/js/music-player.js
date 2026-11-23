@@ -148,6 +148,15 @@
   setIcon(dock.querySelector('.music-dock-list'), 'list');
   findDock('track').href = pageUrl;
   findDock('track').textContent = i18n.title;
+  findDock('track').addEventListener('click', (event) => {
+    if (!pageRoot || !pageRoot.isConnected) return;
+    const pid = playingPlaylistId || (activePlaylist && activePlaylist.id);
+    const target = pid && playlists.find((pl) => String(pl.id) === String(pid));
+    if (target) {
+      event.preventDefault();
+      openPlaylistPage(target, true);
+    }
+  });
 
   function cover(img, url) {
     if (!img) return;
@@ -426,6 +435,65 @@
     if (open) renderDockList();
   }
 
+  function getRoutePlaylistId() {
+    try {
+      return new URLSearchParams(window.location.search).get('playlist') || '';
+    } catch (_) {
+      return '';
+    }
+  }
+  function playlistPageHref(id) {
+    return id ? `${pageUrl}?playlist=${encodeURIComponent(id)}` : pageUrl;
+  }
+  function syncPageView() {
+    if (!pageRoot || !pageRoot.isConnected) return;
+    const gridView = findPage('grid-view');
+    const detailView = findPage('detail-view');
+    if (!gridView || !detailView) return;
+    const routeId = getRoutePlaylistId();
+    const target = routeId && playlists.find((pl) => String(pl.id) === String(routeId));
+    if (target) {
+      gridView.hidden = true;
+      detailView.hidden = false;
+      activePlaylist = target;
+      tracks = Array.isArray(target.tracks) ? target.tracks : [];
+      savePlaylistId(target.id);
+      renderPageDetail(target);
+      if (dock.classList.contains('is-playlist-open')) renderDockList();
+    } else {
+      gridView.hidden = false;
+      detailView.hidden = true;
+      renderPlaylistGrid();
+    }
+    update();
+  }
+  function openPlaylistPage(pl, pushHistory = true) {
+    if (!pl) return;
+    if (pushHistory) {
+      const nextUrl = playlistPageHref(pl.id);
+      if (window.location.pathname + window.location.search !== nextUrl) {
+        try {
+          window.history.pushState({ musicPlaylistId: String(pl.id) }, '', nextUrl);
+        } catch (_) {}
+      }
+    }
+    selectPlaylist(pl, false);
+    syncPageView();
+    if (pageRoot) pageRoot.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function closePlaylistPage(pushHistory = true) {
+    if (pushHistory && getRoutePlaylistId()) {
+      try {
+        window.history.pushState({ musicPlaylistId: '' }, '', pageUrl);
+      } catch (_) {}
+    }
+    syncPageView();
+    if (pageRoot) pageRoot.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  window.addEventListener('popstate', () => {
+    if (pageRoot && pageRoot.isConnected) syncPageView();
+  });
+
   function update() {
     const playing = !audio.paused;
     dock.querySelectorAll('[data-action="toggle"]').forEach((button) => {
@@ -435,6 +503,8 @@
     });
     const plLabel = findDock('playlist-name');
     if (plLabel && activePlaylist) plLabel.textContent = activePlaylist.name;
+    const dockTrackLink = findDock('track');
+    if (dockTrackLink) dockTrackLink.href = playlistPageHref(playingPlaylistId || (activePlaylist && activePlaylist.id) || '');
     findDock('status').textContent = statusText;
     findDock('elapsed').textContent = time(audio.currentTime);
     findDock('duration').textContent = time(audio.duration);
@@ -640,16 +710,12 @@
 
       card.append(coverWrap, nameEl, metaEl);
       card.addEventListener('click', () => {
-        selectPlaylist(pl, false);
-        const detail = pageRoot.querySelector('.music-detail-section');
-        if (detail && playlists.length > 1) {
-          detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+        openPlaylistPage(pl, true);
       });
       card.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          selectPlaylist(pl, false);
+          openPlaylistPage(pl, true);
         }
       });
       grid.append(card);
@@ -661,6 +727,7 @@
     findPage('title').textContent = data.name;
     const metaEl = findPage('meta');
     if (metaEl) metaEl.textContent = playlistMetaText(data);
+    cover(findPage('playlist-cover'), playlistCover(data));
     const linkEl = findPage('playlist-link');
     if (linkEl) {
       if (data.url) {
@@ -719,6 +786,10 @@
     pageCover.hidden = true;
     root.querySelector('.music-cover').appendChild(pageCover);
     root.addEventListener('click', (event) => {
+      if (event.target.closest('[data-music-back]')) {
+        closePlaylistPage(true);
+        return;
+      }
       const button = event.target.closest('[data-music-action]');
       if (button) action(button.dataset.musicAction);
     });
@@ -742,8 +813,7 @@
       lyricView.addEventListener('touchstart', holdLyricFollow, { passive: true });
     }
     if (playlists.length) {
-      renderPlaylistGrid();
-      if (activePlaylist) renderPageDetail(activePlaylist);
+      syncPageView();
     }
     update();
   }
@@ -826,7 +896,8 @@
       rawSnapshot = snapshot;
       playlists = nextPlaylists;
 
-      const preferredId = (activePlaylist && String(activePlaylist.id)) || readSavedPlaylistId();
+      const routeId = pageRoot && pageRoot.isConnected ? getRoutePlaylistId() : '';
+      const preferredId = routeId || (activePlaylist && String(activePlaylist.id)) || readSavedPlaylistId();
       activePlaylist = playlists.find((pl) => String(pl.id) === preferredId) || playlists[0];
       tracks = activePlaylist.tracks || [];
 
@@ -840,8 +911,7 @@
         lyricLines.clear();
         renderedLyricId = null;
         lyricIndex = -1;
-        renderPlaylistGrid();
-        renderPageDetail(activePlaylist);
+        syncPageView();
         if (dock.classList.contains('is-playlist-open')) renderDockList();
       }
       if (!current) {
