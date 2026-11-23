@@ -3878,6 +3878,12 @@ figure.highlight pre .javascript .function {
   outline-offset: 4px;
   border-radius: 4px;
 }
+#nav #nav-darkmode .nav-theme-icon {
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.2em;
+  overflow: visible;
+}
 #nav #nav-darkmode .icon-dark {
   display: none;
 }
