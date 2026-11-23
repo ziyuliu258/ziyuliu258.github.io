@@ -3903,7 +3903,7 @@ figure.highlight pre .javascript .function {
 #nav.hide-menu #toggle-menu .site-page {
   font-size: inherit;
 }
-#nav.hide-menu .menus_items {
+#nav.hide-menu .menus_items > .menus_item {
   display: none;
 }
 #nav.hide-menu #search-button span:not(.site-page) {
