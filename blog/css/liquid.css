@@ -946,10 +946,11 @@ html.solid-bg .liquid-glass::after,
   z-index: 1;
 }
 
-/* 菜单项保持 z-index: auto（不创建隔离层叠上下文），以便：
- * .nav-pill-glass (0) < 菜单文字 (auto) < .nav-hover-lens (2) < More 下拉菜单 (12) */
+/* 层叠顺序：.nav-pill-glass (0) < .nav-hover-lens (1) < 菜单文字与图标 (2) < More 下拉菜单 (12)，
+ * 保证按钮背后的油画与玻璃能实时折射色散，而文字与图标永远锐利不发糊。 */
 #nav #menus > :not(.nav-pill-glass):not(.nav-hover-lens) {
   position: relative;
+  z-index: 2;
 }
 
 #nav .menus_items .menus_item .menus_item_child {
@@ -1151,13 +1152,13 @@ html:not(.solid-bg) #nav:not(.hide-menu) #menus .site-page:not(.child)::after {
   display: none;
 }
 
-/* ===== 悬停滑动液态玻璃按钮（0px 模糊全透明镜面玻璃：中心完全清澈不糊字，顶部镜面反光 + 物理底影 + 动态折射色散） ===== */
+/* ===== 悬停滑动液态玻璃按钮（位于文字下层 z-index: 1，文字永远 100% 锐利不糊，玻璃层 0px 模糊全透明折射） ===== */
 html:not(.solid-bg) #nav:not(.hide-menu) #menus > .nav-hover-lens {
   display: block;
   position: absolute;
   top: 5px;
   left: 0;
-  z-index: 2;
+  z-index: 1;
   height: 36px;
   border-radius: 18px;
   opacity: 0;
