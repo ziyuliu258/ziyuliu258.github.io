@@ -1006,51 +1006,29 @@ html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus
   z-index: 0;
   border-radius: inherit;
   clip-path: inset(0 round 23px);
-  --glass-blur: 2px;
-  --glass-saturate: 220%;
-  --glass-refract-thickness: 19;
-  --glass-refract-ior: 1.78;
-  --glass-refract-scale: 15;
-  --glass-chroma-strength: 1.35;
-  --glass-spec-strength: 1.0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.06) 100%);
+  --glass-blur: 1.5px;
+  --glass-saturate: 185%;
+  --glass-refract-thickness: 18;
+  --glass-refract-ior: 1.55;
+  --glass-refract-scale: 36;
+  --glass-chroma-strength: 1.3;
+  --glass-spec-strength: 0.95;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 100%);
   box-shadow:
-    inset 0 1px 0.5px rgba(255, 255, 255, 0.72),
-    inset 0 -1px 0.5px rgba(255, 255, 255, 0.28);
-  -webkit-backdrop-filter: var(--glass-backdrop, blur(3.5px) saturate(215%) brightness(1.08));
-  backdrop-filter: var(--glass-backdrop, blur(3.5px) saturate(215%) brightness(1.08));
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.62),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.22);
+  -webkit-backdrop-filter: var(--glass-backdrop, blur(6px) saturate(185%));
+  backdrop-filter: var(--glass-backdrop, blur(6px) saturate(185%));
 }
 
 html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus > .nav-pill-glass {
-  background: linear-gradient(180deg, rgba(26, 28, 36, 0.30) 0%, rgba(12, 14, 20, 0.16) 100%);
+  background: linear-gradient(180deg, rgba(22, 24, 30, 0.26) 0%, rgba(10, 12, 16, 0.14) 100%);
   box-shadow:
-    inset 0 1px 0.5px rgba(255, 255, 255, 0.44),
-    inset 0 -1px 0.5px rgba(255, 255, 255, 0.16);
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.40),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.14);
 }
 
-/* 玻璃内部四周的柔和色散光带（严格位于纯白外框内侧 2~14px 曲面区域，向中心自然羽化消散） */
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus > .nav-pill-glass::before {
-  position: absolute;
-  inset: 1.5px;
-  z-index: 1;
-  content: '';
-  border-radius: inherit;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  box-shadow:
-    inset 7px 6px 13px -4px rgba(255, 108, 165, 0.48),
-    inset -7px -6px 13px -4px rgba(72, 198, 255, 0.50),
-    inset -5px 5px 11px -4px rgba(125, 165, 255, 0.34),
-    inset 5px -5px 11px -4px rgba(255, 168, 130, 0.32),
-    inset 0 0 12px 0 rgba(255, 255, 255, 0.16);
-}
-
-/* Chromium 真光学 3 通道折射色散激活时适当减轻静态色散叠加，让真实背景折射占主导 */
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus > .nav-pill-glass[data-shader-glass="1"]::before {
-  opacity: 0.55;
-}
-
-/* 顶部通透液态玻璃胶囊内的文字与图标：纯白高对比 + 轻投影，和苹果 Control Center 一致 */
+/* 顶部通透液态玻璃胶囊内的文字与图标：纯白高对比 + 轻投影 */
 html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus a,
 html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus span.site-page,
 html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus button.site-page,
@@ -1123,31 +1101,29 @@ html:not(.solid-bg) #page-header.not-top-img > #nav > .nav-bar-glass {
   inset: 0;
   z-index: 0;
   --glass-blur: 5px;
-  --glass-saturate: 210%;
+  --glass-saturate: 195%;
   --glass-refract-thickness: 16;
-  --glass-refract-ior: 1.65;
-  --glass-refract-scale: 11;
-  --glass-chroma-strength: 0.95;
+  --glass-refract-ior: 1.55;
+  --glass-refract-scale: 24;
+  --glass-chroma-strength: 0.9;
   --glass-spec-strength: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.50) 0%, rgba(255, 255, 255, 0.30) 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.68);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.34) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.65);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.80),
-    inset 0 -1px 0.5px rgba(255, 255, 255, 0.42),
-    inset 0 -6px 12px -8px rgba(96, 192, 255, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.36),
     0 8px 24px -10px rgba(15, 23, 42, 0.14);
-  -webkit-backdrop-filter: var(--glass-backdrop, blur(8px) saturate(205%));
-  backdrop-filter: var(--glass-backdrop, blur(8px) saturate(205%));
+  -webkit-backdrop-filter: var(--glass-backdrop, blur(8px) saturate(190%));
+  backdrop-filter: var(--glass-backdrop, blur(8px) saturate(190%));
 }
 
 html:not(.solid-bg)[data-theme='dark'] #page-header.nav-fixed > #nav > .nav-bar-glass,
 html:not(.solid-bg)[data-theme='dark'] #page-header.not-top-img > #nav > .nav-bar-glass {
-  background: linear-gradient(180deg, rgba(28, 30, 36, 0.46) 0%, rgba(16, 18, 22, 0.30) 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  background: linear-gradient(180deg, rgba(28, 30, 36, 0.48) 0%, rgba(16, 18, 22, 0.34) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.20);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.20),
-    inset 0 -1px 0.5px rgba(255, 255, 255, 0.12),
-    inset 0 -6px 12px -8px rgba(110, 195, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.10),
     0 10px 28px -10px rgba(0, 0, 0, 0.42);
 }
 

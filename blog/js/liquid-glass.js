@@ -130,9 +130,14 @@
       preserveAspectRatio: 'none'
     })
 
-    // Peak Snell deflection occurs at t = 0 (sinThetaI = 1.0)
-    const thetaI0 = Math.asin(1.0)
-    const thetaT0 = Math.asin(Math.min(1.0 / refractIOR, 1.0))
+    // Compact glass capsules (h <= 80) cap grazing incidence at sinThetaI = 0.90 with a gentler dome curve
+    // so Snell refraction & RGB chromatic dispersion stay clearly visible across the 2..14px inner bevel
+    // instead of collapsing into the outermost 1px hidden behind the white specular rim.
+    const isCapsule = h <= 80
+    const maxSinI = isCapsule ? 0.90 : 1.0
+    const domeExp = isCapsule ? 1.35 : 2.0
+    const thetaI0 = Math.asin(maxSinI)
+    const thetaT0 = Math.asin(Math.min(maxSinI / refractIOR, 1.0))
     const maxEdgeMag = Math.max(Math.tan(thetaI0 - thetaT0), 1e-4)
     const maxDisplacePx = maxEdgeMag * refractScale
     const maxChromaPx = chromaStrength * refractThickness * 0.35
@@ -141,7 +146,7 @@
     const snellLUT = new Float32Array(256)
     for (let i = 0; i < 256; i++) {
       const t = i / 255
-      const sinThetaI = (1.0 - t) * (1.0 - t)
+      const sinThetaI = maxSinI * Math.pow(1.0 - t, domeExp)
       const thetaI = Math.asin(Math.min(Math.max(sinThetaI, 0.0), 1.0))
       const sinThetaT = sinThetaI / refractIOR
       const thetaT = Math.asin(Math.min(Math.max(sinThetaT, 0.0), 1.0))
@@ -371,8 +376,9 @@
     const mapKey = [h, refractThickness, refractIOR, refractScale, chromaStrength].join(':')
     let mapEntry = sharedBarMaps.get(mapKey)
     if (!mapEntry) {
-      const thetaI0 = Math.asin(1.0)
-      const thetaT0 = Math.asin(Math.min(1.0 / refractIOR, 1.0))
+      const maxSinI = 0.90
+      const thetaI0 = Math.asin(maxSinI)
+      const thetaT0 = Math.asin(Math.min(maxSinI / refractIOR, 1.0))
       const maxEdgeMag = Math.max(Math.tan(thetaI0 - thetaT0), 1e-4)
       const maxDisplacePx = maxEdgeMag * refractScale
       const maxChromaPx = chromaStrength * refractThickness * 0.35
@@ -389,7 +395,7 @@
         const depthFromBottom = stripCanvas.height - 0.5 - row
         if (depthFromBottom >= 0 && depthFromBottom < refractThickness) {
           const t = depthFromBottom / refractThickness
-          const sinThetaI = (1.0 - t) * (1.0 - t)
+          const sinThetaI = maxSinI * Math.pow(1.0 - t, 1.35)
           const thetaI = Math.asin(Math.min(Math.max(sinThetaI, 0.0), 1.0))
           const thetaT = Math.asin(Math.min(Math.max(sinThetaI / refractIOR, 0.0), 1.0))
           const normMag = Math.tan(thetaI - thetaT) / maxEdgeMag
@@ -521,8 +527,7 @@
     }
 
     const shared = getOrBuildSharedFilter(w, h, radius, refractThickness, refractIOR, refractScale, chromaStrength, specStrength)
-    const brightness = surface.classList.contains('nav-pill-glass') ? ' brightness(1.06)' : ''
-    surface.style.setProperty('--glass-backdrop', `blur(var(--glass-blur)) saturate(var(--glass-saturate, 165%))${brightness} url("#${shared.id}")`)
+    surface.style.setProperty('--glass-backdrop', `blur(var(--glass-blur)) saturate(var(--glass-saturate, 165%)) url("#${shared.id}")`)
     surface.style.setProperty('--glass-spec-image', shared.specUrl)
     surface.setAttribute('data-shader-glass', '1')
   }
