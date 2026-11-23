@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (init) {
       const blogInfoWidth = getAllWidth(document.querySelector('#blog-info > a').children)
-      const menusWidth = getAllWidth(Array.from(document.getElementById('menus').children).filter(el => !el.classList.contains('nav-pill-glass') && !el.classList.contains('nav-hover-lens')))
+      const menusWidth = getAllWidth(Array.from(document.getElementById('menus').children).filter(el => !el.classList.contains('nav-pill-glass') && !el.classList.contains('nav-hover-lens') && !el.classList.contains('nav-glass-canvas')))
       headerContentWidth = blogInfoWidth + menusWidth
       $nav = document.getElementById('nav')
     }

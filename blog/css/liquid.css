@@ -934,6 +934,7 @@ html.solid-bg .liquid-glass::after,
 
 /* 顶栏液态玻璃光学表面层默认隐藏（纯色模式下零开销） */
 #nav > .nav-bar-glass,
+#nav #menus > .nav-glass-canvas,
 #nav #menus > .nav-pill-glass,
 #nav #menus > .nav-hover-lens {
   display: none;
@@ -946,9 +947,9 @@ html.solid-bg .liquid-glass::after,
   z-index: 1;
 }
 
-/* 层叠顺序：.nav-pill-glass (0) < .nav-hover-lens (1) < 菜单文字与图标 (2) < More 下拉菜单 (12)，
+/* 层叠顺序：.nav-glass-canvas / .nav-pill-glass (0) < .nav-hover-lens (1) < 菜单文字与图标 (2) < More 下拉菜单 (12)，
  * 保证按钮背后的油画与玻璃能实时折射色散，而文字与图标永远锐利不发糊。 */
-#nav #menus > :not(.nav-pill-glass):not(.nav-hover-lens) {
+#nav #menus > :not(.nav-glass-canvas):not(.nav-pill-glass):not(.nav-hover-lens) {
   position: relative;
   z-index: 2;
 }
@@ -1040,6 +1041,23 @@ html:not(.solid-bg) #page-header.nav-morph-ready > #nav #menus {
   box-shadow:
     0 12px 32px -10px rgba(0, 0, 0, calc(0.30 * var(--nav-pill-opacity, 1))),
     0 2px 10px -2px rgba(0, 0, 0, calc(0.16 * var(--nav-pill-opacity, 1)));
+}
+
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav:not(.nav-pill-hidden) #menus.has-webgl-glass > .nav-glass-canvas,
+html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav #menus.has-webgl-glass > .nav-glass-canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* WebGL 液态玻璃就绪后隐藏 CSS/SVG 胶囊回退层，避免双层叠边与重复模糊 */
+html:not(.solid-bg) #page-header > #nav #menus.has-webgl-glass > .nav-pill-glass {
+  display: none !important;
 }
 
 html:not(.solid-bg) #page-header.nav-morph-ready > #nav:not(.nav-pill-hidden) #menus > .nav-pill-glass {

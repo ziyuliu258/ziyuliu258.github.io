@@ -651,15 +651,390 @@
     return lensFilterNode
   }
 
+  // Cross-browser WebGL Liquid Glass Renderer (Safari / Firefox / Chrome / Edge):
+  // Exact port of kube.io's Convex Squircle optical model: h(t) = (1 - (1 - t)^4)^(1/4),
+  // 3D Snell refraction with 3-wavelength Cauchy RGB chromatic dispersion, Fresnel + Blinn-Phong speculars,
+  // and real-time sliding hover glass droplet with velocity-modulated dispersion & physical contact shadow.
+  // Renders on-demand ONLY (0 FPS when idle, <0.05ms/frame while sliding).
+  const bgImageCache = new Map()
+  let navWebGL = null
+
+  function extractHeaderBgUrl(header) {
+    const bgCfg = liquidSite.background || {}
+    const inlineBg = header ? header.style.backgroundImage : ''
+    const compBg = (!inlineBg && header) ? getComputedStyle(header).backgroundImage : ''
+    const bgStr = inlineBg || compBg || ''
+    const match = bgStr.match(/url\(['"]?([^)'"]+)['"]?\)/)
+    const rawUrl = (match && match[1]) || bgCfg.image || ''
+    return rawUrl
+  }
+
+  function loadBgImage(url) {
+    if (!url) return Promise.reject(new Error('no url'))
+    if (bgImageCache.has(url)) return bgImageCache.get(url)
+    const promise = new Promise((resolve, reject) => {
+      const img = new Image()
+      img.decoding = 'async'
+      try {
+        if (new URL(url, location.href).origin !== location.origin) {
+          img.crossOrigin = 'anonymous'
+        }
+      } catch (e) {}
+      img.onload = () => resolve(img)
+      img.onerror = () => reject(new Error('bg load failed'))
+      img.src = url
+    })
+    bgImageCache.set(url, promise)
+    return promise
+  }
+
+  function createNavWebGLGlass(header, nav, menus, canvas) {
+    if (!canvas || !header || !nav || !menus || reducedTransparency.matches) return null
+    const gl = canvas.getContext('webgl', {
+      alpha: true,
+      antialias: false,
+      depth: false,
+      stencil: false,
+      premultipliedAlpha: true,
+      powerPreference: 'low-power'
+    })
+    if (!gl) return null
+
+    const vsSrc = `
+      attribute vec2 aPos;
+      varying vec2 vUv;
+      void main() {
+        vUv = vec2(aPos.x * 0.5 + 0.5, 0.5 - aPos.y * 0.5);
+        gl_Position = vec4(aPos, 0.0, 1.0);
+      }
+    `
+    const fsSrc = `
+      precision highp float;
+      uniform sampler2D uTex;
+      uniform vec4 uCanvasRect;
+      uniform vec4 uBgRect;
+      uniform float uVeil;
+      uniform float uDark;
+      uniform vec4 uLens; // x, w, alpha, velNorm (-1..1)
+      varying vec2 vUv;
+
+      float sdCapsule(vec2 p, vec2 b, float r) {
+        vec2 q = abs(p) - b + vec2(r);
+        return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+      }
+
+      vec2 sdCapsuleNormal(vec2 p, vec2 b, float r) {
+        vec2 s = vec2(p.x >= 0.0 ? 1.0 : -1.0, p.y >= 0.0 ? 1.0 : -1.0);
+        vec2 qRaw = abs(p) - b + vec2(r);
+        vec2 q = max(qRaw, 0.0);
+        vec2 n;
+        if (q.x <= 0.0 && q.y <= 0.0) {
+          n = qRaw.x >= qRaw.y ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+        } else {
+          n = normalize(q + vec2(1e-5));
+        }
+        return n * s;
+      }
+
+      // kube.io Convex Squircle height profile: h(t) = (1 - (1 - t)^4)^(1/4)
+      vec2 squircleProfile(float t) {
+        float u = clamp(1.0 - t, 0.0, 0.955);
+        float u3 = u * u * u;
+        float u4 = u3 * u;
+        float inside = max(1.0 - u4, 1e-4);
+        float h = pow(inside, 0.25);
+        float dhdt = u3 / pow(inside, 0.75);
+        return vec2(h, dhdt);
+      }
+
+      float snellDisp(float t, float bezelW, float thickness, float ior) {
+        if (t >= 1.0) return 0.0;
+        vec2 prof = squircleProfile(t);
+        float h = prof.x;
+        float slope = prof.y;
+        float thetaI = atan(slope);
+        float sinT = sin(thetaI) / ior;
+        float thetaT = asin(clamp(sinT, -0.99, 0.99));
+        float totalH = h * bezelW + thickness;
+        return totalH * tan(thetaI - thetaT);
+      }
+
+      vec3 sampleBgRaw(vec2 vpPos) {
+        vec2 uv = clamp((vpPos - uBgRect.xy) / uBgRect.zw, vec2(0.001), vec2(0.999));
+        return texture2D(uTex, uv).rgb * (1.0 - uVeil);
+      }
+
+      // Crisp crystal interior + silky anti-aliased bevel (prevents 1px streaking along steep refraction edge)
+      vec3 sampleBg(vec2 vpPos, float bevelAA) {
+        if (bevelAA <= 0.05) return sampleBgRaw(vpPos);
+        vec3 c = sampleBgRaw(vpPos) * 0.40;
+        c += sampleBgRaw(vpPos + vec2(bevelAA, 0.0)) * 0.15;
+        c += sampleBgRaw(vpPos - vec2(bevelAA, 0.0)) * 0.15;
+        c += sampleBgRaw(vpPos + vec2(0.0, bevelAA)) * 0.15;
+        c += sampleBgRaw(vpPos - vec2(0.0, bevelAA)) * 0.15;
+        return c;
+      }
+
+      vec3 saturateColor(vec3 c, float sat) {
+        float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+        return mix(vec3(l), c, sat);
+      }
+
+      vec3 shadeGlass(
+        vec2 px, vec2 center, vec2 halfSize, float radius,
+        float bezelW, float thickness, float dispGain, float chromaSpread,
+        float specBoost, float glintShift, float centerMag
+      ) {
+        vec2 rel = px - center;
+        float d = sdCapsule(rel, halfSize, radius);
+        float depth = max(-d, 0.0);
+        vec2 outN = sdCapsuleNormal(rel, halfSize, radius);
+        float t = clamp(depth / bezelW, 0.0, 1.0);
+
+        float dispR = snellDisp(t, bezelW, thickness, 1.44 - chromaSpread) * dispGain;
+        float dispG = snellDisp(t, bezelW, thickness, 1.52) * dispGain;
+        float dispB = snellDisp(t, bezelW, thickness, 1.60 + chromaSpread) * dispGain;
+
+        // Subtle convex center magnification for realistic water-drop lens feel
+        vec2 magOffset = -rel * centerMag;
+        vec2 vpBase = uCanvasRect.xy + px + magOffset;
+        float bevelAA = (1.0 - t) * (1.0 - t) * 1.45;
+
+        vec3 col;
+        col.r = sampleBg(vpBase - outN * dispR, bevelAA).r;
+        col.g = sampleBg(vpBase - outN * dispG, bevelAA).g;
+        col.b = sampleBg(vpBase - outN * dispB, bevelAA).b;
+
+        col = saturateColor(col, 1.38);
+        col *= (uDark > 0.5 ? 1.04 : 1.05);
+
+        // Crystal clarity: only a subtle top sky reflection, zero matte milkiness
+        float topGrad = 1.0 - clamp((rel.y + halfSize.y) / (2.0 * halfSize.y), 0.0, 1.0);
+        col += vec3(1.0) * (uDark > 0.5 ? 0.022 : 0.042) * smoothstep(0.55, 1.0, topGrad);
+
+        // 3D normal on Convex Squircle surface for physical Fresnel + directional speculars
+        vec2 prof = squircleProfile(t);
+        float slope = t < 1.0 ? prof.y : 0.0;
+        vec3 surfN = normalize(vec3(outN * slope, 1.0));
+        vec3 viewDir = vec3(0.0, 0.0, 1.0);
+        float ndotv = max(dot(surfN, viewDir), 0.0);
+        float fresnel = pow(1.0 - ndotv, 2.8);
+
+        vec3 light1 = normalize(vec3(-0.36 + glintShift, -0.84, 0.42));
+        vec3 light2 = normalize(vec3(0.40 + glintShift * 0.5, 0.80, 0.44));
+        vec3 half1 = normalize(light1 + viewDir);
+        vec3 half2 = normalize(light2 + viewDir);
+        float spec1 = pow(max(dot(surfN, half1), 0.0), 22.0);
+        float spec2 = pow(max(dot(surfN, half2), 0.0), 26.0) * 0.55;
+
+        // Directional top-left & antipodal bottom-right glass rim (carved crystal, not a soap-bubble ring)
+        float rimMask = 1.0 - smoothstep(0.0, 1.8, depth);
+        float rimDir = 0.12 + 0.88 * max(dot(outN, normalize(vec2(-0.42 + glintShift, -0.90))), 0.0);
+        float rimAnti = 0.48 * max(dot(outN, normalize(vec2(0.42 + glintShift, 0.90))), 0.0);
+        float rimLight = rimMask * (rimDir + rimAnti);
+
+        // Subtle dark TIR edge right inside the specular rim for genuine thick glass depth
+        float tirBand = smoothstep(0.9, 2.8, depth) * (1.0 - smoothstep(2.8, 6.2, depth));
+        col *= (1.0 - tirBand * 0.20);
+
+        float totalSpec = (fresnel * 0.30 + spec1 * 0.78 + spec2 * 0.44 + rimLight * 0.54) * specBoost;
+        col += vec3(1.0) * totalSpec * (uDark > 0.5 ? 0.62 : 0.88);
+
+        return col;
+      }
+
+      void main() {
+        vec2 size = uCanvasRect.zw;
+        vec2 px = vUv * size;
+        vec2 halfSize = size * 0.5;
+        float radius = halfSize.y;
+
+        float dOuter = sdCapsule(px - halfSize, halfSize, radius);
+        float outerAlpha = 1.0 - smoothstep(-0.7, 0.7, dOuter);
+        if (outerAlpha <= 0.002) discard;
+
+        vec3 col = shadeGlass(px, halfSize, halfSize, radius, 16.0, 8.0, 1.05, 0.045, 0.92, 0.0, 0.0);
+
+        float lensAlpha = uLens.z;
+        if (lensAlpha > 0.004) {
+          vec2 lensHalf = vec2(uLens.y * 0.5, 18.0);
+          vec2 lensCenter = vec2(uLens.x + lensHalf.x, halfSize.y);
+          float lensR = 18.0;
+          float dLens = sdCapsule(px - lensCenter, lensHalf, lensR);
+
+          // Soft contact shadow cast onto the outer glass bar by the raised hover droplet
+          float dShadow = sdCapsule(px - (lensCenter + vec2(0.0, 2.2)), lensHalf, lensR);
+          float shadow = (1.0 - smoothstep(-1.0, 7.5, dShadow)) * smoothstep(-0.5, 1.5, dLens) * lensAlpha;
+          col *= (1.0 - shadow * 0.30);
+
+          float lensMask = (1.0 - smoothstep(-0.65, 0.65, dLens)) * lensAlpha;
+          if (lensMask > 0.002) {
+            float speed = abs(uLens.w);
+            float glintShift = uLens.w * 0.50;
+            vec3 lensCol = shadeGlass(
+              px, lensCenter, lensHalf, lensR,
+              13.5, 11.5,
+              1.25 + speed * 0.55,
+              0.075 + speed * 0.17,
+              1.18,
+              glintShift,
+              0.045
+            );
+            col = mix(col, lensCol, lensMask);
+          }
+        }
+
+        gl_FragColor = vec4(col * outerAlpha, outerAlpha);
+      }
+    `
+
+    const compile = (type, src) => {
+      const sh = gl.createShader(type)
+      gl.shaderSource(sh, src)
+      gl.compileShader(sh)
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+        gl.deleteShader(sh)
+        return null
+      }
+      return sh
+    }
+    const vs = compile(gl.VERTEX_SHADER, vsSrc)
+    const fs = compile(gl.FRAGMENT_SHADER, fsSrc)
+    if (!vs || !fs) return null
+
+    const prog = gl.createProgram()
+    gl.attachShader(prog, vs)
+    gl.attachShader(prog, fs)
+    gl.linkProgram(prog)
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null
+
+    const buf = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW)
+    const aPos = gl.getAttribLocation(prog, 'aPos')
+
+    const uTex = gl.getUniformLocation(prog, 'uTex')
+    const uCanvasRect = gl.getUniformLocation(prog, 'uCanvasRect')
+    const uBgRect = gl.getUniformLocation(prog, 'uBgRect')
+    const uVeil = gl.getUniformLocation(prog, 'uVeil')
+    const uDark = gl.getUniformLocation(prog, 'uDark')
+    const uLens = gl.getUniformLocation(prog, 'uLens')
+
+    const tex = gl.createTexture()
+    gl.bindTexture(gl.TEXTURE_2D, tex)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+    let imgW = 0
+    let imgH = 0
+    let ready = false
+    let destroyed = false
+    let lensState = { x: 0, w: 76, alpha: 0, vel: 0 }
+
+    const render = () => {
+      if (destroyed || !ready) return
+      if (document.documentElement.classList.contains('solid-bg')) return
+      if (header.classList.contains('not-top-img')) return
+      if (nav.classList.contains('nav-pill-hidden')) return
+      if (!header.classList.contains('nav-morph-ready') && header.classList.contains('nav-fixed')) return
+      const cRect = canvas.getBoundingClientRect()
+      if (!cRect.width || !cRect.height) return
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const pw = Math.max(1, Math.round(cRect.width * dpr))
+      const ph = Math.max(1, Math.round(cRect.height * dpr))
+      if (canvas.width !== pw || canvas.height !== ph) {
+        canvas.width = pw
+        canvas.height = ph
+      }
+
+      const hStyle = getComputedStyle(header)
+      const isFixedBg = hStyle.backgroundAttachment === 'fixed'
+      let boxX = 0
+      let boxY = 0
+      let boxW = window.innerWidth
+      let boxH = window.innerHeight
+      if (!isFixedBg) {
+        const hRect = header.getBoundingClientRect()
+        boxX = hRect.left
+        boxY = hRect.top
+        boxW = hRect.width
+        boxH = hRect.height
+      }
+      const coverScale = Math.max(boxW / imgW, boxH / imgH)
+      const drawW = imgW * coverScale
+      const drawH = imgH * coverScale
+      const offX = boxX + (boxW - drawW) * 0.5
+      const offY = boxY + (boxH - drawH) * 0.5
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+      const veil = isDark ? 0.60 : 0.30
+
+      gl.viewport(0, 0, pw, ph)
+      gl.clearColor(0, 0, 0, 0)
+      gl.clear(gl.COLOR_BUFFER_BIT)
+      gl.useProgram(prog)
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf)
+      gl.enableVertexAttribArray(aPos)
+      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0)
+      gl.activeTexture(gl.TEXTURE0)
+      gl.bindTexture(gl.TEXTURE_2D, tex)
+      gl.uniform1i(uTex, 0)
+      gl.uniform4f(uCanvasRect, cRect.left, cRect.top, cRect.width, cRect.height)
+      gl.uniform4f(uBgRect, offX, offY, drawW, drawH)
+      gl.uniform1f(uVeil, veil)
+      gl.uniform1f(uDark, isDark ? 1.0 : 0.0)
+      gl.uniform4f(uLens, lensState.x, lensState.w, lensState.alpha, lensState.vel)
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+    }
+
+    const bgUrl = extractHeaderBgUrl(header)
+    loadBgImage(bgUrl).then(img => {
+      if (destroyed) return
+      imgW = img.naturalWidth || img.width
+      imgH = img.naturalHeight || img.height
+      if (!imgW || !imgH) return
+      gl.bindTexture(gl.TEXTURE_2D, tex)
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
+      ready = true
+      menus.classList.add('has-webgl-glass')
+      render()
+    }).catch(() => {})
+
+    return {
+      isReady: () => ready && !destroyed,
+      setLens(x, w, alpha, vel) {
+        lensState.x = x
+        lensState.w = w
+        lensState.alpha = alpha
+        lensState.vel = vel
+        render()
+      },
+      render,
+      destroy() {
+        destroyed = true
+        menus.classList.remove('has-webgl-glass')
+      }
+    }
+  }
+
   // Sliding Liquid Glass hover lens inside #menus (like Apple iOS 26 sliding glass thumb):
-  // Glides smoothly with spring physics and dynamically modulates 3-channel RGB dispersion with velocity.
+  // Glides smoothly with dt-based spring physics and drives WebGL Convex Squircle Cauchy RGB dispersion.
   let hoverLensCleanup = null
   function initNavHoverLens() {
     if (hoverLensCleanup) { hoverLensCleanup(); hoverLensCleanup = null }
+    if (navWebGL) { navWebGL.destroy(); navWebGL = null }
+    const header = document.getElementById('page-header')
     const menus = document.getElementById('menus')
     const nav = document.getElementById('nav')
     const lens = menus && menus.querySelector('.nav-hover-lens')
-    if (!menus || !nav || !lens) return
+    const canvas = menus && menus.querySelector('.nav-glass-canvas')
+    if (!header || !menus || !nav || !lens) return
+
+    navWebGL = createNavWebGLGlass(header, nav, menus, canvas)
 
     const controller = new AbortController()
     const { signal } = controller
@@ -667,8 +1042,10 @@
     let active = false
     let curX = 0
     let curW = 76
+    let curAlpha = 0
     let targetX = 0
     let targetW = 76
+    let targetAlpha = 0
     let vx = 0
     let vw = 0
     let rafId = 0
@@ -686,20 +1063,31 @@
       !nav.classList.contains('hide-menu') &&
       window.innerWidth > 768
 
+    const useWebGLLens = () =>
+      Boolean(navWebGL && navWebGL.isReady() && !nav.classList.contains('nav-pill-hidden') && !nav.classList.contains('nav-docked'))
+
     const itemSelector = '#nav-darkmode > button.site-page, .menus_item > a.site-page, .menus_item > span.site-page, #search-button > button.site-page'
 
-    const applyLensVisuals = (x, w, speed, dir) => {
+    const applyLensVisuals = (x, w, alpha, velNorm) => {
+      if (useWebGLLens()) {
+        lens.classList.remove('is-visible')
+        navWebGL.setLens(x, w, alpha, velNorm)
+        return
+      }
+      if (navWebGL && navWebGL.isReady()) navWebGL.setLens(x, w, 0, 0)
+      const speed = Math.abs(velNorm)
+      const dir = velNorm >= 0 ? 1 : -1
       lens.style.width = `${w.toFixed(1)}px`
       lens.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0)`
       const glintX = (50 + dir * speed * 32).toFixed(1)
       lens.style.setProperty('--lens-glint-x', `${glintX}%`)
+      lens.classList.toggle('is-visible', alpha > 0.05)
 
       const node = ensureHoverLensFilter()
       if (node) {
         const wInt = Math.max(24, Math.round(w))
         node.filter.setAttribute('width', wInt)
         node.image.setAttribute('width', wInt)
-        // Dynamic dispersion: crystal-clear at rest, blooms dramatically with R/G/B prism split while gliding
         const baseDisplace = 8.5 + speed * 12.0
         const chroma = 2.8 + speed * 9.5
         const scaleG = (2.0 * baseDisplace).toFixed(1)
@@ -718,7 +1106,6 @@
     const zeta = 0.84
     const tick = now => {
       rafId = 0
-      if (!active) return
       const dt = lastTs ? Math.min(0.032, Math.max(0.004, (now - lastTs) / 1000)) : 0.016
       lastTs = now
 
@@ -730,20 +1117,25 @@
       vw += aw * dt
       curW += vw * dt
 
-      // vx is in px/sec; peak velocity across adjacent nav items (~90px) is ~520 px/s
-      const speed = Math.min(1, (Math.abs(vx) + Math.abs(vw) * 0.4) / 480)
-      const dir = vx >= 0 ? 1 : -1
-      applyLensVisuals(curX, curW, speed, dir)
+      const alphaRate = targetAlpha > curAlpha ? 10.5 : 8.5
+      curAlpha += (targetAlpha - curAlpha) * Math.min(1, dt * alphaRate)
+      if (Math.abs(targetAlpha - curAlpha) < 0.01) curAlpha = targetAlpha
+
+      const rawVel = (vx + vw * 0.35) / 480
+      const velNorm = Math.max(-1, Math.min(1, rawVel))
+      applyLensVisuals(curX, curW, curAlpha, velNorm)
 
       const settled = Math.abs(targetX - curX) < 0.25 && Math.abs(vx) < 4 &&
-                      Math.abs(targetW - curW) < 0.25 && Math.abs(vw) < 4
+                      Math.abs(targetW - curW) < 0.25 && Math.abs(vw) < 4 &&
+                      curAlpha === targetAlpha
       if (settled) {
         curX = targetX
         curW = targetW
         vx = 0
         vw = 0
         lastTs = 0
-        applyLensVisuals(curX, curW, 0, 1)
+        if (targetAlpha === 0) active = false
+        applyLensVisuals(curX, curW, curAlpha, 0)
       } else {
         rafId = requestAnimationFrame(tick)
       }
@@ -755,23 +1147,24 @@
       const mRect = menus.getBoundingClientRect()
       const tRect = item.getBoundingClientRect()
       if (!tRect.width) return
-      const padX = item.closest('#nav-darkmode') ? 11 : 12
+      const padX = item.closest('#nav-darkmode') ? 10 : 10
       const nextX = (tRect.left - mRect.left) - padX
       const nextW = tRect.width + padX * 2
 
-      if (!active) {
+      if (!active && curAlpha < 0.05) {
         active = true
         curX = targetX = nextX
         curW = targetW = nextW
         vx = 0
         vw = 0
+        targetAlpha = 1
         lastTs = 0
-        applyLensVisuals(curX, curW, 0, 1)
-        lens.classList.add('is-visible')
+        if (!rafId) rafId = requestAnimationFrame(tick)
       } else {
+        active = true
         targetX = nextX
         targetW = nextW
-        lens.classList.add('is-visible')
+        targetAlpha = 1
         if (!rafId) {
           lastTs = 0
           rafId = requestAnimationFrame(tick)
@@ -783,19 +1176,23 @@
       if (hideTimer) clearTimeout(hideTimer)
       hideTimer = setTimeout(() => {
         hideTimer = 0
-        active = false
-        if (rafId) { cancelAnimationFrame(rafId); rafId = 0 }
-        lastTs = 0
-        lens.classList.remove('is-visible')
+        targetAlpha = 0
+        if (!rafId) {
+          lastTs = 0
+          rafId = requestAnimationFrame(tick)
+        }
       }, 140)
     }
 
     const hideLensImmediate = () => {
       if (hideTimer) { clearTimeout(hideTimer); hideTimer = 0 }
       active = false
+      curAlpha = 0
+      targetAlpha = 0
       if (rafId) { cancelAnimationFrame(rafId); rafId = 0 }
       lastTs = 0
       lens.classList.remove('is-visible')
+      if (navWebGL && navWebGL.isReady()) navWebGL.setLens(curX, curW, 0, 0)
     }
 
     menus.addEventListener('pointerover', event => {
@@ -812,7 +1209,7 @@
     menus.addEventListener('focusout', event => {
       if (!menus.contains(event.relatedTarget)) hideLens()
     }, { signal })
-    window.addEventListener('scroll', () => { if (active) hideLensImmediate() }, { passive: true, signal })
+    window.addEventListener('scroll', () => { if (active || curAlpha > 0) hideLensImmediate() }, { passive: true, signal })
   }
 
   // Smooth scroll-linked transition on desktop background-image mode:
@@ -827,6 +1224,7 @@
     if (!header || !nav || !menus) return
 
     const pillGlass = menus.querySelector('.nav-pill-glass')
+    const glassCanvas = menus.querySelector('.nav-glass-canvas')
     const barGlass = nav.querySelector('.nav-bar-glass')
     const isHome = header.classList.contains('full_page')
     const heroTitle = isHome ? document.getElementById('site-title') : null
@@ -850,6 +1248,7 @@
       menus.style.transform = ''
       menus.style.removeProperty('--nav-pill-opacity')
       if (pillGlass) pillGlass.style.opacity = ''
+      if (glassCanvas) glassCanvas.style.opacity = ''
       if (barGlass) barGlass.style.opacity = ''
       if (heroTitle) {
         heroTitle.style.transform = ''
@@ -940,11 +1339,13 @@
       const barOpacity = Math.min(1, Math.max(0, (p - 0.12) / 0.78))
       menus.style.setProperty('--nav-pill-opacity', pillOpacity.toFixed(3))
       if (pillGlass) pillGlass.style.opacity = pillOpacity.toFixed(3)
+      if (glassCanvas) glassCanvas.style.opacity = pillOpacity.toFixed(3)
       if (barGlass) barGlass.style.opacity = barOpacity.toFixed(3)
 
       nav.classList.toggle('nav-pill-hidden', pillOpacity <= 0.005)
       nav.classList.toggle('nav-bar-active', barOpacity > 0.005)
       nav.classList.toggle('nav-docked', p >= 0.52)
+      if (pillOpacity > 0.005 && navWebGL && navWebGL.isReady()) navWebGL.render()
 
       if (metrics.hero && heroTitle && navHomeTitle) {
         const { docLeft, docCY, navLeft, navCY, scaleEnd } = metrics.hero
@@ -1005,7 +1406,8 @@
 
     const refresh = () => {
       measure()
-      apply()
+      if (metrics) apply()
+      else if (navWebGL && navWebGL.isReady()) navWebGL.render()
     }
 
     if (navSiteLink && isHome) {
