@@ -663,7 +663,6 @@
 
     const controller = new AbortController()
     const { signal } = controller
-    hoverLensCleanup = () => controller.abort()
 
     let active = false
     let curX = 0
@@ -673,6 +672,14 @@
     let vx = 0
     let vw = 0
     let rafId = 0
+    let lastTs = 0
+    let hideTimer = 0
+
+    hoverLensCleanup = () => {
+      controller.abort()
+      if (hideTimer) clearTimeout(hideTimer)
+      if (rafId) cancelAnimationFrame(rafId)
+    }
 
     const isEligible = () =>
       !document.documentElement.classList.contains('solid-bg') &&
@@ -682,11 +689,9 @@
     const itemSelector = '#nav-darkmode > button.site-page, .menus_item > a.site-page, .menus_item > span.site-page, #search-button > button.site-page'
 
     const applyLensVisuals = (x, w, speed, dir) => {
-      const stretchX = 1 + speed * 0.08
-      const stretchY = 1 - speed * 0.045
       lens.style.width = `${w.toFixed(1)}px`
-      lens.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0) scale(${stretchX.toFixed(4)}, ${stretchY.toFixed(4)})`
-      const glintX = (50 + dir * speed * 28).toFixed(1)
+      lens.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0)`
+      const glintX = (50 + dir * speed * 32).toFixed(1)
       lens.style.setProperty('--lens-glint-x', `${glintX}%`)
 
       const node = ensureHoverLensFilter()
@@ -694,42 +699,50 @@
         const wInt = Math.max(24, Math.round(w))
         node.filter.setAttribute('width', wInt)
         node.image.setAttribute('width', wInt)
-        // Dynamic dispersion: crystal-clear at rest, blooms dramatically with R/G/B prism split while sliding
-        const baseDisplace = 8.5 + speed * 10.5
-        const chroma = 2.8 + speed * 8.5
+        // Dynamic dispersion: crystal-clear at rest, blooms dramatically with R/G/B prism split while gliding
+        const baseDisplace = 8.5 + speed * 12.0
+        const chroma = 2.8 + speed * 9.5
         const scaleG = (2.0 * baseDisplace).toFixed(1)
         const scaleR = (2.0 * (baseDisplace + chroma)).toFixed(1)
         const scaleB = (2.0 * Math.max(0, baseDisplace - chroma)).toFixed(1)
         node.dispR.setAttribute('scale', scaleR)
         node.dispG.setAttribute('scale', scaleG)
         node.dispB.setAttribute('scale', scaleB)
-        lens.style.setProperty('--glass-backdrop', `saturate(${Math.round(170 + speed * 55)}%) url("#${node.id}")`)
+        lens.style.setProperty('--glass-backdrop', `saturate(${Math.round(170 + speed * 60)}%) url("#${node.id}")`)
         lens.setAttribute('data-shader-glass', '1')
       }
     }
 
-    const tick = () => {
+    // Time-based (dt) damped spring: consistent ~340ms silky horizontal glide across 60Hz / 120Hz / 144Hz / 240Hz
+    const omega = 14.5
+    const zeta = 0.84
+    const tick = now => {
       rafId = 0
       if (!active) return
-      const ax = (targetX - curX) * 0.24
-      vx = (vx + ax) * 0.70
-      curX += vx
+      const dt = lastTs ? Math.min(0.032, Math.max(0.004, (now - lastTs) / 1000)) : 0.016
+      lastTs = now
 
-      const aw = (targetW - curW) * 0.26
-      vw = (vw + aw) * 0.68
-      curW += vw
+      const ax = (targetX - curX) * (omega * omega) - 2 * zeta * omega * vx
+      vx += ax * dt
+      curX += vx * dt
 
-      const speed = Math.min(1, (Math.abs(vx) + Math.abs(vw) * 0.5) / 18)
+      const aw = (targetW - curW) * (omega * omega) - 2 * zeta * omega * vw
+      vw += aw * dt
+      curW += vw * dt
+
+      // vx is in px/sec; peak velocity across adjacent nav items (~90px) is ~520 px/s
+      const speed = Math.min(1, (Math.abs(vx) + Math.abs(vw) * 0.4) / 480)
       const dir = vx >= 0 ? 1 : -1
       applyLensVisuals(curX, curW, speed, dir)
 
-      const settled = Math.abs(targetX - curX) < 0.15 && Math.abs(vx) < 0.06 &&
-                      Math.abs(targetW - curW) < 0.15 && Math.abs(vw) < 0.06
+      const settled = Math.abs(targetX - curX) < 0.25 && Math.abs(vx) < 4 &&
+                      Math.abs(targetW - curW) < 0.25 && Math.abs(vw) < 4
       if (settled) {
         curX = targetX
         curW = targetW
         vx = 0
         vw = 0
+        lastTs = 0
         applyLensVisuals(curX, curW, 0, 1)
       } else {
         rafId = requestAnimationFrame(tick)
@@ -738,6 +751,7 @@
 
     const aimAt = item => {
       if (!isEligible()) return
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = 0 }
       const mRect = menus.getBoundingClientRect()
       const tRect = item.getBoundingClientRect()
       if (!tRect.width) return
@@ -745,24 +759,42 @@
       const nextX = (tRect.left - mRect.left) - padX
       const nextW = tRect.width + padX * 2
 
-      if (!active || reducedMotion.matches) {
+      if (!active) {
         active = true
         curX = targetX = nextX
         curW = targetW = nextW
         vx = 0
         vw = 0
+        lastTs = 0
         applyLensVisuals(curX, curW, 0, 1)
         lens.classList.add('is-visible')
       } else {
         targetX = nextX
         targetW = nextW
-        if (!rafId) rafId = requestAnimationFrame(tick)
+        lens.classList.add('is-visible')
+        if (!rafId) {
+          lastTs = 0
+          rafId = requestAnimationFrame(tick)
+        }
       }
     }
 
     const hideLens = () => {
+      if (hideTimer) clearTimeout(hideTimer)
+      hideTimer = setTimeout(() => {
+        hideTimer = 0
+        active = false
+        if (rafId) { cancelAnimationFrame(rafId); rafId = 0 }
+        lastTs = 0
+        lens.classList.remove('is-visible')
+      }, 140)
+    }
+
+    const hideLensImmediate = () => {
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = 0 }
       active = false
       if (rafId) { cancelAnimationFrame(rafId); rafId = 0 }
+      lastTs = 0
       lens.classList.remove('is-visible')
     }
 
@@ -780,7 +812,7 @@
     menus.addEventListener('focusout', event => {
       if (!menus.contains(event.relatedTarget)) hideLens()
     }, { signal })
-    window.addEventListener('scroll', () => { if (active) hideLens() }, { passive: true, signal })
+    window.addEventListener('scroll', () => { if (active) hideLensImmediate() }, { passive: true, signal })
   }
 
   // Smooth scroll-linked transition on desktop background-image mode:
