@@ -30,10 +30,29 @@
   }, liquidMusic.i18n || {});
   const playlistUrl = liquidMusic.playlistUrl || (assetRoot + 'music/playlist.json');
   const pageUrl = liquidMusic.pageUrl || (assetRoot + 'music/');
+  const storageKey = 'blog-music-playlist-id';
+
+  let playlists = [];
+  let activePlaylist = null;
+  let playingPlaylistId = null;
   let tracks = [];
   let current = null;
   let statusText = i18n.loading;
   let pageRoot = null;
+  let rawSnapshot = '';
+
+  const readSavedPlaylistId = () => {
+    try {
+      return localStorage.getItem(storageKey) || '';
+    } catch (_) {
+      return '';
+    }
+  };
+  const savePlaylistId = (id) => {
+    try {
+      if (id) localStorage.setItem(storageKey, String(id));
+    } catch (_) {}
+  };
 
   const icons = {
     previous: '<path d="M5 5h2v14H5zM18 5v14L8 12z"/>',
@@ -43,7 +62,7 @@
     list: '<path d="M4 6h11v1.8H4zm0 5.1h11v1.8H4zm0 5.1h11v1.8H4zM17 6h3v1.8h-3zm0 5.1h3v1.8h-3zm0 5.1h3v1.8h-3z"/>'
   };
   function setIcon(button, name) {
-    if (button.dataset.icon === name) return;
+    if (!button || button.dataset.icon === name) return;
     button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + icons[name] + '</svg>';
     button.dataset.icon = name;
   }
@@ -55,7 +74,6 @@
 
   const dock = document.createElement('aside');
   dock.id = 'music-dock';
-  // 默认折叠，只显示右下角的圆形音符按钮。
   dock.className = 'music-dock is-collapsed';
   dock.setAttribute('aria-label', i18n.dockLabel);
   dock.innerHTML = `
@@ -83,6 +101,10 @@
           <a data-dock-track></a>
           <small data-dock-artist>${i18n.loading}</small>
         </div>
+        <button class="music-dock-playlist-pill" type="button" data-action="playlist" aria-expanded="false" title="${i18n.playlist}">
+          <span class="music-dock-playlist-label" data-dock-playlist-name>${i18n.playlist}</span>
+          <span class="music-dock-caret" aria-hidden="true">▾</span>
+        </button>
         <button class="music-dock-collapse" type="button" data-action="collapse" aria-label="${i18n.collapse}" title="${i18n.collapseShort}">×</button>
       </div>
       <div class="music-dock-lyric" data-dock-lyric hidden></div>
@@ -102,6 +124,7 @@
       <p class="music-dock-status" data-dock-status role="status"></p>
     </div>
     <div class="music-dock-playlist" data-dock-playlist hidden>
+      <div class="music-dock-playlists" data-dock-playlists></div>
       <ol data-dock-list></ol>
     </div>`;
   document.body.appendChild(dock);
@@ -122,7 +145,7 @@
   const findDock = (name) => dock.querySelector('[data-dock-' + name + ']');
   const findPage = (name) => pageRoot && pageRoot.querySelector('[data-music-' + name + ']');
   setTransportIcons(dock, 'data-action');
-  setIcon(dock.querySelector('[data-action="playlist"]'), 'list');
+  setIcon(dock.querySelector('.music-dock-list'), 'list');
   findDock('track').href = pageUrl;
   findDock('track').textContent = i18n.title;
 
@@ -143,6 +166,20 @@
     seconds = Math.floor(seconds);
     return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
   }
+  function playlistCover(pl) {
+    if (!pl) return '';
+    if (pl.cover) return pl.cover;
+    const firstWithCover = (pl.tracks || []).find((item) => item && item.cover);
+    return firstWithCover ? firstWithCover.cover : '';
+  }
+  function playlistMetaText(pl) {
+    if (!pl) return '';
+    const count = (pl.tracks || []).length;
+    const parts = [`${count} 首`];
+    if (pl.updated) parts.push(pl.updated);
+    return parts.join(' · ');
+  }
+
   const lyricLines = new Map();
   let lyricIndex = -1;
   let renderedLyricId = null;
@@ -308,16 +345,57 @@
   window.addEventListener('scroll', hideTip, { passive: true, capture: true });
   window.addEventListener('resize', hideTip);
 
+  function renderDockPlaylists() {
+    const bar = dock.querySelector('[data-dock-playlists]');
+    if (!bar) return;
+    bar.replaceChildren();
+    bar.hidden = playlists.length === 0;
+    playlists.forEach((pl) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'music-dock-pl-chip';
+      chip.dataset.playlistId = String(pl.id);
+      if (activePlaylist && String(activePlaylist.id) === String(pl.id)) chip.classList.add('is-active');
+
+      const thumb = document.createElement('span');
+      thumb.className = 'music-dock-pl-thumb';
+      thumb.setAttribute('aria-hidden', 'true');
+      const url = playlistCover(pl);
+      if (url) {
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = '';
+        img.referrerPolicy = 'no-referrer';
+        thumb.append(img);
+      } else {
+        thumb.textContent = '♫';
+      }
+
+      const name = document.createElement('span');
+      name.className = 'music-dock-pl-name';
+      name.textContent = pl.name;
+
+      const count = document.createElement('span');
+      count.className = 'music-dock-pl-count';
+      count.textContent = String((pl.tracks || []).length);
+
+      chip.title = `${pl.name}（${(pl.tracks || []).length} 首）`;
+      chip.append(thumb, name, count);
+      bar.append(chip);
+    });
+  }
+
   function renderDockList() {
+    renderDockPlaylists();
     const list = dock.querySelector('[data-dock-list]');
     list.replaceChildren();
-    tracks.forEach((track, index) => {
+    tracks.forEach((track) => {
       const item = document.createElement('li');
       const button = document.createElement('button');
       button.type = 'button';
       button.dataset.trackId = String(track.id);
       button.disabled = !track.available;
-      if (current && current.id === track.id) button.classList.add('is-current');
+      if (current && String(current.id) === String(track.id)) button.classList.add('is-current');
       const name = document.createElement('strong');
       const nameText = document.createElement('span');
       nameText.className = 'music-track-text';
@@ -336,14 +414,18 @@
     watchOverflow(list);
     bindMarqueeReturn(list, 'button[data-track-id]');
     const currentButton = list.querySelector('.is-current');
-    if (currentButton) dock.querySelector('[data-dock-playlist]').scrollTop = Math.max(0, currentButton.offsetTop - 24);
+    if (currentButton) dock.querySelector('[data-dock-playlist]').scrollTop = Math.max(0, currentButton.offsetTop - 64);
   }
+
   function setPlaylistOpen(open) {
     dock.classList.toggle('is-playlist-open', open);
     dock.querySelector('[data-dock-playlist]').hidden = !open;
-    dock.querySelector('[data-action="playlist"]').setAttribute('aria-expanded', open ? 'true' : 'false');
+    dock.querySelectorAll('[data-action="playlist"]').forEach((btn) => {
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
     if (open) renderDockList();
   }
+
   function update() {
     const playing = !audio.paused;
     dock.querySelectorAll('[data-action="toggle"]').forEach((button) => {
@@ -351,6 +433,8 @@
       button.setAttribute('aria-label', playing ? i18n.pause : i18n.play);
       button.title = playing ? i18n.pause : i18n.play;
     });
+    const plLabel = findDock('playlist-name');
+    if (plLabel && activePlaylist) plLabel.textContent = activePlaylist.name;
     findDock('status').textContent = statusText;
     findDock('elapsed').textContent = time(audio.currentTime);
     findDock('duration').textContent = time(audio.duration);
@@ -359,6 +443,9 @@
     if (dock.classList.contains('is-playlist-open')) {
       dock.querySelectorAll('[data-track-id]').forEach((button) => {
         button.classList.toggle('is-current', current && button.dataset.trackId === String(current.id));
+      });
+      dock.querySelectorAll('.music-dock-pl-chip').forEach((chip) => {
+        chip.classList.toggle('is-active', activePlaylist && chip.dataset.playlistId === String(activePlaylist.id));
       });
     }
     syncLyrics();
@@ -375,16 +462,31 @@
     findPage('seek').value = Number.isFinite(audio.duration) && audio.duration ? Math.round(audio.currentTime / audio.duration * 1000) : 0;
     findPage('volume').value = audio.muted ? 0 : audio.volume;
     pageRoot.querySelectorAll('.music-tracks li').forEach((li) => li.classList.toggle('is-current', current && li.dataset.id === String(current.id)));
+    pageRoot.querySelectorAll('.music-playlist-card').forEach((card) => {
+      const pid = card.dataset.playlistId;
+      const isSelected = activePlaylist && String(activePlaylist.id) === pid;
+      const isPlayingThis = playing && playingPlaylistId && String(playingPlaylistId) === pid;
+      card.classList.toggle('is-selected', Boolean(isSelected));
+      card.classList.toggle('is-playing', Boolean(isPlayingThis));
+      const playBtn = card.querySelector('.music-playlist-play');
+      if (playBtn) {
+        setIcon(playBtn, isPlayingThis ? 'pause' : 'play');
+        playBtn.setAttribute('aria-label', isPlayingThis ? i18n.pause : i18n.play);
+      }
+    });
   }
+
   function setStatus(message) { statusText = message; update(); }
   function play() {
     if (!current) return;
     audio.play().catch(() => setStatus(i18n.playFailed));
   }
-  function select(track, shouldPlay) {
+  function select(track, shouldPlay, playlistIdOverride) {
     if (!track) return;
-    const changed = !current || current.id !== track.id;
+    const changed = !current || String(current.id) !== String(track.id);
     current = track;
+    if (playlistIdOverride) playingPlaylistId = String(playlistIdOverride);
+    else if (activePlaylist) playingPlaylistId = String(activePlaylist.id);
     findDock('track').textContent = track.name;
     findDock('artist').textContent = track.artist;
     cover(findDock('cover'), track.cover);
@@ -392,11 +494,33 @@
     setStatus(track.preview ? i18n.preview : '');
     if (shouldPlay) play();
   }
+  function selectPlaylist(pl, shouldPlayFirst) {
+    if (!pl) return;
+    activePlaylist = pl;
+    tracks = Array.isArray(pl.tracks) ? pl.tracks : [];
+    savePlaylistId(pl.id);
+    if (pageRoot && pageRoot.isConnected) renderPageDetail(pl);
+    if (dock.classList.contains('is-playlist-open')) renderDockList();
+    if (shouldPlayFirst) {
+      const first = tracks.find((track) => track.available);
+      if (first) select(first, true, pl.id);
+      else setStatus(i18n.emptyPlaylist);
+    } else if (!current || audio.paused) {
+      const hasCurrent = current && tracks.some((t) => String(t.id) === String(current.id));
+      if (!hasCurrent) {
+        const first = tracks.find((track) => track.available);
+        if (first) select(first, false, pl.id);
+      }
+    }
+    update();
+  }
   function advance(direction, shouldPlay = true) {
-    const playable = tracks.filter((track) => track.available);
+    const sourceList = (playingPlaylistId && playlists.find((pl) => String(pl.id) === String(playingPlaylistId))) || activePlaylist;
+    const listTracks = sourceList && Array.isArray(sourceList.tracks) ? sourceList.tracks : tracks;
+    const playable = listTracks.filter((track) => track.available);
     if (!playable.length) return;
-    const index = playable.findIndex((track) => current && track.id === current.id);
-    select(playable[(index + direction + playable.length) % playable.length], shouldPlay);
+    const index = playable.findIndex((track) => current && String(track.id) === String(current.id));
+    select(playable[(index + direction + playable.length) % playable.length], shouldPlay, sourceList && sourceList.id);
   }
   function action(name) {
     if (name === 'toggle') {
@@ -405,6 +529,7 @@
     } else if (name === 'previous') advance(-1);
     else if (name === 'next') advance(1);
   }
+
   dock.addEventListener('click', (event) => {
     const button = event.target.closest('button');
     if (!button || !dock.contains(button)) return;
@@ -421,10 +546,15 @@
       setPlaylistOpen(!dock.classList.contains('is-playlist-open'));
       return;
     }
+    if (button.dataset.playlistId) {
+      const target = playlists.find((pl) => String(pl.id) === button.dataset.playlistId);
+      if (target) selectPlaylist(target, false);
+      return;
+    }
     if (button.dataset.trackId) {
       const track = tracks.find((item) => String(item.id) === button.dataset.trackId);
       if (track && track.available) {
-        select(track, true);
+        select(track, true, activePlaylist && activePlaylist.id);
         setPlaylistOpen(false);
       }
       return;
@@ -445,6 +575,134 @@
   ['play', 'pause', 'timeupdate', 'durationchange', 'volumechange'].forEach((event) => audio.addEventListener(event, update));
   audio.addEventListener('ended', () => advance(1));
   audio.addEventListener('error', () => { if (current) setStatus(i18n.trackFailed); });
+
+  function renderPlaylistGrid() {
+    if (!pageRoot || !pageRoot.isConnected) return;
+    const grid = findPage('playlist-grid');
+    const countEl = findPage('playlist-count');
+    if (!grid) return;
+    grid.replaceChildren();
+    if (countEl) countEl.textContent = playlists.length ? `${playlists.length} 个歌单` : '';
+
+    playlists.forEach((pl) => {
+      const card = document.createElement('article');
+      card.className = 'music-playlist-card';
+      card.dataset.playlistId = String(pl.id);
+      card.tabIndex = 0;
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', `${pl.name}（${(pl.tracks || []).length} 首）`);
+
+      const coverWrap = document.createElement('div');
+      coverWrap.className = 'music-playlist-cover-wrap';
+
+      const fallback = document.createElement('span');
+      fallback.className = 'music-playlist-cover-fallback';
+      fallback.setAttribute('aria-hidden', 'true');
+      fallback.textContent = '♫';
+      coverWrap.append(fallback);
+
+      const url = playlistCover(pl);
+      if (url) {
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = pl.name;
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        coverWrap.append(img);
+      }
+
+      const playBtn = document.createElement('button');
+      playBtn.type = 'button';
+      playBtn.className = 'music-playlist-play';
+      setIcon(playBtn, 'play');
+      playBtn.setAttribute('aria-label', i18n.play);
+      playBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isPlayingThis = !audio.paused && playingPlaylistId && String(playingPlaylistId) === String(pl.id);
+        if (isPlayingThis) {
+          audio.pause();
+        } else if (playingPlaylistId && String(playingPlaylistId) === String(pl.id) && current) {
+          play();
+        } else {
+          selectPlaylist(pl, true);
+        }
+      });
+      coverWrap.append(playBtn);
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'music-playlist-card-name';
+      nameEl.textContent = pl.name;
+      nameEl.title = pl.name;
+
+      const metaEl = document.createElement('div');
+      metaEl.className = 'music-playlist-card-meta';
+      metaEl.textContent = playlistMetaText(pl);
+
+      card.append(coverWrap, nameEl, metaEl);
+      card.addEventListener('click', () => {
+        selectPlaylist(pl, false);
+        const detail = pageRoot.querySelector('.music-detail-section');
+        if (detail && playlists.length > 1) {
+          detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+      card.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          selectPlaylist(pl, false);
+        }
+      });
+      grid.append(card);
+    });
+  }
+
+  function renderPageDetail(data) {
+    if (!pageRoot || !pageRoot.isConnected || !data) return;
+    findPage('title').textContent = data.name;
+    const metaEl = findPage('meta');
+    if (metaEl) metaEl.textContent = playlistMetaText(data);
+    const linkEl = findPage('playlist-link');
+    if (linkEl) {
+      if (data.url) {
+        linkEl.href = data.url;
+        linkEl.hidden = false;
+      } else {
+        linkEl.hidden = true;
+      }
+    }
+    const list = findPage('tracks');
+    list.replaceChildren();
+    (data.tracks || []).forEach((track) => {
+      const li = document.createElement('li');
+      li.dataset.id = track.id;
+      const info = document.createElement(track.available ? 'button' : 'div');
+      info.className = 'music-track-info';
+      if (track.available) {
+        info.type = 'button';
+        info.addEventListener('click', () => select(track, true, data.id));
+      }
+      const name = document.createElement('span');
+      name.className = 'music-track-name';
+      const nameText = document.createElement('span');
+      nameText.className = 'music-track-text';
+      nameText.textContent = track.name;
+      name.append(nameText);
+      const artist = document.createElement('small');
+      const artistText = document.createElement('span');
+      artistText.className = 'music-track-text';
+      artistText.textContent = track.artist;
+      artist.append(artistText);
+      info.append(name, artist);
+      li.dataset.fullName = track.name;
+      li.dataset.fullArtist = track.artist || '';
+      li.append(info);
+      list.append(li);
+    });
+    watchOverflow(list);
+    bindTips(list);
+    bindMarqueeReturn(list, 'li[data-id]');
+    update();
+  }
 
   function initPage() {
     pageRoot = document.getElementById('music-library');
@@ -483,47 +741,13 @@
       lyricView.addEventListener('pointerdown', holdLyricFollow);
       lyricView.addEventListener('touchstart', holdLyricFollow, { passive: true });
     }
-    if (playlist) renderPage(playlist);
+    if (playlists.length) {
+      renderPlaylistGrid();
+      if (activePlaylist) renderPageDetail(activePlaylist);
+    }
     update();
   }
-  function renderPage(data) {
-    if (!pageRoot || !pageRoot.isConnected) return;
-    findPage('title').textContent = data.name;
-    findPage('playlist-link').href = data.url;
-    const list = findPage('tracks');
-    list.replaceChildren();
-    data.tracks.forEach((track) => {
-      const li = document.createElement('li');
-      li.dataset.id = track.id;
-      const info = document.createElement(track.available ? 'button' : 'div');
-      info.className = 'music-track-info';
-      if (track.available) {
-        info.type = 'button';
-        info.addEventListener('click', () => select(track, true));
-      }
-      const name = document.createElement('span');
-      name.className = 'music-track-name';
-      const nameText = document.createElement('span');
-      nameText.className = 'music-track-text';
-      nameText.textContent = track.name;
-      name.append(nameText);
-      const artist = document.createElement('small');
-      const artistText = document.createElement('span');
-      artistText.className = 'music-track-text';
-      artistText.textContent = track.artist;
-      artist.append(artistText);
-      info.append(name, artist);
-      li.dataset.fullName = track.name;
-      li.dataset.fullArtist = track.artist || '';
-      li.append(info);
-      list.append(li);
-    });
-    watchOverflow(list);
-    bindTips(list);
-    bindMarqueeReturn(list, 'li[data-id]');
-    update();
-  }
-  // Give a one-line label a slow horizontal scroll only while it actually overflows.
+
   function measureMarquee(scope) {
     scope.querySelectorAll('.music-track-text').forEach((text) => {
       const box = text.parentElement;
@@ -548,16 +772,15 @@
       observer.observe(scope);
     }
   }
-  // 鼠标移开后，滚动停止并从当前位置平滑回到开头。
   function returnToStart(row) {
     if (!row || !row.querySelector) return;
     row.querySelectorAll('.is-scrolling > .music-track-text').forEach((text) => {
-      const current = getComputedStyle(text).transform;
-      if (!current || current === 'none') return;
+      const currentTransform = getComputedStyle(text).transform;
+      if (!currentTransform || currentTransform === 'none') return;
       text.getAnimations().forEach((animation) => animation.cancel());
       try {
         text.animate(
-          [{ transform: current }, { transform: 'translateX(0)' }],
+          [{ transform: currentTransform }, { transform: 'translateX(0)' }],
           { duration: 420, easing: 'ease-out', fill: 'none' }
         );
       } catch (_error) {
@@ -575,7 +798,17 @@
       returnToStart(row);
     }, true);
   }
-  let playlist = null;
+
+  function normalizePlaylists(data) {
+    if (data && Array.isArray(data.playlists) && data.playlists.length) {
+      return data.playlists.filter((pl) => pl && Array.isArray(pl.tracks));
+    }
+    if (data && Array.isArray(data.tracks)) {
+      return [data];
+    }
+    return [];
+  }
+
   document.addEventListener('pjax:complete', initPage);
   initPage();
   let refreshInFlight = false;
@@ -586,27 +819,40 @@
       const response = await fetch(playlistUrl, { cache: 'no-store' });
       if (!response.ok) throw new Error('playlist unavailable');
       const data = await response.json();
-      if (!Array.isArray(data.tracks)) throw new Error('invalid playlist');
-      const changed = !playlist || JSON.stringify(data) !== JSON.stringify(playlist);
-      playlist = data;
-      tracks = data.tracks;
+      const nextPlaylists = normalizePlaylists(data);
+      if (!nextPlaylists.length) throw new Error('invalid playlist');
+      const snapshot = JSON.stringify(nextPlaylists);
+      const changed = snapshot !== rawSnapshot;
+      rawSnapshot = snapshot;
+      playlists = nextPlaylists;
+
+      const preferredId = (activePlaylist && String(activePlaylist.id)) || readSavedPlaylistId();
+      activePlaylist = playlists.find((pl) => String(pl.id) === preferredId) || playlists[0];
+      tracks = activePlaylist.tracks || [];
+
       if (changed) {
-        // Refresh the selected track's metadata without replacing the audio source.
-        // Otherwise new lyrics for the playing song remain invisible until it is reselected.
-        if (current) current = tracks.find((track) => String(track.id) === String(current.id)) || current;
+        if (current) {
+          for (const pl of playlists) {
+            const match = (pl.tracks || []).find((track) => String(track.id) === String(current.id));
+            if (match) { current = match; break; }
+          }
+        }
         lyricLines.clear();
         renderedLyricId = null;
         lyricIndex = -1;
-        renderPage(data);
+        renderPlaylistGrid();
+        renderPageDetail(activePlaylist);
         if (dock.classList.contains('is-playlist-open')) renderDockList();
       }
       if (!current) {
         const first = tracks.find((track) => track.available);
-        if (first) select(first, false);
+        if (first) select(first, false, activePlaylist.id);
         else setStatus(i18n.emptyPlaylist);
+      } else {
+        update();
       }
     } catch (_) {
-      if (!playlist) setStatus(i18n.loadFailed);
+      if (!playlists.length) setStatus(i18n.loadFailed);
     } finally {
       refreshInFlight = false;
     }
