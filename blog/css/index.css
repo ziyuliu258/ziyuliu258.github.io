@@ -4110,9 +4110,6 @@ figure.highlight pre .javascript .function {
   -webkit-align-items: center;
   align-items: center;
 }
-#nav.hide-menu #toggle-menu .site-page {
-  font-size: inherit;
-}
 #nav.hide-menu .menus_items > .menus_item {
   display: none;
 }

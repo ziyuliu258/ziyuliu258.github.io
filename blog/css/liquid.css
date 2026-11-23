@@ -174,11 +174,13 @@
   line-height: 1;
 }
 
-#page-header.nav-fixed #nav .nav-back {
+#page-header.nav-fixed #nav .nav-back,
+html:not(.solid-bg) #page-header.nav-morph-ready:not(.full_page) > #nav.nav-docked .nav-back {
   display: inline-flex;
 }
 
-#page-header.nav-fixed #nav #blog-info > a.nav-page-title {
+#page-header.nav-fixed #nav #blog-info > a.nav-page-title,
+html:not(.solid-bg) #page-header.nav-morph-ready:not(.full_page) > #nav.nav-docked #blog-info > a.nav-page-title {
   display: inline-flex;
   align-items: center;
   height: 36px;
@@ -187,13 +189,18 @@
   line-height: 1.2;
 }
 
-#page-header.nav-fixed #nav #blog-info > a.nav-page-title .site-name {
+#page-header.nav-fixed #nav #blog-info > a.nav-page-title .site-name,
+html:not(.solid-bg) #page-header.nav-morph-ready:not(.full_page) > #nav.nav-docked #blog-info > a.nav-page-title .site-name {
   display: block;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   line-height: 1.2;
+}
+
+html:not(.solid-bg) #page-header.nav-morph-ready:not(.full_page) > #nav.nav-docked #blog-info > .nav-site-title {
+  display: none;
 }
 
 #nav .nav-back:hover {
@@ -971,8 +978,19 @@ html.solid-bg .liquid-glass::after,
 }
 
 /* 首页顶栏左上角标题：页首隐藏，下滑时承接大标题丝滑飞入。 */
+#nav .nav-site-title {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+}
+
 #nav .nav-home-title {
-  display: inline-block;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.96em;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -997,7 +1015,7 @@ html.solid-bg #page-header.full_page.nav-fixed #nav .nav-home-title {
  *    首页大标题（#site-title）同步平滑缩放飞入左上角并无缝交接给 .nav-home-title；
  * 4) 滚动全宽栏 (.nav-bar-glass)：1×60px 1D 底边折射条纹 + 2px 轻模糊。 */
 
-/* ===== 连续滚动过渡模式（桌面端有背景图模式） ===== */
+/* ===== 连续滚动过渡模式（有背景图模式，桌面端与移动端通用） ===== */
 html:not(.solid-bg) #page-header.nav-morph-ready > #nav {
   position: fixed;
   top: 0;
@@ -1013,6 +1031,7 @@ html:not(.solid-bg) #page-header.nav-morph-ready > #nav {
   border: none;
   border-radius: 0;
   box-shadow: none;
+  transform: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   pointer-events: auto;
@@ -1178,13 +1197,13 @@ html:not(.solid-bg) #page-header.full_page.nav-morph-ready #site-subtitle {
   will-change: transform, opacity;
 }
 
-/* 桌面端有背景模式下用液态玻璃水滴透镜替代原有平直下划线 */
-html:not(.solid-bg) #nav:not(.hide-menu) #menus .site-page:not(.child)::after {
+/* 有背景模式下用液态玻璃水滴透镜替代原有平直下划线（桌面端悬停 + 移动端触控） */
+html:not(.solid-bg) #nav #menus .site-page:not(.child)::after {
   display: none;
 }
 
-/* ===== 悬停滑动液态玻璃按钮（位于文字下层 z-index: 1，文字永远 100% 锐利不糊，玻璃层 0px 模糊全透明折射） ===== */
-html:not(.solid-bg) #nav:not(.hide-menu) #menus > .nav-hover-lens {
+/* ===== 悬停/触控滑动液态玻璃按钮（位于文字下层 z-index: 1，文字永远 100% 锐利不糊，玻璃层 0px 模糊全透明折射） ===== */
+html:not(.solid-bg) #nav #menus > .nav-hover-lens {
   display: block;
   position: absolute;
   top: 5px;
@@ -1219,11 +1238,11 @@ html:not(.solid-bg) #nav:not(.hide-menu) #menus > .nav-hover-lens {
   backdrop-filter: var(--glass-backdrop, saturate(155%) contrast(1.06));
 }
 
-html:not(.solid-bg) #nav:not(.hide-menu) #menus > .nav-hover-lens.is-visible {
+html:not(.solid-bg) #nav #menus > .nav-hover-lens.is-visible {
   opacity: 1;
 }
 
-html:not(.solid-bg) #nav.nav-docked:not(.hide-menu) #menus > .nav-hover-lens {
+html:not(.solid-bg) #nav.nav-docked #menus > .nav-hover-lens {
   background:
     linear-gradient(
       180deg,
@@ -1244,7 +1263,7 @@ html:not(.solid-bg) #nav.nav-docked:not(.hide-menu) #menus > .nav-hover-lens {
     0 1px 2px rgba(15, 23, 42, 0.08);
 }
 
-html:not(.solid-bg)[data-theme='dark'] #nav.nav-docked:not(.hide-menu) #menus > .nav-hover-lens {
+html:not(.solid-bg)[data-theme='dark'] #nav.nav-docked #menus > .nav-hover-lens {
   background:
     linear-gradient(
       180deg,
@@ -1352,17 +1371,37 @@ html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-
 }
 
 @media screen and (max-width: 768px) {
-  html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav {
+  html:not(.solid-bg) #page-header.nav-morph-ready > #nav {
+    padding: 0 12px 0 16px;
+  }
+
+  html:not(.solid-bg) #page-header.nav-morph-ready > #nav #menus {
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 22px;
+  }
+
+  html:not(.solid-bg) #page-header.nav-morph-ready > #nav:not(.nav-pill-hidden) #menus > .nav-pill-glass {
+    clip-path: inset(0 round 22px);
+  }
+
+  html:not(.solid-bg) #nav #menus > .nav-hover-lens {
+    top: 4px;
+    height: 36px;
+    border-radius: 18px;
+  }
+
+  html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav {
     top: 12px;
   }
 
-  html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus {
+  html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav #menus {
     height: 44px;
     padding: 0 18px;
     border-radius: 22px;
   }
 
-  html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus > .nav-pill-glass {
+  html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav #menus > .nav-pill-glass {
     clip-path: inset(0 round 22px);
   }
 }

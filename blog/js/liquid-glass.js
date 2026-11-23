@@ -709,7 +709,11 @@
       }
     `
     const fsSrc = `
+      #ifdef GL_FRAGMENT_PRECISION_HIGH
       precision highp float;
+      #else
+      precision mediump float;
+      #endif
       #define PI 3.14159265359
 
       // Exact dispersion refractive indices from iyinchao/liquid-glass-studio (fragment-main.glsl)
@@ -1139,14 +1143,12 @@
     }
 
     const isEligible = () =>
-      !document.documentElement.classList.contains('solid-bg') &&
-      !nav.classList.contains('hide-menu') &&
-      window.innerWidth > 768
+      !document.documentElement.classList.contains('solid-bg')
 
     const useWebGLLens = () =>
       Boolean(navWebGL && navWebGL.isReady() && !nav.classList.contains('nav-pill-hidden') && !nav.classList.contains('nav-docked'))
 
-    const itemSelector = '#nav-darkmode > button.site-page, .menus_item > a.site-page, .menus_item > span.site-page, #search-button > button.site-page'
+    const itemSelector = '#nav-darkmode > button.site-page, .menus_item > a.site-page, .menus_item > span.site-page, #search-button > button.site-page, #toggle-menu > span.site-page'
 
     const applyLensVisuals = (x, w, alpha, velNorm) => {
       if (useWebGLLens()) {
@@ -1227,7 +1229,7 @@
       const mRect = menus.getBoundingClientRect()
       const tRect = item.getBoundingClientRect()
       if (!tRect.width) return
-      const padX = item.closest('#nav-darkmode') ? 10 : 10
+      const padX = window.innerWidth <= 768 ? 8 : 10
       const nextX = (tRect.left - mRect.left) - padX
       const nextW = tRect.width + padX * 2
 
@@ -1252,7 +1254,7 @@
       }
     }
 
-    const hideLens = () => {
+    const hideLens = (delay = 140) => {
       if (hideTimer) clearTimeout(hideTimer)
       hideTimer = setTimeout(() => {
         hideTimer = 0
@@ -1261,7 +1263,7 @@
           lastTs = 0
           rafId = requestAnimationFrame(tick)
         }
-      }, 140)
+      }, delay)
     }
 
     const hideLensImmediate = () => {
@@ -1280,21 +1282,30 @@
       const item = event.target.closest(itemSelector)
       if (item) aimAt(item)
     }, { signal })
+    menus.addEventListener('pointerdown', event => {
+      if (event.pointerType !== 'touch') return
+      const item = event.target.closest(itemSelector)
+      if (item) aimAt(item)
+    }, { passive: true, signal })
+    menus.addEventListener('pointerup', event => {
+      if (event.pointerType === 'touch') hideLens(220)
+    }, { passive: true, signal })
+    menus.addEventListener('pointercancel', () => hideLens(80), { passive: true, signal })
 
-    menus.addEventListener('pointerleave', hideLens, { signal })
+    menus.addEventListener('pointerleave', () => hideLens(140), { signal })
     menus.addEventListener('focusin', event => {
       const item = event.target.closest(itemSelector)
       if (item) aimAt(item)
     }, { signal })
     menus.addEventListener('focusout', event => {
-      if (!menus.contains(event.relatedTarget)) hideLens()
+      if (!menus.contains(event.relatedTarget)) hideLens(140)
     }, { signal })
     window.addEventListener('scroll', () => { if (active || curAlpha > 0) hideLensImmediate() }, { passive: true, signal })
   }
 
-  // Smooth scroll-linked transition on desktop background-image mode:
+  // Smooth scroll-linked transition in background-image mode (desktop & mobile):
   // 1) Glides #menus smoothly from centered floating capsule -> right-docked full-width bar;
-  // 2) On Home page, flies #site-title ("Derrick Liu的个人博客") smoothly into top-left of #nav.
+  // 2) On Home page, flies #site-title (site title) smoothly into top-left of #nav.
   let scrollMorphCleanup = null
   function initNavScrollMorph() {
     if (scrollMorphCleanup) { scrollMorphCleanup(); scrollMorphCleanup = null }
@@ -1321,6 +1332,7 @@
 
     let metrics = null
     let ticking = false
+    let lastViewportW = 0
 
     const resetInline = () => {
       header.classList.remove('nav-morph-ready')
@@ -1350,7 +1362,6 @@
     const canMorph = () =>
       !document.documentElement.classList.contains('solid-bg') &&
       !header.classList.contains('not-top-img') &&
-      window.innerWidth > 768 &&
       !reducedMotion.matches
 
     const measure = () => {
@@ -1360,6 +1371,7 @@
         return
       }
       header.classList.add('nav-morph-ready')
+      lastViewportW = window.innerWidth
 
       // Temporarily clear transforms to read true natural geometry
       const prevMenusTransform = menus.style.transform
@@ -1369,7 +1381,7 @@
 
       const navWidth = nav.offsetWidth
       const menusWidth = menus.offsetWidth
-      const navPadRight = Number.parseFloat(getComputedStyle(nav).paddingRight) || 36
+      const navPadRight = Number.parseFloat(getComputedStyle(nav).paddingRight) || (window.innerWidth <= 768 ? 12 : 36)
       const dockedMenusLeft = navWidth - navPadRight - menusWidth
       const centeredMenusLeft = (navWidth - menusWidth) * 0.5
       const centerShiftX = centeredMenusLeft - dockedMenusLeft
@@ -1380,13 +1392,13 @@
         const nRect = navHomeTitle.getBoundingClientRect()
         const heroFontSize = Number.parseFloat(getComputedStyle(heroTitle).fontSize) || 40
         const navFontSize = Number.parseFloat(getComputedStyle(navHomeTitle).fontSize) || 18.5
-        if (hRect.width > 0 && nRect.width > 0) {
+        if (hRect.width > 0 && nRect.width > 0 && hRect.height < heroFontSize * 2.2) {
           hero = {
             docLeft: hRect.left,
             docCY: hRect.top + window.scrollY + hRect.height * 0.5,
             navLeft: nRect.left,
             navCY: 30,
-            scaleEnd: navFontSize / heroFontSize
+            scaleEnd: Math.min(navFontSize / heroFontSize, nRect.width / hRect.width)
           }
         }
       }
@@ -1395,8 +1407,8 @@
       if (heroTitle) heroTitle.style.transform = prevTitleTransform
 
       const morphDist = hero
-        ? Math.max(220, Math.min(360, Math.round(hero.docCY * 0.72)))
-        : 160
+        ? Math.max(window.innerWidth <= 768 ? 180 : 220, Math.min(360, Math.round(hero.docCY * 0.72)))
+        : (window.innerWidth <= 768 ? 130 : 160)
 
       metrics = { centerShiftX, morphDist, hero }
     }
@@ -1499,9 +1511,26 @@
       }, { signal })
     }
 
+    const onResize = () => {
+      if (window.innerWidth === lastViewportW && metrics) return
+      refresh()
+    }
+
     window.addEventListener('scroll', schedule, { passive: true, signal })
-    window.addEventListener('resize', refresh, { passive: true, signal })
+    window.addEventListener('resize', onResize, { passive: true, signal })
     reducedMotion.addEventListener('change', refresh, { signal })
+    if ('ResizeObserver' in window) {
+      let lastMenusW = 0
+      const menusObs = new ResizeObserver(() => {
+        const w = menus.offsetWidth
+        if (w && w !== lastMenusW) {
+          lastMenusW = w
+          refresh()
+        }
+      })
+      menusObs.observe(menus)
+      signal.addEventListener('abort', () => menusObs.disconnect())
+    }
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => { if (!signal.aborted) refresh() })
     }
