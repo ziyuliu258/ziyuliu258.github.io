@@ -295,19 +295,6 @@ html.solid-bg[data-theme='dark'] .layout .pagination > *:not(.space) {
   font-family: "JetBrains Mono", "Consolas", monospace;
 }
 
-/* 分类/系列列表的圆点也改成中性灰。 */
-.category-lists ul li::before {
-  border-color: rgba(128, 128, 128, 0.55) !important;
-}
-
-.category-lists ul li:hover::before {
-  border-color: var(--font-color) !important;
-}
-
-[data-theme='dark'] .category-lists ul li::before {
-  border-color: rgba(255, 255, 255, 0.45) !important;
-}
-
 /* 行内代码改成中性灰，不再用红色。代码块仍保留高亮配色。 */
 #article-container :not(pre) > code,
 .container :not(pre) > code {
