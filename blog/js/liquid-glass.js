@@ -479,7 +479,8 @@
   function updateRefraction(surface) {
     const rootClass = document.documentElement.classList
     if (rootClass.contains('aside-motion') || rootClass.contains('aside-glass-pause') || rootClass.contains('solid-bg')) return
-    if (!pointer.matches || reducedTransparency.matches) {
+    const isNavGlass = surface.classList.contains('nav-pill-glass') || surface.classList.contains('nav-bar-glass')
+    if ((!isNavGlass && !pointer.matches) || reducedTransparency.matches) {
       surfaceSignature.delete(surface)
       surface.style.removeProperty('--glass-backdrop')
       surface.style.removeProperty('--glass-spec-image')
@@ -513,14 +514,15 @@
 
     if (isNavBar) {
       const bar = getOrUpdateBarFilter(w, h, refractThickness, refractIOR, refractScale, chromaStrength)
-      surface.style.setProperty('--glass-backdrop', `blur(var(--glass-blur)) saturate(var(--glass-saturate, 190%)) url("#${bar.id}")`)
+      surface.style.setProperty('--glass-backdrop', `blur(var(--glass-blur)) saturate(var(--glass-saturate, 210%)) url("#${bar.id}")`)
       surface.style.removeProperty('--glass-spec-image')
       surface.setAttribute('data-shader-glass', '1')
       return
     }
 
     const shared = getOrBuildSharedFilter(w, h, radius, refractThickness, refractIOR, refractScale, chromaStrength, specStrength)
-    surface.style.setProperty('--glass-backdrop', `blur(var(--glass-blur)) saturate(var(--glass-saturate, 165%)) url("#${shared.id}")`)
+    const brightness = surface.classList.contains('nav-pill-glass') ? ' brightness(1.06)' : ''
+    surface.style.setProperty('--glass-backdrop', `blur(var(--glass-blur)) saturate(var(--glass-saturate, 165%))${brightness} url("#${shared.id}")`)
     surface.style.setProperty('--glass-spec-image', shared.specUrl)
     surface.setAttribute('data-shader-glass', '1')
   }
