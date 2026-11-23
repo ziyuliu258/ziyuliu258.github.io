@@ -283,9 +283,9 @@ html.solid-bg[data-theme='dark'] .layout .pagination > *:not(.space) {
   background: #2a2a2a;
 }
 
-/* 只有阅读文章时的正文用宋体（霞鹜新致宋），其余页面一律黑体。 */
+/* 只有阅读文章时的正文用思源宋体，其余页面一律思源黑体。 */
 #post #article-container {
-  font-family: "LXGW Neo ZhiSong", "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
 }
 
 /* 正文里的代码仍然用等宽字体。 */
