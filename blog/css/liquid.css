@@ -934,45 +934,99 @@ html.solid-bg .liquid-glass::after,
 
 /* 顶栏液态玻璃光学表面层默认隐藏（纯色模式下零开销） */
 #nav > .nav-bar-glass,
-#nav #menus > .nav-pill-glass {
+#nav #menus > .nav-pill-glass,
+#nav #menus > .nav-hover-lens {
   display: none;
   pointer-events: none;
 }
 
 #nav > #blog-info,
-#nav > #menus,
-#nav #menus > :not(.nav-pill-glass) {
+#nav > #menus {
   position: relative;
   z-index: 1;
 }
 
-/* 有背景模式下的苹果风真光学液态玻璃顶栏（低开销 GPU 着色方案）：
- * 1) 顶部居中胶囊 (.nav-pill-glass)：仅约 460×46px（全宽栏面积的 ~1/6）且为静态绝对定位，
- *    复用 liquid-glass.js 完整 Snell 球面边缘折射 + 3 通道 R/G/B 色散 + SDF 高光唇边，
- *    内部保持极低模糊（blur 2.5px + 高饱和度）让背景色彩通透折射；
- * 2) 滚动全宽栏 (.nav-bar-glass)：仅生成 1×60px（60 像素）垂直底边折射色散条纹，
- *    窗口缩放 O(1) 拉伸复用不重建画布，并用 blur(6px) 替代原先 blur(14px)，
- *    GPU 开销与原先相当甚至更低，同时下边缘呈现液态玻璃折射弯曲与轻色散；
- * 3) 玻璃层独立于文字与下拉菜单之外，可安全使用 clip-path 杜绝溢出残影，且不裁切 More 下拉框。 */
+/* 菜单项保持 z-index: auto（不创建隔离层叠上下文），以便：
+ * .nav-pill-glass (0) < 菜单文字 (auto) < .nav-hover-lens (2) < More 下拉菜单 (12) */
+#nav #menus > :not(.nav-pill-glass):not(.nav-hover-lens) {
+  position: relative;
+}
 
-/* 状态一：有背景模式且位于页面最顶端 —— 居中悬浮的液态玻璃胶囊（类似 iOS 26 Control Center） */
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav {
-  top: 14px;
-  height: auto;
-  padding: 0 16px;
-  justify-content: center;
+#nav .menus_items .menus_item .menus_item_child {
+  z-index: 12;
+}
+
+/* 首页顶栏左上角标题：页首隐藏，下滑时承接大标题丝滑飞入。 */
+#nav .nav-home-title {
+  display: inline-block;
+  font-size: 0.96em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  color: var(--font-color);
+  text-shadow: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+html.solid-bg #page-header.full_page.nav-fixed #nav .nav-home-title {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 有背景模式下的苹果风真光学液态玻璃顶栏与交互动效：
+ * 1) 顶部居中胶囊 (.nav-pill-glass)：约 510×46px，0px 模糊 + Snell 折射 + 3 通道 R/G/B 色散；
+ * 2) 悬停滑动液态玻璃透镜 (.nav-hover-lens)：类似 iOS 26 水滴按钮，弹簧平滑跟随选项滑动，
+ *    并随滑动速度实时增强/舒缓 3 通道 R/G/B 光学色散；
+ * 3) 下滑平滑过渡 (.nav-morph-ready)：#menus 以纯 GPU transform 从居中丝滑过渡到右侧，
+ *    首页大标题（#site-title）同步平滑缩放飞入左上角并无缝交接给 .nav-home-title；
+ * 4) 滚动全宽栏 (.nav-bar-glass)：1×60px 1D 底边折射条纹 + 2px 轻模糊。 */
+
+/* ===== 连续滚动过渡模式（桌面端有背景图模式） ===== */
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 91;
+  width: 100%;
+  height: 60px;
+  padding: 0 14px 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: transparent;
+  border: none;
+  border-radius: 0;
   box-shadow: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+  pointer-events: auto;
+}
+
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav #blog-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  padding-right: 16px;
+  overflow: hidden;
+}
+
+/* 内页（如文章页）左侧返回+标题在导航停靠后再平滑淡入 */
+html:not(.solid-bg) #page-header.nav-morph-ready:not(.full_page) > #nav:not(.nav-docked) #blog-info {
+  opacity: 0;
   pointer-events: none;
+  transition: opacity 0.24s ease;
 }
 
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #blog-info {
-  display: none;
+html:not(.solid-bg) #page-header.nav-morph-ready:not(.full_page) > #nav.nav-docked #blog-info {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.24s ease;
 }
 
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus {
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav #menus {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -981,12 +1035,13 @@ html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus
   padding: 0 22px;
   border-radius: 23px;
   pointer-events: auto;
+  will-change: transform;
   box-shadow:
-    0 12px 32px -10px rgba(0, 0, 0, 0.30),
-    0 2px 10px -2px rgba(0, 0, 0, 0.16);
+    0 12px 32px -10px rgba(0, 0, 0, calc(0.30 * var(--nav-pill-opacity, 1))),
+    0 2px 10px -2px rgba(0, 0, 0, calc(0.16 * var(--nav-pill-opacity, 1)));
 }
 
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus > .nav-pill-glass {
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav:not(.nav-pill-hidden) #menus > .nav-pill-glass {
   display: block;
   position: absolute;
   inset: 0;
@@ -1008,31 +1063,225 @@ html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus
   backdrop-filter: var(--glass-backdrop, blur(2px) saturate(160%));
 }
 
-html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus > .nav-pill-glass {
+html:not(.solid-bg)[data-theme='dark'] #page-header.nav-morph-ready > #nav:not(.nav-pill-hidden) #menus > .nav-pill-glass {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(10, 12, 16, 0.12) 100%);
   box-shadow:
     inset 0 1px 0.5px rgba(255, 255, 255, 0.45),
     inset 0 -1px 0.5px rgba(255, 255, 255, 0.18);
 }
 
-/* 顶部通透液态玻璃胶囊内的文字与图标：纯白高对比 + 轻投影 */
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus a,
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus span.site-page,
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus button.site-page,
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus #toggle-menu {
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav.nav-bar-active > .nav-bar-glass {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  --glass-blur: 2px;
+  --glass-saturate: 170%;
+  --glass-refract-thickness: 16;
+  --glass-refract-ior: 1.55;
+  --glass-refract-scale: 24;
+  --glass-chroma-strength: 0.9;
+  --glass-spec-strength: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.36) 0%, rgba(255, 255, 255, 0.20) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.68);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.38),
+    0 8px 24px -10px rgba(15, 23, 42, 0.12);
+  -webkit-backdrop-filter: var(--glass-backdrop, blur(4px) saturate(170%));
+  backdrop-filter: var(--glass-backdrop, blur(4px) saturate(170%));
+}
+
+html:not(.solid-bg)[data-theme='dark'] #page-header.nav-morph-ready > #nav.nav-bar-active > .nav-bar-glass {
+  background: linear-gradient(180deg, rgba(22, 24, 30, 0.34) 0%, rgba(12, 14, 18, 0.20) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.12),
+    0 10px 28px -10px rgba(0, 0, 0, 0.38);
+}
+
+/* 顶部未停靠时文字为纯白高对比；停靠到全宽玻璃栏后平滑切换为日/夜主题色 */
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav:not(.nav-docked) #menus a,
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav:not(.nav-docked) #menus span.site-page,
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav:not(.nav-docked) #menus button.site-page,
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav:not(.nav-docked) #menus #toggle-menu {
   color: rgba(255, 255, 255, 0.98);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.42), 0 0 1px rgba(0, 0, 0, 0.25);
+  transition: color 0.24s ease, text-shadow 0.24s ease;
 }
 
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus a:hover,
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus span.site-page:hover,
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus button.site-page:hover,
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus #toggle-menu:hover {
-  color: #fff;
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav.nav-docked #menus a,
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav.nav-docked #menus span.site-page,
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav.nav-docked #menus button.site-page,
+html:not(.solid-bg) #page-header.nav-morph-ready > #nav.nav-docked #menus #toggle-menu {
+  color: var(--font-color);
+  text-shadow: none;
+  transition: color 0.24s ease, text-shadow 0.24s ease;
 }
 
-html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus .site-page:not(.child)::after {
-  background-color: rgba(255, 255, 255, 0.85);
+html:not(.solid-bg)[data-theme='dark'] #page-header.nav-morph-ready > #nav.nav-docked #menus a,
+html:not(.solid-bg)[data-theme='dark'] #page-header.nav-morph-ready > #nav.nav-docked #menus span.site-page,
+html:not(.solid-bg)[data-theme='dark'] #page-header.nav-morph-ready > #nav.nav-docked #menus button.site-page,
+html:not(.solid-bg)[data-theme='dark'] #page-header.nav-morph-ready > #nav.nav-docked #menus #toggle-menu,
+html:not(.solid-bg)[data-theme='dark'] #page-header.nav-morph-ready > #nav.nav-docked .nav-home-title {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* 首页大标题平滑飞入左上角时的层级与锚点设置 */
+html:not(.solid-bg) #page-header.full_page.nav-morph-ready #site-info {
+  z-index: 95;
+  text-align: center;
+  pointer-events: none;
+}
+
+html:not(.solid-bg) #page-header.full_page.nav-morph-ready #site-title {
+  display: inline-block;
+  transform-origin: left center;
+  will-change: transform, opacity;
+  pointer-events: auto;
+}
+
+html:not(.solid-bg) #page-header.full_page.nav-morph-ready #site-subtitle {
+  will-change: transform, opacity;
+}
+
+/* 桌面端有背景模式下用液态玻璃水滴透镜替代原有平直下划线 */
+html:not(.solid-bg) #nav:not(.hide-menu) #menus .site-page:not(.child)::after {
+  display: none;
+}
+
+/* ===== 悬停滑动液态玻璃按钮（类似苹果 iOS 26 水滴滑块，带实时动态色散） ===== */
+html:not(.solid-bg) #nav:not(.hide-menu) #menus > .nav-hover-lens {
+  display: block;
+  position: absolute;
+  top: 5px;
+  left: 0;
+  z-index: 2;
+  height: 36px;
+  border-radius: 18px;
+  clip-path: inset(0 round 18px);
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: center center;
+  will-change: transform, width, opacity;
+  transition: opacity 0.18s ease;
+  background:
+    radial-gradient(
+      90% 120% at var(--lens-glint-x, 50%) 0%,
+      rgba(255, 255, 255, 0.34) 0%,
+      rgba(255, 255, 255, 0.06) 52%,
+      rgba(255, 255, 255, 0.14) 100%
+    );
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.88),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.40),
+    inset 1px 0 1px rgba(255, 255, 255, 0.28),
+    inset -1px 0 1px rgba(255, 255, 255, 0.28);
+  -webkit-backdrop-filter: var(--glass-backdrop, saturate(175%));
+  backdrop-filter: var(--glass-backdrop, saturate(175%));
+}
+
+html:not(.solid-bg) #nav:not(.hide-menu) #menus > .nav-hover-lens.is-visible {
+  opacity: 1;
+}
+
+html:not(.solid-bg) #nav.nav-docked:not(.hide-menu) #menus > .nav-hover-lens {
+  background:
+    radial-gradient(
+      90% 120% at var(--lens-glint-x, 50%) 0%,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.10) 55%,
+      rgba(255, 255, 255, 0.18) 100%
+    );
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.92),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.08),
+    inset 1px 0 1px rgba(255, 255, 255, 0.42),
+    inset -1px 0 1px rgba(255, 255, 255, 0.42);
+}
+
+html:not(.solid-bg)[data-theme='dark'] #nav.nav-docked:not(.hide-menu) #menus > .nav-hover-lens {
+  background:
+    radial-gradient(
+      90% 120% at var(--lens-glint-x, 50%) 0%,
+      rgba(255, 255, 255, 0.24) 0%,
+      rgba(255, 255, 255, 0.05) 55%,
+      rgba(255, 255, 255, 0.10) 100%
+    );
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.56),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.22),
+    inset 1px 0 1px rgba(255, 255, 255, 0.22),
+    inset -1px 0 1px rgba(255, 255, 255, 0.22);
+}
+
+/* 静态回退状态（移动端 / 减弱动态效果 / 首屏 JS 初始化前） */
+html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav {
+  top: 14px;
+  height: auto;
+  padding: 0 16px;
+  justify-content: center;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+
+html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav #blog-info {
+  display: none;
+}
+
+html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav #menus {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 0 22px;
+  border-radius: 23px;
+  pointer-events: auto;
+  box-shadow:
+    0 12px 32px -10px rgba(0, 0, 0, 0.30),
+    0 2px 10px -2px rgba(0, 0, 0, 0.16);
+}
+
+html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav #menus > .nav-pill-glass {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  clip-path: inset(0 round 23px);
+  --glass-blur: 0px;
+  --glass-saturate: 155%;
+  --glass-refract-thickness: 18;
+  --glass-refract-ior: 1.55;
+  --glass-refract-scale: 36;
+  --glass-chroma-strength: 1.3;
+  --glass-spec-strength: 1.0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 55%, rgba(255, 255, 255, 0.06) 100%);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.68),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.28);
+  -webkit-backdrop-filter: var(--glass-backdrop, blur(2px) saturate(160%));
+  backdrop-filter: var(--glass-backdrop, blur(2px) saturate(160%));
+}
+
+html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav #menus > .nav-pill-glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(10, 12, 16, 0.12) 100%);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.18);
+}
+
+html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav #menus a,
+html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav #menus span.site-page,
+html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav #menus button.site-page,
+html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-top-img) > #nav #menus #toggle-menu {
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.42), 0 0 1px rgba(0, 0, 0, 0.25);
 }
 
 /* 外圈高光描边始终保持纯粹白色（绝不染色） */
@@ -1070,8 +1319,8 @@ html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus
   }
 }
 
-/* 状态二：向下滚动后 —— 全宽液态玻璃吸顶导航（单层 .nav-bar-glass，避免双层模糊） */
-html:not(.solid-bg) #page-header.nav-fixed > #nav,
+/* 状态二回退（移动端 / not-top-img / 减弱动态效果）：全宽液态玻璃吸顶导航 */
+html:not(.solid-bg) #page-header:not(.nav-morph-ready).nav-fixed > #nav,
 html:not(.solid-bg) #page-header.not-top-img > #nav {
   background: transparent;
   border: none;
@@ -1081,7 +1330,7 @@ html:not(.solid-bg) #page-header.not-top-img > #nav {
   backdrop-filter: none;
 }
 
-html:not(.solid-bg) #page-header.nav-fixed > #nav > .nav-bar-glass,
+html:not(.solid-bg) #page-header:not(.nav-morph-ready).nav-fixed > #nav > .nav-bar-glass,
 html:not(.solid-bg) #page-header.not-top-img > #nav > .nav-bar-glass {
   display: block;
   position: absolute;
@@ -1104,7 +1353,7 @@ html:not(.solid-bg) #page-header.not-top-img > #nav > .nav-bar-glass {
   backdrop-filter: var(--glass-backdrop, blur(4px) saturate(170%));
 }
 
-html:not(.solid-bg)[data-theme='dark'] #page-header.nav-fixed > #nav > .nav-bar-glass,
+html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-morph-ready).nav-fixed > #nav > .nav-bar-glass,
 html:not(.solid-bg)[data-theme='dark'] #page-header.not-top-img > #nav > .nav-bar-glass {
   background: linear-gradient(180deg, rgba(22, 24, 30, 0.34) 0%, rgba(12, 14, 18, 0.20) 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.22);

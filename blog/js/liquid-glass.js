@@ -538,11 +538,475 @@
     for (const entry of entries) updateRefraction(entry.target)
   }) : null
 
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
+  let lensFilterNode = null
+
+  // Cached convex water-drop dome filter for the sliding hover glass lens.
+  // Built once (96x36px); during hover slides we only update SVG scale/width attributes (0 canvas redraws).
+  function ensureHoverLensFilter() {
+    if (!refracting || reducedTransparency.matches) return null
+    if (lensFilterNode) return lensFilterNode
+
+    if (!definitions) {
+      const svg = svgElement('svg', { width: 0, height: 0, 'aria-hidden': 'true', focusable: 'false' })
+      svg.style.cssText = 'position:fixed;pointer-events:none;overflow:hidden'
+      definitions = svgElement('defs', {})
+      svg.append(definitions)
+      document.body.append(svg)
+    }
+
+    const mapW = 96
+    const mapH = 36
+    const halfW = mapW * 0.5
+    const halfH = mapH * 0.5
+    const radius = halfH
+    const refractThickness = 10
+    const refractIOR = 1.62
+    const maxSinI = 0.92
+    const domeExp = 1.25
+    const thetaI0 = Math.asin(maxSinI)
+    const thetaT0 = Math.asin(Math.min(maxSinI / refractIOR, 1.0))
+    const maxEdgeMag = Math.max(Math.tan(thetaI0 - thetaT0), 1e-4)
+
+    const canvas = document.createElement('canvas')
+    canvas.width = mapW
+    canvas.height = mapH
+    const ctx = canvas.getContext('2d')
+    const pixels = ctx.createImageData(mapW, mapH)
+    new Uint32Array(pixels.data.buffer).fill(0xff808080)
+
+    for (let row = 0; row < mapH; row++) {
+      const py = row + 0.5 - halfH
+      for (let col = 0; col < mapW; col++) {
+        const px = col + 0.5 - halfW
+        const { d, nx, ny } = sceneSDFAndNormal(px, py, halfW, halfH, radius, 2.0)
+        const depthPx = -d
+        if (depthPx >= 0 && depthPx < refractThickness) {
+          const t = depthPx / refractThickness
+          const sinThetaI = maxSinI * Math.pow(1.0 - t, domeExp)
+          const thetaI = Math.asin(Math.min(Math.max(sinThetaI, 0.0), 1.0))
+          const thetaT = Math.asin(Math.min(Math.max(sinThetaI / refractIOR, 0.0), 1.0))
+          const normMag = Math.tan(thetaI - thetaT) / maxEdgeMag
+          const idx = (row * mapW + col) * 4
+          pixels.data[idx] = Math.min(255, Math.max(0, (128 + 127 * (-nx * normMag) + 0.5) | 0))
+          pixels.data[idx + 1] = Math.min(255, Math.max(0, (128 + 127 * (-ny * normMag) + 0.5) | 0))
+        }
+      }
+    }
+    ctx.putImageData(pixels, 0, 0)
+    const mapUrl = canvas.toDataURL()
+
+    const id = 'blog-glass-lens'
+    const filter = svgElement('filter', {
+      id,
+      x: '0',
+      y: '0',
+      width: mapW,
+      height: mapH,
+      filterUnits: 'userSpaceOnUse',
+      primitiveUnits: 'userSpaceOnUse',
+      'color-interpolation-filters': 'sRGB'
+    })
+    const image = svgElement('feImage', {
+      x: '0',
+      y: '0',
+      width: mapW,
+      height: mapH,
+      result: 'lens-map',
+      preserveAspectRatio: 'none'
+    })
+    image.setAttribute('href', mapUrl)
+    image.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', mapUrl)
+
+    const dispR = svgElement('feDisplacementMap', {
+      in: 'SourceGraphic', in2: 'lens-map', scale: '32',
+      xChannelSelector: 'R', yChannelSelector: 'G', result: 'lens-dr'
+    })
+    const matR = svgElement('feColorMatrix', {
+      in: 'lens-dr', type: 'matrix',
+      values: '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0', result: 'lens-r'
+    })
+    const dispG = svgElement('feDisplacementMap', {
+      in: 'SourceGraphic', in2: 'lens-map', scale: '24',
+      xChannelSelector: 'R', yChannelSelector: 'G', result: 'lens-dg'
+    })
+    const matG = svgElement('feColorMatrix', {
+      in: 'lens-dg', type: 'matrix',
+      values: '0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0', result: 'lens-g'
+    })
+    const dispB = svgElement('feDisplacementMap', {
+      in: 'SourceGraphic', in2: 'lens-map', scale: '16',
+      xChannelSelector: 'R', yChannelSelector: 'G', result: 'lens-db'
+    })
+    const matB = svgElement('feColorMatrix', {
+      in: 'lens-db', type: 'matrix',
+      values: '0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0', result: 'lens-b'
+    })
+    const blendRG = svgElement('feBlend', { in: 'lens-r', in2: 'lens-g', mode: 'screen', result: 'lens-rg' })
+    const blendRGB = svgElement('feBlend', { in: 'lens-rg', in2: 'lens-b', mode: 'screen' })
+    filter.append(image, dispR, matR, dispG, matG, dispB, matB, blendRG, blendRGB)
+    definitions.append(filter)
+
+    lensFilterNode = { id, filter, image, dispR, dispG, dispB }
+    return lensFilterNode
+  }
+
+  // Sliding Liquid Glass hover lens inside #menus (like Apple iOS 26 sliding glass thumb):
+  // Glides smoothly with spring physics and dynamically modulates 3-channel RGB dispersion with velocity.
+  let hoverLensCleanup = null
+  function initNavHoverLens() {
+    if (hoverLensCleanup) { hoverLensCleanup(); hoverLensCleanup = null }
+    const menus = document.getElementById('menus')
+    const nav = document.getElementById('nav')
+    const lens = menus && menus.querySelector('.nav-hover-lens')
+    if (!menus || !nav || !lens) return
+
+    const controller = new AbortController()
+    const { signal } = controller
+    hoverLensCleanup = () => controller.abort()
+
+    let active = false
+    let curX = 0
+    let curW = 76
+    let targetX = 0
+    let targetW = 76
+    let vx = 0
+    let vw = 0
+    let rafId = 0
+
+    const isEligible = () =>
+      !document.documentElement.classList.contains('solid-bg') &&
+      !nav.classList.contains('hide-menu') &&
+      window.innerWidth > 768
+
+    const itemSelector = '#nav-darkmode > button.site-page, .menus_item > a.site-page, .menus_item > span.site-page, #search-button > button.site-page'
+
+    const applyLensVisuals = (x, w, speed, dir) => {
+      const stretchX = 1 + speed * 0.08
+      const stretchY = 1 - speed * 0.045
+      lens.style.width = `${w.toFixed(1)}px`
+      lens.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0) scale(${stretchX.toFixed(4)}, ${stretchY.toFixed(4)})`
+      const glintX = (50 + dir * speed * 28).toFixed(1)
+      lens.style.setProperty('--lens-glint-x', `${glintX}%`)
+
+      const node = ensureHoverLensFilter()
+      if (node) {
+        const wInt = Math.max(24, Math.round(w))
+        node.filter.setAttribute('width', wInt)
+        node.image.setAttribute('width', wInt)
+        // Dynamic dispersion: crystal-clear at rest, blooms dramatically with R/G/B prism split while sliding
+        const baseDisplace = 8.5 + speed * 10.5
+        const chroma = 2.8 + speed * 8.5
+        const scaleG = (2.0 * baseDisplace).toFixed(1)
+        const scaleR = (2.0 * (baseDisplace + chroma)).toFixed(1)
+        const scaleB = (2.0 * Math.max(0, baseDisplace - chroma)).toFixed(1)
+        node.dispR.setAttribute('scale', scaleR)
+        node.dispG.setAttribute('scale', scaleG)
+        node.dispB.setAttribute('scale', scaleB)
+        lens.style.setProperty('--glass-backdrop', `saturate(${Math.round(170 + speed * 55)}%) url("#${node.id}")`)
+        lens.setAttribute('data-shader-glass', '1')
+      }
+    }
+
+    const tick = () => {
+      rafId = 0
+      if (!active) return
+      const ax = (targetX - curX) * 0.24
+      vx = (vx + ax) * 0.70
+      curX += vx
+
+      const aw = (targetW - curW) * 0.26
+      vw = (vw + aw) * 0.68
+      curW += vw
+
+      const speed = Math.min(1, (Math.abs(vx) + Math.abs(vw) * 0.5) / 18)
+      const dir = vx >= 0 ? 1 : -1
+      applyLensVisuals(curX, curW, speed, dir)
+
+      const settled = Math.abs(targetX - curX) < 0.15 && Math.abs(vx) < 0.06 &&
+                      Math.abs(targetW - curW) < 0.15 && Math.abs(vw) < 0.06
+      if (settled) {
+        curX = targetX
+        curW = targetW
+        vx = 0
+        vw = 0
+        applyLensVisuals(curX, curW, 0, 1)
+      } else {
+        rafId = requestAnimationFrame(tick)
+      }
+    }
+
+    const aimAt = item => {
+      if (!isEligible()) return
+      const mRect = menus.getBoundingClientRect()
+      const tRect = item.getBoundingClientRect()
+      if (!tRect.width) return
+      const padX = item.closest('#nav-darkmode') ? 11 : 12
+      const nextX = (tRect.left - mRect.left) - padX
+      const nextW = tRect.width + padX * 2
+
+      if (!active || reducedMotion.matches) {
+        active = true
+        curX = targetX = nextX
+        curW = targetW = nextW
+        vx = 0
+        vw = 0
+        applyLensVisuals(curX, curW, 0, 1)
+        lens.classList.add('is-visible')
+      } else {
+        targetX = nextX
+        targetW = nextW
+        if (!rafId) rafId = requestAnimationFrame(tick)
+      }
+    }
+
+    const hideLens = () => {
+      active = false
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0 }
+      lens.classList.remove('is-visible')
+    }
+
+    menus.addEventListener('pointerover', event => {
+      if (event.pointerType === 'touch') return
+      const item = event.target.closest(itemSelector)
+      if (item) aimAt(item)
+    }, { signal })
+
+    menus.addEventListener('pointerleave', hideLens, { signal })
+    menus.addEventListener('focusin', event => {
+      const item = event.target.closest(itemSelector)
+      if (item) aimAt(item)
+    }, { signal })
+    menus.addEventListener('focusout', event => {
+      if (!menus.contains(event.relatedTarget)) hideLens()
+    }, { signal })
+    window.addEventListener('scroll', () => { if (active) hideLens() }, { passive: true, signal })
+  }
+
+  // Smooth scroll-linked transition on desktop background-image mode:
+  // 1) Glides #menus smoothly from centered floating capsule -> right-docked full-width bar;
+  // 2) On Home page, flies #site-title ("Derrick Liu的个人博客") smoothly into top-left of #nav.
+  let scrollMorphCleanup = null
+  function initNavScrollMorph() {
+    if (scrollMorphCleanup) { scrollMorphCleanup(); scrollMorphCleanup = null }
+    const header = document.getElementById('page-header')
+    const nav = document.getElementById('nav')
+    const menus = document.getElementById('menus')
+    if (!header || !nav || !menus) return
+
+    const pillGlass = menus.querySelector('.nav-pill-glass')
+    const barGlass = nav.querySelector('.nav-bar-glass')
+    const isHome = header.classList.contains('full_page')
+    const heroTitle = isHome ? document.getElementById('site-title') : null
+    const heroSubtitle = isHome ? document.getElementById('site-subtitle') : null
+    const navHomeTitle = isHome ? nav.querySelector('.nav-home-title') : null
+    const navSiteLink = isHome ? nav.querySelector('.nav-site-title') : null
+
+    const controller = new AbortController()
+    const { signal } = controller
+    scrollMorphCleanup = () => {
+      controller.abort()
+      resetInline()
+    }
+
+    let metrics = null
+    let ticking = false
+
+    const resetInline = () => {
+      header.classList.remove('nav-morph-ready')
+      nav.classList.remove('nav-docked', 'nav-bar-active', 'nav-pill-hidden')
+      menus.style.transform = ''
+      menus.style.removeProperty('--nav-pill-opacity')
+      if (pillGlass) pillGlass.style.opacity = ''
+      if (barGlass) barGlass.style.opacity = ''
+      if (heroTitle) {
+        heroTitle.style.transform = ''
+        heroTitle.style.opacity = ''
+        heroTitle.style.color = ''
+        heroTitle.style.textShadow = ''
+        heroTitle.style.pointerEvents = ''
+      }
+      if (heroSubtitle) {
+        heroSubtitle.style.transform = ''
+        heroSubtitle.style.opacity = ''
+      }
+      if (navHomeTitle) {
+        navHomeTitle.style.opacity = ''
+        navHomeTitle.style.pointerEvents = ''
+      }
+    }
+
+    const canMorph = () =>
+      !document.documentElement.classList.contains('solid-bg') &&
+      !header.classList.contains('not-top-img') &&
+      window.innerWidth > 768 &&
+      !reducedMotion.matches
+
+    const measure = () => {
+      if (!canMorph()) {
+        metrics = null
+        resetInline()
+        return
+      }
+      header.classList.add('nav-morph-ready')
+
+      // Temporarily clear transforms to read true natural geometry
+      const prevMenusTransform = menus.style.transform
+      const prevTitleTransform = heroTitle ? heroTitle.style.transform : ''
+      menus.style.transform = 'none'
+      if (heroTitle) heroTitle.style.transform = 'none'
+
+      const navWidth = nav.offsetWidth
+      const menusWidth = menus.offsetWidth
+      const navPadRight = Number.parseFloat(getComputedStyle(nav).paddingRight) || 36
+      const dockedMenusLeft = navWidth - navPadRight - menusWidth
+      const centeredMenusLeft = (navWidth - menusWidth) * 0.5
+      const centerShiftX = centeredMenusLeft - dockedMenusLeft
+
+      let hero = null
+      if (isHome && heroTitle && navHomeTitle) {
+        const hRect = heroTitle.getBoundingClientRect()
+        const nRect = navHomeTitle.getBoundingClientRect()
+        const heroFontSize = Number.parseFloat(getComputedStyle(heroTitle).fontSize) || 40
+        const navFontSize = Number.parseFloat(getComputedStyle(navHomeTitle).fontSize) || 18.5
+        if (hRect.width > 0 && nRect.width > 0) {
+          hero = {
+            docLeft: hRect.left,
+            docCY: hRect.top + window.scrollY + hRect.height * 0.5,
+            navLeft: nRect.left,
+            navCY: 30,
+            scaleEnd: navFontSize / heroFontSize
+          }
+        }
+      }
+
+      menus.style.transform = prevMenusTransform
+      if (heroTitle) heroTitle.style.transform = prevTitleTransform
+
+      const morphDist = hero
+        ? Math.max(220, Math.min(360, Math.round(hero.docCY * 0.72)))
+        : 160
+
+      metrics = { centerShiftX, morphDist, hero }
+    }
+
+    const apply = () => {
+      ticking = false
+      if (!metrics) return
+      const y = Math.max(0, window.scrollY || document.documentElement.scrollTop)
+      const p = Math.min(1, y / metrics.morphDist)
+      const eMenu = 1 - Math.pow(1 - p, 2.4)
+      const eTitle = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) * 0.5
+
+      const tx = metrics.centerShiftX * (1 - eMenu)
+      const ty = 7 * (1 - eMenu)
+      menus.style.transform = (Math.abs(tx) < 0.1 && Math.abs(ty) < 0.1)
+        ? ''
+        : `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0)`
+
+      const pillOpacity = Math.max(0, 1 - p * 1.9)
+      const barOpacity = Math.min(1, Math.max(0, (p - 0.12) / 0.78))
+      menus.style.setProperty('--nav-pill-opacity', pillOpacity.toFixed(3))
+      if (pillGlass) pillGlass.style.opacity = pillOpacity.toFixed(3)
+      if (barGlass) barGlass.style.opacity = barOpacity.toFixed(3)
+
+      nav.classList.toggle('nav-pill-hidden', pillOpacity <= 0.005)
+      nav.classList.toggle('nav-bar-active', barOpacity > 0.005)
+      nav.classList.toggle('nav-docked', p >= 0.52)
+
+      if (metrics.hero && heroTitle && navHomeTitle) {
+        const { docLeft, docCY, navLeft, navCY, scaleEnd } = metrics.hero
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+        if (p <= 0.001) {
+          heroTitle.style.transform = ''
+          heroTitle.style.opacity = ''
+          heroTitle.style.color = ''
+          heroTitle.style.textShadow = ''
+          heroTitle.style.pointerEvents = ''
+          navHomeTitle.style.opacity = '0'
+          navHomeTitle.style.pointerEvents = 'none'
+        } else if (p >= 0.995) {
+          heroTitle.style.opacity = '0'
+          heroTitle.style.pointerEvents = 'none'
+          navHomeTitle.style.opacity = '1'
+          navHomeTitle.style.pointerEvents = 'auto'
+        } else {
+          const curLeft = docLeft + (navLeft - docLeft) * eTitle
+          const curCY = docCY + (navCY - docCY) * eTitle
+          const curScale = 1 + (scaleEnd - 1) * eTitle
+          const titleTx = curLeft - docLeft
+          const titleTy = (curCY - docCY) + y
+          heroTitle.style.transform = `translate3d(${titleTx.toFixed(2)}px, ${titleTy.toFixed(2)}px, 0) scale(${curScale.toFixed(4)})`
+          heroTitle.style.pointerEvents = p > 0.65 ? 'none' : ''
+
+          if (!isDark) {
+            const cP = Math.min(1, Math.max(0, (p - 0.42) / 0.50))
+            const r = Math.round(255 + (44 - 255) * cP)
+            const g = Math.round(255 + (49 - 255) * cP)
+            const b = Math.round(255 + (56 - 255) * cP)
+            heroTitle.style.color = `rgb(${r}, ${g}, ${b})`
+            heroTitle.style.textShadow = `0 2px 4px rgba(0, 0, 0, ${(0.15 * (1 - cP)).toFixed(3)})`
+          } else {
+            heroTitle.style.color = ''
+            heroTitle.style.textShadow = ''
+          }
+
+          const handoff = Math.max(0, (p - 0.90) / 0.10)
+          heroTitle.style.opacity = (1 - handoff).toFixed(3)
+          navHomeTitle.style.opacity = handoff.toFixed(3)
+          navHomeTitle.style.pointerEvents = handoff > 0.5 ? 'auto' : 'none'
+        }
+
+        if (heroSubtitle) {
+          const subOpacity = Math.max(0, 1 - p * 2.4)
+          heroSubtitle.style.opacity = subOpacity.toFixed(3)
+          heroSubtitle.style.transform = p > 0 ? `translate3d(0, ${(-14 * p).toFixed(1)}px, 0)` : ''
+        }
+      }
+    }
+
+    const schedule = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(apply)
+    }
+
+    const refresh = () => {
+      measure()
+      apply()
+    }
+
+    if (navSiteLink && isHome) {
+      navSiteLink.addEventListener('click', event => {
+        if (window.scrollY > 40) {
+          event.preventDefault()
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+      }, { signal })
+    }
+
+    window.addEventListener('scroll', schedule, { passive: true, signal })
+    window.addEventListener('resize', refresh, { passive: true, signal })
+    reducedMotion.addEventListener('change', refresh, { signal })
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => { if (!signal.aborted) refresh() })
+    }
+    if ('MutationObserver' in window) {
+      const rootObs = new MutationObserver(() => refresh())
+      rootObs.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] })
+      signal.addEventListener('abort', () => rootObs.disconnect())
+    }
+
+    refresh()
+  }
+
   const initialize = () => {
     document.querySelectorAll(selector).forEach(surface => {
       surface.classList.add('liquid-glass')
       if (resize) resize.observe(surface)
     })
+    initNavHoverLens()
+    initNavScrollMorph()
   }
 
   for (const preference of [pointer, reducedTransparency]) {
