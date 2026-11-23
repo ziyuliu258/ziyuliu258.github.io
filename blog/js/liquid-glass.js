@@ -928,7 +928,7 @@
 
         vec3 col = shadeLiquidGlass(
           px, halfSize, halfSize, radius,
-          15.0, 1.40, 22.0, 7.0,
+          22.0, 1.52, 40.0, 9.0,
           28.0, 0.18, outerFresnel,
           28.0, 0.18, outerGlare,
           0.52, 0.80, 0.0,
@@ -954,7 +954,7 @@
             vec4 lensTint = uDark > 0.5 ? vec4(1.0, 1.0, 1.0, 0.04) : vec4(1.0, 1.0, 1.0, 0.06);
             vec3 lensCol = shadeLiquidGlass(
               px, lensCenter, lensHalf, lensR,
-              13.0, 1.44, 26.0 + speed * 14.0, 7.5 + speed * 11.0,
+              18.0, 1.56, 42.0 + speed * 18.0, 9.5 + speed * 13.0,
               25.0, 0.20, uDark > 0.5 ? 0.18 : 0.22,
               25.0, 0.20, uDark > 0.5 ? 0.68 : 0.88,
               0.50, 0.80, glareTilt,
