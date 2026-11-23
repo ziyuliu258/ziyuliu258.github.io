@@ -3864,6 +3864,26 @@ figure.highlight pre .javascript .function {
 #nav.hide-menu #search-button span:not(.site-page) {
   display: none;
 }
+#nav #nav-darkmode {
+  display: inline;
+  padding: 0;
+}
+#nav #nav-darkmode button.site-page {
+  display: inline;
+  font-family: inherit;
+  line-height: inherit;
+}
+#nav #nav-darkmode button.site-page:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+#nav #nav-darkmode .icon-dark {
+  display: none;
+}
+#nav #nav-darkmode .icon-light {
+  display: inline-block;
+}
 #nav #search-button {
   display: inline;
   padding: 0 0 0 14px;
@@ -3903,6 +3923,12 @@ figure.highlight pre .javascript .function {
 }
 #nav .site-page:not(.child):hover:after {
   width: 100%;
+}
+[data-theme='dark'] #nav #nav-darkmode .icon-light {
+  display: none;
+}
+[data-theme='dark'] #nav #nav-darkmode .icon-dark {
+  display: inline-block;
 }
 #pagination .pagination {
   margin-top: 20px;

@@ -716,6 +716,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })
 
+  document.addEventListener('click', event => {
+    if (!event.target.closest('#nav-darkmode')) return
+    rightSideFn.darkmode()
+  })
+
   document.getElementById('rightside').addEventListener('click', e => {
     const $target = e.target.closest('[id]')
     if ($target && rightSideFn[$target.id]) {
