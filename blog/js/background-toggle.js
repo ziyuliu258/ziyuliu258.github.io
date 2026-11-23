@@ -11,7 +11,7 @@
 
   const storageKey = 'blog-bg-mode'
   const root = document.documentElement
-  const light = config.light || '#f6f6f6'
+  const light = config.light || '#efefef'
   const dark = config.dark || '#1e1e1e'
 
   const saved = () => {

@@ -390,7 +390,7 @@ html.solid-bg[data-theme='dark'] .layout .pagination > *:not(.space) {
 html.solid-bg #web_bg,
 html.solid-bg #page-header,
 html.solid-bg #footer {
-  background-color: var(--solid-bg, #f6f6f6) !important;
+  background-color: var(--solid-bg, #efefef) !important;
   background-image: none !important;
 }
 
@@ -507,8 +507,8 @@ html.solid-bg:not([data-theme='dark']) #category,
 html.solid-bg:not([data-theme='dark']) #page,
 html.solid-bg:not([data-theme='dark']) .music-dock,
 html.solid-bg:not([data-theme='dark']) .music-dock-playlist,
-html.solid-bg:not([data-theme='dark']) #recent-posts:not(.series-directory) .recent-post-item,
-html.solid-bg:not([data-theme='dark']) #recent-posts:not(.series-directory) .home-announcement {
+html.solid-bg:not([data-theme='dark']) #recent-posts .recent-post-item,
+html.solid-bg:not([data-theme='dark']) #recent-posts .home-announcement {
   background: #fff;
 }
 
@@ -717,13 +717,13 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
   backdrop-filter: var(--glass-backdrop, blur(var(--aside-blur)) saturate(var(--aside-saturate)));
 }
 
-/* 彻底裁剪掉圆角矩形外的 backdrop-filter 溢出残影，保证边缘绝对锐利干净 */
-#recent-posts .recent-post-item,
-#recent-posts .home-announcement,
-#aside-content .card-widget,
-#article-container .shuoshuo-item,
-.type-404 .error-content,
-.layout .pagination > *:not(.space) {
+/* 仅在毛玻璃模式裁剪圆角矩形外的 backdrop-filter 溢出残影；纯色模式保留完整投影，避免侧栏卡片阴影被裁掉。 */
+html:not(.solid-bg) #recent-posts .recent-post-item,
+html:not(.solid-bg) #recent-posts .home-announcement,
+html:not(.solid-bg) #aside-content .card-widget,
+html:not(.solid-bg) #article-container .shuoshuo-item,
+html:not(.solid-bg) .type-404 .error-content,
+html:not(.solid-bg) .layout .pagination > *:not(.space) {
   clip-path: inset(0 round var(--glass-radius));
 }
 
@@ -774,6 +774,38 @@ html .layout #pagination .pagination > .page-number.current {
   box-shadow:
     0 20px 46px -12px var(--glass-shadow-hover),
     0 6px 14px -4px var(--glass-shadow);
+}
+
+/* 纯色白天模式：细描边 + 轻投影，让正文和侧栏卡片与底色层次清晰、互不融在一起。 */
+html.solid-bg:not([data-theme='dark']) #recent-posts .recent-post-item,
+html.solid-bg:not([data-theme='dark']) #recent-posts .home-announcement,
+html.solid-bg:not([data-theme='dark']) #aside-content .card-widget,
+html.solid-bg:not([data-theme='dark']) #post,
+html.solid-bg:not([data-theme='dark']) #archive,
+html.solid-bg:not([data-theme='dark']) #tag,
+html.solid-bg:not([data-theme='dark']) #category,
+html.solid-bg:not([data-theme='dark']) #page,
+html.solid-bg:not([data-theme='dark']) #article-container .shuoshuo-item,
+html.solid-bg:not([data-theme='dark']) .type-404 .error-content {
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 6px 20px -6px rgba(15, 23, 42, 0.09),
+    0 1px 4px -1px rgba(15, 23, 42, 0.05);
+}
+
+html.solid-bg:not([data-theme='dark']) #recent-posts .recent-post-item:hover,
+html.solid-bg:not([data-theme='dark']) #recent-posts .home-announcement:hover,
+html.solid-bg:not([data-theme='dark']) #aside-content .card-widget:hover,
+html.solid-bg:not([data-theme='dark']) .layout > div:first-child:not(.nc):hover,
+html.solid-bg:not([data-theme='dark']) #article-container .shuoshuo-item:hover,
+html.solid-bg:not([data-theme='dark']) .type-404 .error-content:hover {
+  box-shadow:
+    0 10px 26px -6px rgba(15, 23, 42, 0.13),
+    0 2px 6px -1px rgba(15, 23, 42, 0.07);
+}
+
+html.solid-bg .liquid-glass::after {
+  content: none;
 }
 
 /* 顶部导航栏维持干净的直边毛玻璃，不套用圆角折射滤镜 */
