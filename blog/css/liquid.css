@@ -137,26 +137,51 @@
   }
 }
 
-/* 吸顶导航里的返回箭头：只在收起后出现。 */
+/* 吸顶导航里的返回箭头：只在收起后出现，与标题和右侧菜单共享同一水平中线。 */
+#page-header.nav-fixed #nav #blog-info {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding-right: 16px;
+  overflow: hidden;
+}
+
 #nav .nav-back {
   display: none;
   align-items: center;
   justify-content: center;
-  margin-right: 4px;
-  padding: 0 4px;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
   border: 0;
   background: none;
   color: inherit;
-  font-size: 0.82em;
+  font-size: 0.78em;
   line-height: 1;
-  vertical-align: middle;
-  opacity: 0.62;
+  opacity: 0.65;
   cursor: pointer;
   transition: opacity 0.2s ease;
 }
 
+#nav .nav-back i {
+  display: block;
+  line-height: 1;
+}
+
 #page-header.nav-fixed #nav .nav-back {
   display: inline-flex;
+}
+
+#page-header.nav-fixed #nav #blog-info .nav-page-title {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.4;
 }
 
 #nav .nav-back:hover {
@@ -493,11 +518,6 @@ html.solid-bg[data-theme='dark'] .layout .pagination > *:not(.space) {
   --btn-bg: #454545;
 }
 
-[data-theme='dark'] #page-header.nav-fixed > #nav,
-[data-theme='dark'] #page-header.not-top-img > #nav {
-  background: rgba(28, 28, 28, 0.8);
-}
-
 /* 纯色背景由右下角按钮切换。页眉、页面和页脚共用一个颜色，滤镜遮罩一并去掉。 */
 html.solid-bg body,
 html.solid-bg #web_bg,
@@ -724,9 +744,7 @@ html.solid-bg[data-theme='dark'] .music-dock-playlist {
 
 #article-container .shuoshuo-item,
 .type-404 .error-content,
-.layout .pagination > *:not(.space),
-#page-header.nav-fixed > #nav,
-#page-header.not-top-img > #nav {
+.layout .pagination > *:not(.space) {
   background: var(--glass-tint);
   border: none;
   border-radius: var(--glass-radius);
@@ -927,14 +945,156 @@ html.solid-bg .liquid-glass::after,
   content: none;
 }
 
-/* 顶部导航栏维持干净的直边毛玻璃，不套用圆角折射滤镜 */
-#page-header.nav-fixed > #nav,
-#page-header.not-top-img > #nav {
-  border-bottom: 1px solid var(--glass-border);
+/* 有背景模式下的苹果风液态玻璃顶栏（低开销纯 GPU 合成实现：
+ * 1) 仅使用单层原生 backdrop-filter: blur(12px) saturate(180%)，不挂载 SVG feDisplacementMap 逐帧重算；
+ * 2) 顶部状态仅模糊约 460×46px 的居中圆角矩形（面积仅为全宽栏的 ~1/6）；
+ * 3) 高光折射边使用纯 CSS 内阴影 + 静态 mask-composite 细边，绘制一次即缓存到 GPU 合成层，
+ *    且滚动切换时不触发 backdrop-filter/几何尺寸动画。 */
+
+/* 状态一：有背景模式且位于页面最顶端 —— 居中悬浮的液态玻璃圆角矩形胶囊 */
+html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav {
+  top: 14px;
+  height: auto;
+  padding: 0 16px;
+  justify-content: center;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #blog-info {
+  display: none;
+}
+
+html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 0 22px;
+  border-radius: 23px;
+  pointer-events: auto;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.54) 0%, rgba(255, 255, 255, 0.36) 100%);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.84),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.24),
+    0 10px 28px -10px rgba(15, 23, 42, 0.24),
+    0 2px 8px -2px rgba(15, 23, 42, 0.12);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
+}
+
+html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus {
+  background: linear-gradient(180deg, rgba(44, 46, 54, 0.54) 0%, rgba(22, 23, 28, 0.42) 100%);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.26),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.08),
+    0 12px 32px -10px rgba(0, 0, 0, 0.52),
+    0 2px 10px -2px rgba(0, 0, 0, 0.30);
+}
+
+/* 顶部液态玻璃胶囊内的文字与图标颜色：白天深色高对比，黑夜浅色高对比 */
+html:not(.solid-bg):not([data-theme='dark']) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus a,
+html:not(.solid-bg):not([data-theme='dark']) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus span.site-page,
+html:not(.solid-bg):not([data-theme='dark']) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus button.site-page,
+html:not(.solid-bg):not([data-theme='dark']) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus #toggle-menu {
+  color: #1f2329;
+  text-shadow: none;
+}
+
+html:not(.solid-bg):not([data-theme='dark']) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus a:hover,
+html:not(.solid-bg):not([data-theme='dark']) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus span.site-page:hover,
+html:not(.solid-bg):not([data-theme='dark']) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus button.site-page:hover,
+html:not(.solid-bg):not([data-theme='dark']) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus #toggle-menu:hover {
+  color: #000;
+}
+
+html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus a,
+html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus span.site-page,
+html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus button.site-page,
+html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus #toggle-menu {
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: none;
+}
+
+html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus a:hover,
+html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus span.site-page:hover,
+html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus button.site-page:hover,
+html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus #toggle-menu:hover {
+  color: #fff;
+}
+
+/* 静态对角折射高光细边（仅 GPU 缓存一次，不阻挡点击也不裁切下拉菜单） */
+@supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
+  html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus::before {
+    position: absolute;
+    inset: 0;
+    content: '';
+    padding: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.90) 0%,
+      rgba(255, 255, 255, 0.24) 32%,
+      rgba(255, 255, 255, 0.08) 52%,
+      rgba(255, 255, 255, 0.20) 72%,
+      rgba(255, 255, 255, 0.65) 100%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  html:not(.solid-bg)[data-theme='dark'] #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus::before {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.44) 0%,
+      rgba(255, 255, 255, 0.12) 32%,
+      rgba(255, 255, 255, 0.04) 52%,
+      rgba(255, 255, 255, 0.09) 72%,
+      rgba(255, 255, 255, 0.28) 100%
+    );
+  }
+}
+
+@media screen and (max-width: 768px) {
+  html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav {
+    top: 12px;
+  }
+
+  html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus {
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 22px;
+  }
+}
+
+/* 状态二：向下滚动后 —— 全宽液态玻璃吸顶导航（左返回+标题，右功能键） */
+html:not(.solid-bg) #page-header.nav-fixed > #nav,
+html:not(.solid-bg) #page-header.not-top-img > #nav {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.48) 100%);
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.58);
   border-radius: 0;
-  box-shadow: 0 8px 24px -12px var(--glass-shadow);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.24),
+    0 8px 24px -10px rgba(15, 23, 42, 0.14);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
+}
+
+html:not(.solid-bg)[data-theme='dark'] #page-header.nav-fixed > #nav,
+html:not(.solid-bg)[data-theme='dark'] #page-header.not-top-img > #nav {
+  background: linear-gradient(180deg, rgba(36, 37, 42, 0.56) 0%, rgba(22, 23, 27, 0.46) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 10px 28px -10px rgba(0, 0, 0, 0.42);
 }
 
 /* 静态对角与唇边高光通过 JS 按 shader 公式绘制到 ::after，不截获点击。 */
@@ -983,13 +1143,19 @@ html.solid-bg .liquid-glass::after,
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .liquid-glass {
+  .liquid-glass,
+  html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus,
+  html:not(.solid-bg) #page-header.nav-fixed > #nav,
+  html:not(.solid-bg) #page-header.not-top-img > #nav {
     background: var(--glass-solid) !important;
   }
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .liquid-glass {
+  .liquid-glass,
+  html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus,
+  html:not(.solid-bg) #page-header.nav-fixed > #nav,
+  html:not(.solid-bg) #page-header.not-top-img > #nav {
     background: var(--glass-solid) !important;
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;

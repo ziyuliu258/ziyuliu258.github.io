@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } else {
         flag = ''
-        if (currentTop === 0) {
+        if (currentTop <= 16) {
           $header.classList.remove('nav-fixed', 'nav-visible')
         }
         $rightside.classList.remove('rightside-show')
