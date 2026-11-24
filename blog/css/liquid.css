@@ -1109,7 +1109,7 @@ html:not(.solid-bg) #page-header.nav-morph-ready > #nav:not(.nav-pill-hidden) #m
   --glass-refract-scale: 36;
   --glass-chroma-strength: 1.3;
   --glass-spec-strength: 0.72;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.11) 0%, rgba(255, 255, 255, 0.01) 52%, rgba(255, 255, 255, 0.06) 100%);
+  background: var(--nav-glass-tint, transparent) linear-gradient(180deg, rgba(255, 255, 255, 0.11) 0%, rgba(255, 255, 255, 0.01) 52%, rgba(255, 255, 255, 0.06) 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.52),
     inset 0 -1px 0.5px rgba(255, 255, 255, 0.18);
@@ -1337,7 +1337,7 @@ html:not(.solid-bg) #page-header:not(.nav-morph-ready):not(.nav-fixed):not(.not-
   --glass-refract-scale: 36;
   --glass-chroma-strength: 1.3;
   --glass-spec-strength: 1.0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 55%, rgba(255, 255, 255, 0.06) 100%);
+  background: var(--nav-glass-tint, transparent) linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 55%, rgba(255, 255, 255, 0.06) 100%);
   box-shadow:
     inset 0 1px 0.5px rgba(255, 255, 255, 0.68),
     inset 0 -1px 0.5px rgba(255, 255, 255, 0.28);
@@ -1506,6 +1506,12 @@ html:not(.solid-bg)[data-theme='dark'] #page-header.not-top-img > #nav > .nav-ba
 /* 顶部大图上的导航维持原有样式，滚动固定后再显示玻璃。 */
 #page-header:not(.nav-fixed):not(.not-top-img) #nav::after {
   content: none;
+}
+
+/* On Edge, tint the actual backdrop under the floating white menu text. */
+html.native-glass:not(.solid-bg) #page-header > #nav #menus > .nav-pill-glass {
+  --glass-backdrop: blur(9px) saturate(145%);
+  --nav-glass-tint: rgba(23, 31, 40, 0.46);
 }
 
 /* The floating menu uses white text in both themes, including on its solid fallback. */

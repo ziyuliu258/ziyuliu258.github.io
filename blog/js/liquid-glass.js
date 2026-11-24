@@ -21,7 +21,9 @@
   const liquidSite = (window.GLOBAL_CONFIG_SITE && GLOBAL_CONFIG_SITE.liquid) || {}
   const glassConfig = liquidSite.glass || {}
   const chromium = /Chrome\/|Chromium\//.test(navigator.userAgent)
-  const refracting = glassConfig.refraction !== false && chromium && CSS.supports('backdrop-filter', 'url("#glass")') && 'ResizeObserver' in window
+  // Edge uses native backdrop blur to avoid opaque GPU-composited glass layers.
+  const nativeGlass = /Edg(?:A|iOS)?\//.test(navigator.userAgent)
+  const refracting = glassConfig.refraction !== false && chromium && !nativeGlass && CSS.supports('backdrop-filter', 'url("#glass")') && 'ResizeObserver' in window
   // Cache shared SVG filters and specular overlays by geometry signature so 10 post cards only build 1 filter!
   const sharedFilters = new Map()
   const sharedBarMaps = new Map()
@@ -689,7 +691,7 @@
   }
 
   function createNavWebGLGlass(header, nav, menus, canvas) {
-    if (!canvas || !header || !nav || !menus || reducedTransparency.matches) return null
+    if (nativeGlass || !canvas || !header || !nav || !menus || reducedTransparency.matches) return null
     const gl = canvas.getContext('webgl', {
       alpha: true,
       antialias: false,
@@ -1629,6 +1631,7 @@
       surface.classList.add('liquid-glass')
       if (resize) resize.observe(surface)
     })
+    document.documentElement.classList.toggle('native-glass', nativeGlass)
     initNavHoverLens()
     initNavScrollMorph()
   }
