@@ -1,0 +1,828 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>论文阅读：LiteReality-Agent | Derrick Liu的个人博客</title><meta name="author" content="Derrick Liu,1209830516abc@gmail.com"><meta name="copyright" content="Derrick Liu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="引：LiteReality-Agent 由剑桥大学、帝国理工学院等机构的研究者完成（Zhening Huang、Yueyan Li、Johnathan Chiu、Shangzhe Wu 等），是 LiteReality (Huang et al., 2025) 团队在实景转仿真（Real-to-Sim）方向上的延续，物体程序化建模部分也直接承接了 Articraft (Zhou et al.,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文阅读：LiteReality-Agent">
+<meta property="og:url" content="https://ziyuliu258.cn/blog/posts/2663b18a/index.html">
+<meta property="og:site_name" content="Derrick Liu的个人博客">
+<meta property="og:description" content="引：LiteReality-Agent 由剑桥大学、帝国理工学院等机构的研究者完成（Zhening Huang、Yueyan Li、Johnathan Chiu、Shangzhe Wu 等），是 LiteReality (Huang et al., 2025) 团队在实景转仿真（Real-to-Sim）方向上的延续，物体程序化建模部分也直接承接了 Articraft (Zhou et al.,">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg">
+<meta property="article:published_time" content="2026-11-24T10:47:15.000Z">
+<meta property="article:modified_time" content="2026-11-24T10:52:55.399Z">
+<meta property="article:author" content="Derrick Liu">
+<meta property="article:tag" content="论文阅读笔记">
+<meta property="article:tag" content="3D Reconstruction">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="Real2Sim">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "论文阅读：LiteReality-Agent",
+  "url": "https://ziyuliu258.cn/blog/posts/2663b18a/",
+  "image": "https://ziyuliu258.cn/blog/images/avatar.jpg",
+  "datePublished": "2026-11-24T10:47:15.000Z",
+  "dateModified": "2026-11-24T10:52:55.399Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Derrick Liu",
+      "url": "https://ziyuliu258.cn/blog/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/blog/images/avatar.jpg"><link rel="canonical" href="https://ziyuliu258.cn/blog/posts/2663b18a/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//fonts.gstatic.com" crossorigin=""/><link rel="preconnect" href="https://bsz.iirose.cn" crossorigin=""/><link rel="preconnect" href="https://giscus.app" crossorigin=""/><link rel="stylesheet" href="/blog/css/index.css?v=ec6537d6a15b"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="/blog/css/image-viewer.css?v=2059977d432b"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: {"path":"/blog/search.json?v=7b7bd81892f0","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"未找到与「${query}」相关的内容","hits_stats":"共找到 ${hits} 篇文章","load_data":"正在加载搜索索引…","indexed_stats":"共收录 ${total} 篇文章","load_error":"搜索索引加载失败","retry":"重试","show_more":"展开其余 ${remaining} 篇结果"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    enable: true,
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'viewer',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: false,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '论文阅读：LiteReality-Agent',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post',
+  liquid: {"glass":{"enable":true,"refraction":true},"background":{"toggle":true,"image":"/blog/images/bg2.jpg","avif":"/blog/images/bg2.avif","light":"#efefef","dark":"#1e1e1e"},"stats":{"enable":true,"api":"https://bsz.iirose.cn/api","siteUv":true,"sitePv":true,"pagePv":true,"note":"新统计服务从启用时开始计数","local":"本地预览不计入访问统计","loading":"正在获取统计数据","error":"统计暂时不可用，刷新页面后重试"},"music":{"enable":true,"pageUrl":"/blog/music/","playlistUrl":"/blog/music/playlist.json","i18n":{"dockLabel":"全局音乐播放器","expand":"展开音乐播放器","collapse":"收起音乐播放器","collapseShort":"收起","previous":"上一首","next":"下一首","play":"播放","pause":"暂停","volume":"音量","seek":"播放进度","playlist":"歌单","title":"音乐","loading":"正在加载歌单…","selectTrack":"请选择歌曲","playFailed":"暂时无法播放，请在网易云收听。","preview":"此曲仅提供试听。","trackFailed":"这首歌暂时无法播放，请在网易云收听。","emptyPlaylist":"当前歌单暂无可直接播放的歌曲，请在网易云收听。","loadFailed":"歌单加载失败，请稍后刷新页面重试。"}},"comments":{"giscus":{"loading":"评论区加载中…","error":"评论区暂时无法加载。","retry":"重试"}}}
+}
+</script><script>(function () {
+  try {
+    var saved = window.btf && btf.saveToLocal ? btf.saveToLocal.get('blog-bg-mode') : undefined
+    if (saved === 'image') return
+    var bg = (window.GLOBAL_CONFIG_SITE.liquid || {}).background || {}
+    var night = document.documentElement.getAttribute('data-theme') === 'dark'
+    document.documentElement.style.setProperty('--solid-bg', night ? bg.dark : bg.light)
+    document.documentElement.style.setProperty('--solid-fg', night ? 'rgba(255, 255, 255, 0.82)' : '#2c3138')
+    document.documentElement.classList.add('solid-bg')
+  } catch (error) {}
+})()</script><link rel="stylesheet" href="/blog/css/liquid.css?v=1f88ac148dbe"><link rel="preload" as="image" href="/blog/images/bg2.avif" type="image/avif"><style>#web_bg[style*="/blog/images/bg2.jpg"], #page-header[style*="/blog/images/bg2.jpg"], #footer[style*="/blog/images/bg2.jpg"] {
+  background-image: image-set(url("/blog/images/bg2.avif") type("image/avif"), url("/blog/images/bg2.jpg") type("image/jpeg")) !important;
+}</style><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/blog/atom.xml" title="Derrick Liu的个人博客" type="application/atom+xml">
+</head><body><div id="web_bg" style="background-image: url(/blog/images/bg2.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> More</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/blog/images/bg2.jpg);"><nav id="nav"><div class="nav-bar-glass" aria-hidden="true"></div><span id="blog-info"><a class="nav-site-title" href="/blog/"></a><button class="nav-back" id="nav-back" type="button" title="返回上一页" aria-label="返回上一页"><i class="fas fa-chevron-left"></i></button><a class="nav-page-title" href="#"><span class="site-name">论文阅读：LiteReality-Agent</span></a></span><div id="menus"><canvas class="nav-glass-canvas" aria-hidden="true"></canvas><div class="nav-pill-glass" aria-hidden="true"></div><div class="nav-hover-lens" aria-hidden="true"></div><div id="nav-darkmode"><button class="site-page social-icon nav-darkmode-btn" type="button" title="日间和夜间模式切换" aria-label="日间和夜间模式切换"><svg class="nav-theme-icon icon-light" viewBox="0.5 0.5 23 23" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4" fill="currentColor"></circle><path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" fill="none"></path></svg><svg class="nav-theme-icon icon-dark" viewBox="2 2.5 19.5 19.5" aria-hidden="true" focusable="false"><path d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646Z" fill="currentColor"></path></svg></button></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div id="search-button"><button class="site-page social-icon search" type="button" title="Search (⌘K / Ctrl+K)" aria-label="Search" aria-haspopup="dialog" aria-controls="local-search" aria-keyshortcuts="Meta+K Control+K"><i class="fas fa-search fa-fw" aria-hidden="true"></i><span> Search</span></button></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> More</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">论文阅读：LiteReality-Agent</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-24T10:47:15.000Z" title="发表于 2026-11-24 18:47:15">2026-11-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-24T10:52:55.399Z" title="更新于 2026-11-24 18:52:55">2026-11-24</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">10.2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>35分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv" title="新统计服务从启用时开始计数" aria-live="polite">—</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>引：LiteReality-Agent 由剑桥大学、帝国理工学院等机构的研究者完成（Zhening Huang、Yueyan Li、Johnathan Chiu、Shangzhe Wu 等），是 LiteReality (Huang et al., 2025) 团队在实景转仿真（<em>Real-to-Sim</em>）方向上的延续，物体程序化建模部分也直接承接了 Articraft (Zhou et al., 2026)。这篇工作最值得关注的设计，是把「从消费级 RGB-D 扫描重建可交互三维场景」改写成一道<strong>编程任务</strong>：整个房间就是一个可执行的 <code>Room.py</code> 脚本，由代码智能体在「观测—编辑—验证」（<em>observe–edit–verify</em>）闭环里持续取证、改代码、重新编译并过物理质检。更有意思的是作者和前沿通用代码智能体（GPT-6 Astra、Fable 5.1）的对照实验——<strong>仅仅把点云和深度图喂给通用模型，像素与深度误差确实会大幅下降，但家具穿模反而变多；真正决定重建能否直接进仿真器的，是面向三维场景设计的取证工具与几何/支撑门控。</strong></p>
+</blockquote>
+<p><img src="/blog/posts/2663b18a/teaser.png" alt="LiteReality-Agent 概览"></p>
+<p><em>图来自原论文 Figure 1：LiteReality-Agent 将消费级 RGB-D 扫描转化为可执行的 <code>Room.py</code> 程序，编译后得到逼真、可交互且可直接导入仿真环境的 3D 室内数字孪生。</em></p>
+<h2 id="背景">背景</h2>
+<p>想从真实房间的扫描数据里建出一个能直接跑机器人仿真、物理交互的数字孪生，光把点云拼起来或者重建出一整块大网格是不够的。点云法（如 ORB-SLAM3、VGGT）和常规网格重建（如 Atlas、NeuralRecon）得到的是「一整坨」静态几何，既分不清哪个抽屉能拉、哪扇门能开，也没有质量、摩擦和碰撞体信息。要让场景真正「可交互、可仿真」，系统必须同时搞定四件事：理解房间壳体结构、重建独立物体及其铰接关节、估计材质与物理参数、以及理顺物体间的支撑与碰撞关系。</p>
+<p>沿着这个目标，现有路线各有各的卡点：</p>
+<ul>
+<li><strong>CAD 检索与确定性管线</strong>：Scan2CAD (Avetisyan et al., 2019)、DiffCAD (Gao et al., 2024) 靠检索对齐现成 CAD 资产，前作 LiteReality (Huang et al., 2025) 也把场景解析、资产检索、外观恢复和装配串成了多阶段流水线。这类确定性管线在预设模板内很稳，但一旦遇到资产库里没有的异形家具、墙面杂物或特殊布局，系统缺乏临场排查和修正的能力。</li>
+<li><strong>组合式生成与可微渲染</strong>：像 CAST (Yao et al., 2025) 用 3D 生成模型逐个造物体再摆进场景，PSDR-Room (Yan et al., 2023) 用可微渲染反推几何与材质，但要把大规模真实扫描稳定地做成无穿模、带关节的仿真环境，整体鲁棒性依然不够。</li>
+<li><strong>LLM 驱动的 3D 场景生成</strong>：Holodeck (Yang et al., 2024)、SceneCraft (Hu et al., 2024)、SceneSmith (Pfaff et al., 2026) 等工作已经证明大语言模型能写代码、排布仿真场景；在物体层面，Articraft (Zhou et al., 2026) 把铰接资产生成做成了带专用 SDK 和自动验证的编程任务。不过这些系统大多是「凭空生成」，缺少与真实扫描观测对齐的机制。</li>
+<li><strong>通用代码智能体</strong>：像 GPT-6 Astra 和 Claude Fable 5.1 这样的新一代代码智能体已经具备很强的 3D 理解与建模能力，但如果直接让它们读照片和点云去写 Blender 脚本，它们没有同机位对比、墙面度量网格和物理质检护栏，很容易顾此失彼——画面看着像了，家具却飘在空中或者互相穿模。</li>
+</ul>
+<p>换句话说，现在缺的不再是单个生成模型，而是一套<strong>能把通用代码智能体编排起来、把修改锚定在真实扫描证据上，并强制守住几何与物理底线的系统框架</strong>。为此，作者提出了 <strong>LiteReality-Agent</strong>，核心贡献可以概括为三点：</p>
+<ol>
+<li>将真实室内 RGB-D 重建表述为以 <code>Room.py</code> 为持久化工作区的编程任务，所有场景结构、物体实例、材质和后续编辑都通过可执行代码统一管理，天然支持复现与自然语言二次编辑。</li>
+<li>设计了「场景初始化 + 智能体精修」两阶段框架：第一阶段通过 <strong>Layout Agent</strong> 与双路由物体重建产出干净的初始场景；第二阶段构建 <strong>observe–edit–verify</strong> 闭环，配套多尺度视角选择、同机位渲染对比、墙面拼接度量网格、PBR 材质检索以及独立的碰撞与支撑质量门控。</li>
+<li>实现了面向 MuJoCo (Todorov et al., 2012) 的物理仿真导出，并在 10 个真实室内场景上系统对比了 LiteReality 及 GPT-6 Astra、Fable 5.1 两个前沿代码智能体，在视觉保真度、几何一致性与人工感知评测上均取得最高均分。</li>
+</ol>
+<h2 id="方法">方法</h2>
+<p>LiteReality-Agent 的输入来自消费级移动设备的 RGB-D 扫描及检测结果，输出是一个可直接编译成三维场景的可执行 Python 程序 <code>Room.py</code>（以及各程序化资产对应的 <code>object.py</code>），并进一步导出为带物理属性与关节的 MuJoCo 仿真场景。整个系统分成两个阶段：第一阶段 <strong>场景初始化</strong> 先修好布局并造出主要物体，搭出初始版 <code>Room.py</code>；第二阶段 <strong>智能体精修</strong> 在有界预算内反复取证、改代码、重渲染并过几何与支撑质检。先看整体数据流与闭环结构：</p>
+<pre><code class="highlight mermaid" data-language="mermaid">flowchart TD
+    IN[&quot;输入：RGB-D 帧 + 相机标定 + 点云 + RoomPlan 布局与物体检测框&quot;] --&gt; LA[&quot;Layout Agent：构建场景图、确定性修复 + 可选图像推理修复&quot;]
+    LA --&gt; ROUTE&#123;&quot;物体双路由重建&quot;&#125;
+    ROUTE --&gt;|结构规整 / 含关节| PROC[&quot;程序化生成（Articraft 路线，输出 object.py + 关节与物理元数据）&quot;]
+    ROUTE --&gt;|外观复杂 / 静态| GEN[&quot;Image-to-3D 生成（TRELLIS.2 + 网格质检与椅子重试循环）&quot;]
+    PROC --&gt; ASM[&quot;场景装配：生成初始 Room.py（壳体 + 物体实例 + 材质）&quot;]
+    GEN --&gt; ASM
+    ASM --&gt; LOOP[&quot;进入智能体精修循环（预算上限 T，最后 10% 禁用探索强制收尾）&quot;]
+    LOOP --&gt; TOOLS[&quot;取证工具集：select_views / render_and_compare / stitch_wall / measurement / fetch_material&quot;]
+    TOOLS --&gt; EDIT[&quot;代码智能体分析差异并编辑 Room.py / object.py（四阶段有序精修）&quot;]
+    EDIT --&gt; REBUILD[&quot;重新编译场景并过 QC 门控（网格碰撞检测与局部修正 + 支撑接触检查）&quot;]
+    REBUILD --&gt;|存在未解违规且预算未尽| LOOP
+    REBUILD --&gt;|通过门控或预算结束| EXPORT[&quot;MuJoCo 仿真导出（质量、惯量、凸分解碰撞体、自由/铰链/滑动关节）&quot;]</code></pre>
+<p>可以看到，第一阶段负责把充满噪声的原始扫描变成「结构干净、尺度正确、没有明显硬伤」的初始程序，第二阶段则把精细材质、墙面设施、小物件和局部几何细节交给代码智能体逐步补齐。下面结合原论文的整体管线图，按输入、场景初始化、智能体精修和仿真导出四个部分拆开讲清每个模块的具体做法。</p>
+<p><img src="/blog/posts/2663b18a/pipeline.png" alt="LiteReality-Agent 整体流程"></p>
+<p><em>图来自原论文 Figure 2：左侧为 LiteReality Scan 采集的 RGB-D、相机参数与 RoomPlan 检测框；中间蓝框为阶段一的场景初始化（布局修复、双路由物体生成、初始装配）；右侧橙框为阶段二的智能体精修闭环与质量门控，最终输出可编辑的 <code>Room.py</code> 与可仿真三维房间。</em></p>
+<h3 id="输入">输入</h3>
+<p>系统的输入由配套的 <em>LiteReality Scan</em> 采集应用提供，包含五类紧密关联的数据：</p>
+<ul>
+<li><strong>RGB 图像帧</strong>：提供物体外观、墙面材质、灯具和装饰细节的视觉证据。</li>
+<li><strong>LiDAR 深度图与置信度图</strong>：提供几何度量证据，并在后续墙面拼接和视角筛选时用于判断可见性。</li>
+<li><strong>相机标定信息</strong>：包含每帧的内参、外参位姿和时间戳，用来把三维点反投影回照片，或把重建好的场景渲染到与真实照片完全一致的机位上。</li>
+<li><strong>派生点云</strong>：由 RGB-D 观测融合成的稀疏/稠密三维表面，直观反映已观测区域和缺失盲区。</li>
+<li><strong>RoomPlan 检测结果</strong>：给出房间墙体、门窗开口的初始壳体结构，以及带语义类别、度量尺寸和位姿的初始物体 3D 包围盒。</li>
+</ul>
+<p>这里要注意一点：RoomPlan 检测框只是<strong>初始布局估计</strong>，往往存在墙体穿插、物体悬空、尺寸偏大或把相邻物体错误合并等问题，不能直接拿来当最终布局，否则后面生成的物体也会跟着错位或缩放失真。</p>
+<h3 id="场景初始化">场景初始化</h3>
+<p>阶段一沿用了 LiteReality (Huang et al., 2025) 先拆解房间壳体与独立物体、最后再装配的思路，但做了一个关键替换：<strong>不再从固定资产库检索模型，而是直接基于当前扫描自身的图像证据生成每个物体</strong>。在真正生成物体之前，先由 Layout Agent 把布局理顺。</p>
+<h4 id="布局智能体">布局智能体</h4>
+<p>Layout Agent 首先把房间和物体组织成一张<strong>场景图</strong>（<em>scene graph</em>），节点包括房间壳体、结构表面、门窗开口和物体，边则记录支撑、贴墙、开口宿主、功能分组和潜在冲突。这张图刻意区分了两对容易混淆的关系：</p>
+<ul>
+<li><em><strong>物理支撑</strong></em> 与 <em><strong>功能分组</strong></em>：每个物体只能有一个支撑父节点（地板、墙面、天花板或另一物体），否则会被标成悬空；但一把椅子在功能上属于旁边的书桌，物理上却是由地板支撑的。拆开这两层关系后，系统既能让书桌和椅子保持相对位置一起平移，又不会错误地认为「桌子托着椅子」。</li>
+<li><em><strong>非法穿模</strong></em> 与 <em><strong>合理包围盒重叠</strong></em>：两张书桌的包围盒撞在一起显然是检测出错，但一把椅子推进餐桌底下时，两者的外接长方体天然会重叠。场景图通过类别感知的例外规则，避免把合理嵌套误判成冲突。</li>
+</ul>
+<p>有了场景图后，Layout Agent 会先跑一轮<strong>确定性几何修复搜索</strong>，尝试把跑出房间、插进墙里、悬空或冲突的包围盒做贴墙、靠角、分离和微调尺寸；如果纯几何搜索解决不了（比如检测器把两个柜子误合并成一个大框，或者尺寸错得离谱），再唤醒<strong>可选的图像引导智能体</strong>，把当前框、周围物体、违规信息和参考照片交给它，让它提议平移、缩放、贴一面/两面墙，或是把合并框拆回原始成员。</p>
+<p>为了防止智能体「为了消冲突把房间改得面目全非」，所有候选修改都受严格的<strong>累计保真度上限</strong>约束，且相对于原始扫描累计计算：</p>
+<ul>
+<li>水平位移累计不超过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.6</mn><mtext> </mtext><mtext>m</mtext></mrow><annotation encoding="application/x-tex">0.6\,\text{m}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.6</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">m</span></span></span></span></span>，垂直位移累计不超过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.08</mn><mtext> </mtext><mtext>m</mtext></mrow><annotation encoding="application/x-tex">0.08\,\text{m}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.08</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">m</span></span></span></span></span>；</li>
+<li>桌子、书桌、椅子、沙发、床等主要家具单轴尺寸变化不超过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>15</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">15\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">15%</span></span></span></span>，其他类别不超过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>35</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">35\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">35%</span></span></span></span>；</li>
+<li>允许拆分错误合并的框，但<strong>禁止通过删除已测物体来消除违规</strong>。</li>
+</ul>
+<p>候选方案只有在不破坏已有锚定、满足累计上限且先降违规总数、再降总误差幅度的前提下才会被接受，最多跑 6 轮智能体辅助修复。举两个附录里的真实例子：在办公室场景中，<code>Table1</code> 和 <code>Chair1</code> 共同平移了 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>0.1445</mn><mo separator="true">,</mo><mn>0.0124</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo><mtext> </mtext><mtext>m</mtext></mrow><annotation encoding="application/x-tex">(0.1445, 0.0124, 0)\,\text{m}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0.1445</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0.0124</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">m</span></span></span></span></span>，14.5 cm 的协同位移在不改变尺寸的前提下保留了桌椅相对位置并消除了 2 处违规；在厨房场景中，<code>Storage3</code> 和 <code>Dishwasher0</code> 各移动约 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5.3</mn><mtext> </mtext><mtext>cm</mtext></mrow><annotation encoding="application/x-tex">5.3\,\text{cm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5.3</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">cm</span></span></span></span></span>、两个水平维度各缩小约 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>8.5</mn><mtext> </mtext><mtext>cm</mtext></mrow><annotation encoding="application/x-tex">8.5\,\text{cm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">8.5</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">cm</span></span></span></span></span>，解决了 3 处墙体/边界穿插。在全部 10 个评测场景的 107 个初始框里，这一步把布局检查器的违规数从 30 降到了 0（29 个框移动、4 个框缩放，且全部由确定性搜索即已解出）。</p>
+<h4 id="物体重建与物理元数据">物体重建与物理元数据</h4>
+<p>拿到修正后的包围盒，系统先为每个物体挑选扫描视角，用图像生成模型生成一张去除了背景杂物的干净参考图，再按物体特性分两条路由重建：</p>
+<ol>
+<li><strong>程序化生成路由</strong>（结构规整或需要铰接交互的物体，如橱柜、洗碗机、桌架）：沿用 Articraft (Zhou et al., 2026) 的思路，让代码智能体编写独立的 <code>object.py</code> 脚本，显式定义几何体、独立活动部件、关节轴、枢轴点和运动限位。</li>
+<li><strong>图像到 3D 生成路由</strong>（外观复杂且基本静态的物体，如沙发、软包椅）：调用 <strong>TRELLIS.2</strong> (Xiang et al., 2026) 直接从干净参考图生成带纹理的三维网格。</li>
+</ol>
+<p>生成式 3D 模型偶尔会产出畸形几何，因此网格要过一遍自动筛选，专门拦截异常长宽比、悬空碎块、大片平坦边界以及底部粘连地板/背景的资产。针对容易出问题的椅子类物体，系统还设了有限次重试循环——质检失败就换随机种子重新生成参考图和网格；如果预算耗尽仍未通过，则保留原资产并把未解问题记入日志。</p>
+<p>更关键的是，<strong>物理属性在这一步就与视觉资产同步编译</strong>，而不是等最后导出仿真器再临时拼凑：</p>
+<ul>
+<li><strong>质量与惯量</strong>：若程序化脚本已手写质量或密度则直接保留；否则按「类别占有密度 × 包围盒体积」估算总质量，再按各连杆几何体积分配，并从连杆几何计算质心与惯性张量（退化网格退回凸包或包围盒近似）。</li>
+<li><strong>摩擦与碰撞体</strong>：未指定时由材质名称先验给出摩擦系数和恢复系数；近凸部件直接用单凸包，大型凹部件做凸分解，且分解预算随连杆质量调节，避免轻小物体引入过多接触面拖慢仿真。</li>
+<li><strong>单物体 MuJoCo 预检</strong>：每个资产在装配进房间前先独自进 MuJoCo 跑三项测试——短距离跌落、逐个关节释放、倾斜重力滑动，提前抓出穿模、部件脱落、数值发散或异常滑动，并区分关节撞到自身框架与需要特定开启顺序的相邻门板碰撞。</li>
+</ul>
+<h4 id="场景程序-Room-py">场景程序 <code>Room.py</code></h4>
+<p>房间壳体和所有物体资产准备好后，按修正后的尺度和位姿装配成一个完整的 <strong><code>Room.py</code></strong> 脚本。<code>Room.py</code> 负责房间壳体、物体实例化、材质配置以及后续新增的几何体，程序化资产则保留各自的 <code>object.py</code>。这份代码就是整个系统的持久化工作区：之后任何修改都以代码编辑的形式落盘，重新执行脚本就能完全复现当前三维场景。</p>
+<h3 id="智能体精修">智能体精修</h3>
+<p>阶段一搭出的初始房间虽然布局规整、大件齐全，但墙面贴图往往还很粗糙，白板、插座、吊灯、桌面小物件也还没补齐，部分程序化资产的细节和真实照片仍有差距。阶段二的<strong>智能体精修</strong>把 <code>Room.py</code> 交给代码智能体，在一个有界的 <strong>observe–edit–verify</strong> 循环里持续打磨。</p>
+<p>原论文 Algorithm 1 概括了这个循环的执行逻辑：</p>
+<ul>
+<li>初始状态：<code>env</code> 指向当前 <code>Room.py</code>，<code>tools</code> 为系统工具集，<code>observations</code> 为原始扫描数据，<code>history</code> 置空，<code>turn = 0</code>，<code>qc_passed = false</code>。</li>
+<li>循环条件：当 <code>turn &lt; T</code> 且 <code>not qc_passed</code> 时，每轮由 LLM 根据 <code>(observations, env, tools, history)</code> 产出一步或多步工具调用 <code>actions</code>，执行后将 <code>(actions, result)</code> 写入 <code>history</code>。</li>
+<li>门控触发：只要某步 <code>result</code> 实质修改了场景代码，系统就调用 <code>QC(env, observations)</code> 重新编译并做几何/支撑检查，把 <code>qc_passed</code> 标志和具体违规反馈 <code>feedback</code> 追加回 <code>history</code>，供下一轮继续修复。</li>
+</ul>
+<h4 id="取证工具">取证工具</h4>
+<p>通用代码智能体自己写 3D 场景时最容易「盲人摸象」——要么翻几百张扫描图看花眼，要么凭感觉猜一个坐标写进代码。LiteReality-Agent 把三维取证拆成了五个专用工具（配合通用的 <code>bash</code>、<code>glob</code>、<code>read</code>、<code>edit</code> 文件操作）：</p>
+<table>
+<thead>
+<tr>
+<th>工具名</th>
+<th>核心用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>select_views</code></td>
+<td>按房间、单面墙或单个物体三个层级挑选信息量最高的扫描帧</td>
+</tr>
+<tr>
+<td><code>render_and_compare</code></td>
+<td>用相同标定相机渲染当前场景，与真实照片并排标注对比</td>
+</tr>
+<tr>
+<td><code>stitch_wall</code></td>
+<td>将多帧投影到度量墙面，拼出正视墙面参考图与覆盖率掩码</td>
+</tr>
+<tr>
+<td><code>measurement</code></td>
+<td>在拼接墙面或场景中以米为单位读取真实位置与尺寸</td>
+</tr>
+<tr>
+<td><code>fetch_material</code></td>
+<td>检索 PBR 材质贴图（颜色、粗糙度、法线）并按观测调整色调</td>
+</tr>
+</tbody>
+</table>
+<p>这里面有几个很实用的工程巧思：</p>
+<ul>
+<li><strong>三层视角选择与同机位对比</strong>：<code>select_views</code> 和 <code>render_and_compare</code> 都支持 <strong>房间级 → 墙面级 → 物体级</strong> 的逐层下钻。房间级贪心挑选能互补覆盖多面墙的帧，对比图里直接标出可见物体的名称；墙面级按墙体在画面里的投影面积排序，对比图只勾出选中墙面的轮廓；物体级依据渲染清单的可见度找最清晰的帧，对比图框出目标包围盒；同时用最小帧间隔滤掉几乎重复的相邻帧。因为渲染图和照片严格共用同一组标定相机参数，智能体不需要自己脑补视角对齐，一眼就能把房间级的偏差追溯到某面墙或某个物体。并且每次对比前都会先重新编译修改过的 <code>Room.py</code> 和 <code>object.py</code>，确保看到的永远是最新状态。</li>
+<li><strong>墙面拼接与度量网格</strong>：墙上的白板、挂画、窗户到底离地多高、宽几米？靠人眼从透视照片里估很容易偏十几厘米。<code>stitch_wall</code> 在检测出的墙面上铺一层度量网格，把每个像素对应的三维点反投影到候选标定帧里，优先挑正面、居中、近距离且深度可见的像素直接填充（不做模糊混合），同时输出一张覆盖率掩码标出未拍到的盲区。接着 <code>measurement</code> 往正视墙面上叠一层米制刻度网格——红刻度标沿墙水平距离，蓝刻度标离地高度。</li>
+</ul>
+<p><img src="/blog/posts/2663b18a/metric-grid.jpg" alt="墙面拼接与度量网格"></p>
+<p><em>图来自原论文 Figure A8(d)：厨房场景中一面带白板的拼接正视墙面叠加度量网格，红色刻度为沿墙水平距离（米），蓝色刻度为离地高度（米），智能体可直接读出白板四边坐标写入 <code>Room.py</code>。</em></p>
+<p>看上面的白板例子，智能体不用猜，直接顺着红蓝刻度就能读出白板左右边界和上下高度，原样写进 <code>Room.py</code>。作者也专门提醒：平面投影会把凸出墙面的物体拉变形，所以遇到灯具、家具和桌面杂物时，智能体仍要回看原始采集帧。</p>
+<ul>
+<li><strong>四阶段有序精修流</strong>：为了让智能体不乱改，编排框架按固定顺序引导四个精修模块：<strong>第一步</strong>匹配墙面与地面材质（通过 <code>fetch_material</code> 拉取 PBR 贴图并调色，保留纹理空间图案的同时对齐真实色调）；<strong>第二步</strong>补齐固定设施与灯具；<strong>第三步</strong>放置桌面和地面上的小物件；<strong>第四步</strong>对已有的程序化资产做多视角渲染检查，继续精修其几何、外观与关节。每一步都把所有新增几何打包成具名物体，并强制写明 <code>rests_on</code>（支撑关系）或 <code>attached_to</code>（附着关系），让后续编辑也能顺着语义和依赖关系安全改动。</li>
+</ul>
+<h4 id="预算控制与质量门控">预算控制与质量门控</h4>
+<p>精修什么时候该停？视觉相似度很难定一个放之四海而皆准的自动阈值——设太高会死循环烧预算，设太低又草草收场。LiteReality-Agent 的做法是把<strong>停止条件</strong>和<strong>质量判定</strong>分开：</p>
+<ul>
+<li><strong>预算控制</strong>：每个精修会话设定最大轮数和工具调用上限。在最后 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">10\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">10%</span></span></span></span> 的调用预算里，系统通过前置钩子禁用探索和自检类工具（若底层适配器不支持钩子则硬停），逼着智能体收尾并保存代码。但<strong>耗尽预算终止绝不等于质检通过</strong>，保存后的程序依然要过重建与验证。</li>
+<li><strong>独立的网格碰撞门控</strong>：阶段一的布局修复只看粗包围盒，到了阶段二物体有了精细网格、还添了新物件，必须拿真实三角网格查穿模——特别是椅子和桌子这种包围盒允许重叠、但椅腿和桌板绝不能真插在一起的组合。系统先用网格相交判定碰撞，再用凸近似估计水平修正平移，在有界预算内移动未锚定物体、把累计位移写回 <code>Room.py</code> 并重建复查；局部平移解不了的冲突直接打回给精修循环。</li>
+<li><strong>独立的支撑接触门控</strong>：不穿模不代表没问题，物体完全可能悬空飘着。验证器把每个物体底面与它声明的支撑面顶部逐一核对，并检查底面投影重叠率：
+<ul>
+<li>悬空缝隙 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><mn>1</mn><mtext> </mtext><mtext>cm</mtext></mrow><annotation encoding="application/x-tex">&gt; 1\,\text{cm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">cm</span></span></span></span></span> 或穿透深度 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><mn>2</mn><mtext> </mtext><mtext>cm</mtext></mrow><annotation encoding="application/x-tex">&gt; 2\,\text{cm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">cm</span></span></span></span></span> 直接阻塞；</li>
+<li>缺少或未知的支撑声明直接阻塞；</li>
+<li>底面投影落在支撑面上的比例不足 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>50</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">50\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">50%</span></span></span></span> 报出复查；</li>
+<li>已识别但未显式声明支撑的落地家具按 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn><mtext> </mtext><mtext>cm</mtext></mrow><annotation encoding="application/x-tex">5\,\text{cm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">cm</span></span></span></span></span> 容差兜底检查，附着在墙面或天花板上的固定件则豁免重力支撑检查；</li>
+<li>同时确认铰接资产仍保留独立的活动部件。</li>
+</ul>
+</li>
+</ul>
+<p>除了这些确定性几何门控，系统还支持接入基于检查清单的视觉审查来补充外观反馈。</p>
+<h3 id="仿真导出">仿真导出</h3>
+<p>当 <code>Room.py</code> 通过精修与门控后，导出器汇总四份数据生成可直接运行的 MuJoCo 场景（MJCF）：</p>
+<ol>
+<li><code>Room.py</code> 中的房间壳体几何（墙体会绕开门窗开口拆成结构化长方体）；</li>
+<li><code>room_layout.json</code> 中的物体位姿与支撑声明；</li>
+<li><code>Room.glb</code> 中的外观网格与材质；</li>
+<li>每个物体在阶段一编译好的物理元数据记录。</li>
+</ol>
+<p>导出时，墙面与附着固定件锁定不动，可移动家具分配自由关节（<em>free joint</em>），程序化铰接部件保留对应的铰链（<em>hinge</em>）或滑动（<em>slide</em>）关节，并为带力矩元数据的关节配置电机执行器。独立的凸分解碰撞体保留了桌底和柜内的可用空间，不会被一个实心大盒子堵死；如果精修阶段改过物体尺寸，导出器会自动按体积缩放派生质量并重算惯量（手写质量则原样保留）；新增且缺少物理记录的小物件会在导出时补算兜底质量和碰撞体，并在导出报告中如实记录。</p>
+<h2 id="实验">实验</h2>
+<h3 id="实验设置">实验设置</h3>
+<p>作者在 <strong>10 个真实室内场景</strong>（共 620 个采集视角，每个场景 27–91 帧）上评测 LiteReality-Agent，对比三类基线：</p>
+<ul>
+<li><strong>LiteReality</strong> (Huang et al., 2025)：确定性多阶段检索与重建管线；</li>
+<li><strong>GPT-6 Astra（运行于 Codex）</strong>：通用前沿代码智能体，分别测试纯照片输入（<code>RGB-only</code>）和附加扫描输入（<code>+Scan</code>）；</li>
+<li><strong>Fable 5.1（运行于 Claude Code）</strong>：另一款通用前沿代码智能体，同样测试 <code>RGB-only</code> 和 <code>+Scan</code>。</li>
+</ul>
+<p>其中 <code>+Scan</code> 条件向基线提供与 LiteReality-Agent 完全相同的扫描信息，包括对齐的 LiDAR 深度与置信度图、相机标定、点云和 RoomPlan USDZ 布局。所有重建结果都对齐到采集相机坐标系（不改动场景尺度和单个物体位姿），在 Blender 5.2 Cycles（64 spp + OptiX 降噪）中按采集位姿渲染到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>960</mn><mo>×</mo><mn>720</mn></mrow><annotation encoding="application/x-tex">960 \times 720</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">960</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">720</span></span></span></span>。为了公平比较几何与材质，同一场景下所有方法共享对应 LiteReality-Agent 场景的灯光、世界照明和色彩管理设置，但各自保留自己的材质、纹理和自发光（注意：共享灯光并未针对参考照片单独校准，且评测在采集视角上进行，而非未见新视角）。</p>
+<h3 id="视觉保真度">视觉保真度</h3>
+<p>视觉保真度在全部 620 帧上计算四个常见指标，参考照片由 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1920</mn><mo>×</mo><mn>1440</mn></mrow><annotation encoding="application/x-tex">1920 \times 1440</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1920</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1440</span></span></span></span> Lanczos 下采样到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>960</mn><mo>×</mo><mn>720</mn></mrow><annotation encoding="application/x-tex">960 \times 720</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">960</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">720</span></span></span></span>，不做额外对齐或曝光校正，每帧等权平均：</p>
+<ul>
+<li><strong>SSIM</strong>（结构相似度，越大越好 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↑</mo></mrow><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↑</span></span></span></span>）：在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>11</mn><mo>×</mo><mn>11</mn></mrow><annotation encoding="application/x-tex">11 \times 11</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">11</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">11</span></span></span></span> 高斯窗口（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>1.5</mn></mrow><annotation encoding="application/x-tex">\sigma = 1.5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">σ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1.5</span></span></span></span>）上衡量亮度、对比度与结构一致性；</li>
+<li><strong>PSNR</strong>（峰值信噪比，dB，越大越好 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↑</mo></mrow><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↑</span></span></span></span>）与 <strong>RMSE</strong>（均方根误差，越小越好 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↓</mo></mrow><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↓</span></span></span></span>）：衡量像素级误差；</li>
+<li><strong>LPIPS</strong>（感知图像块相似度，越小越好 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↓</mo></mrow><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↓</span></span></span></span>）：基于预训练 AlexNet v0.1 衡量人眼感知差异。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th style="text-align:right">SSIM <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↑</mo></mrow><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↑</span></span></span></span></th>
+<th style="text-align:right">PSNR (dB) <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↑</mo></mrow><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↑</span></span></span></span></th>
+<th style="text-align:right">RMSE <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↓</mo></mrow><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↓</span></span></span></span></th>
+<th style="text-align:right">LPIPS <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↓</mo></mrow><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↓</span></span></span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LiteReality</td>
+<td style="text-align:right">0.5609</td>
+<td style="text-align:right">11.881</td>
+<td style="text-align:right">0.2635</td>
+<td style="text-align:right">0.6709</td>
+</tr>
+<tr>
+<td>Fable 5.1 (RGB-only)</td>
+<td style="text-align:right">0.5307</td>
+<td style="text-align:right">10.681</td>
+<td style="text-align:right">0.3008</td>
+<td style="text-align:right">0.7197</td>
+</tr>
+<tr>
+<td>Fable 5.1 (+Scan)</td>
+<td style="text-align:right">0.5649</td>
+<td style="text-align:right">12.287</td>
+<td style="text-align:right">0.2506</td>
+<td style="text-align:right">0.6422</td>
+</tr>
+<tr>
+<td>GPT-6 (RGB-only)</td>
+<td style="text-align:right">0.5742</td>
+<td style="text-align:right">11.549</td>
+<td style="text-align:right">0.2694</td>
+<td style="text-align:right">0.6910</td>
+</tr>
+<tr>
+<td>GPT-6 (+Scan)</td>
+<td style="text-align:right">0.6004</td>
+<td style="text-align:right">12.967</td>
+<td style="text-align:right">0.2323</td>
+<td style="text-align:right">0.6250</td>
+</tr>
+<tr>
+<td><strong>LiteReality-Agent (ours)</strong></td>
+<td style="text-align:right"><strong>0.6105</strong></td>
+<td style="text-align:right"><strong>14.129</strong></td>
+<td style="text-align:right"><strong>0.2033</strong></td>
+<td style="text-align:right"><strong>0.5392</strong></td>
+</tr>
+</tbody>
+</table>
+<p>LiteReality-Agent 在四项指标上全部拿到最优：相比最强的对手 GPT-6 (+Scan)，PSNR 提高了 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.162</mn><mtext> </mtext><mtext>dB</mtext></mrow><annotation encoding="application/x-tex">1.162\,\text{dB}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord">1.162</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">dB</span></span></span></span></span>，LPIPS 下降了 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>13.7</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">13.7\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">13.7%</span></span></span></span>；相比确定性管线 LiteReality，PSNR 提高 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2.248</mn><mtext> </mtext><mtext>dB</mtext></mrow><annotation encoding="application/x-tex">2.248\,\text{dB}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord">2.248</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">dB</span></span></span></span></span>，LPIPS 下降 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>19.6</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">19.6\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">19.6%</span></span></span></span>。从下面的定性对比也能直观看出差别：</p>
+<p><img src="/blog/posts/2663b18a/baseline-comparison.png" alt="与各基线方法的定性对比"></p>
+<p><em>图来自原论文 Figure 3：三个代表性场景在相同标定视角下的渲染对比。从左到右依次为真实 RGB 输入、LiteReality-Agent、GPT-6 Astra（带完整扫描 / 纯 RGB）、Fable 5.1（带完整扫描 / 纯 RGB）以及 LiteReality。</em></p>
+<p>在办公室（第一行）里，LiteReality 受限于资产库几乎丢掉了空调、壁挂书架和桌面显示器；纯 RGB 的通用智能体虽然画出了大概语义，但机位和几何比例明显漂移；加上扫描后，GPT-6 Astra 和 Fable 5.1 的大致位置对上了，但空调、置物架物件、墙面砖纹（第二行）和会议室椅阵（第三行）的贴合度仍明显不如 LiteReality-Agent。</p>
+<h3 id="几何一致性与物理合理性">几何一致性与物理合理性</h3>
+<p>仅看像素指标还不够，仿真环境更关心三维几何准不准、家具落没落地、有没有互相穿模。作者在 10 个场景上评测了三项几何与物理合理性指标：</p>
+<ul>
+<li><strong>Depth MAE (cm) <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↓</mo></mrow><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↓</span></span></span></span></strong>：在 611 帧存在共享有效深度的像素上，计算渲染深度与采集深度的平均绝对误差；</li>
+<li><strong>Bottom near-contact <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↑</mo></mrow><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↑</span></span></span></span></strong>：统计底部至少有一个采样点距离外部支撑面 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><mn>1</mn><mtext> </mtext><mtext>cm</mtext></mrow><annotation encoding="application/x-tex">\le 1\,\text{cm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">cm</span></span></span></span></span> 的家具占比（衡量支撑贴合，但不要求每条椅腿都贴地）；</li>
+<li><strong>Inters. pairs <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↓</mo></mrow><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↓</span></span></span></span></strong>：在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.1</mn><mtext> </mtext><mtext>mm</mtext></mrow><annotation encoding="application/x-tex">0.1\,\text{mm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.1</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">mm</span></span></span></span></span> 容差下，统计不同家具三角网格之间严格相交的配对总数（排除物体自身与墙体相交）。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th style="text-align:right">Depth MAE (cm) <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↓</mo></mrow><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↓</span></span></span></span></th>
+<th style="text-align:center">Bottom near-contact <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↑</mo></mrow><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↑</span></span></span></span></th>
+<th style="text-align:right">Inters. pairs <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↓</mo></mrow><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↓</span></span></span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LiteReality</td>
+<td style="text-align:right">15.03</td>
+<td style="text-align:center">85/85 (<strong>100%</strong>)</td>
+<td style="text-align:right">43</td>
+</tr>
+<tr>
+<td>Fable 5.1 (RGB-only)</td>
+<td style="text-align:right">58.64</td>
+<td style="text-align:center">71/102 (69.6%)</td>
+<td style="text-align:right">36</td>
+</tr>
+<tr>
+<td>Fable 5.1 (+Scan)</td>
+<td style="text-align:right">16.32</td>
+<td style="text-align:center">78/97 (80.4%)</td>
+<td style="text-align:right">54</td>
+</tr>
+<tr>
+<td>GPT-6 (RGB-only)</td>
+<td style="text-align:right">40.51</td>
+<td style="text-align:center">65/94 (69.1%)</td>
+<td style="text-align:right">14</td>
+</tr>
+<tr>
+<td>GPT-6 (+Scan)</td>
+<td style="text-align:right">13.33</td>
+<td style="text-align:center">58/92 (63.0%)</td>
+<td style="text-align:right">24</td>
+</tr>
+<tr>
+<td><strong>LiteReality-Agent (ours)</strong></td>
+<td style="text-align:right"><strong>10.50</strong></td>
+<td style="text-align:center">86/86 (<strong>100%</strong>)</td>
+<td style="text-align:right"><strong>0</strong></td>
+</tr>
+</tbody>
+</table>
+<p>结果非常鲜明：LiteReality-Agent 把深度误差压到了 <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10.50</mn><mtext> </mtext><mtext>cm</mtext></mrow><annotation encoding="application/x-tex">10.50\,\text{cm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">10.50</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">cm</span></span></span></span></span></strong>（比 GPT-6 (+Scan) 低 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>21.2</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">21.2\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">21.2%</span></span></span></span>，比 LiteReality 的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>15.03</mn><mtext> </mtext><mtext>cm</mtext></mrow><annotation encoding="application/x-tex">15.03\,\text{cm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">15.03</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">cm</span></span></span></span></span> 也有明显下降），86 个识别家具 <strong>100%</strong> 满足底部近接触，并且 <strong>家具间穿模对数为 0</strong>——作为对比，确定性管线 LiteReality 虽然也做到了 100% 落地，却留有 43 对家具相交。需要留意作者的严谨提示：不同方法重建出的家具总数并不相同（85 到 102 件不等），因此基于物体的统计必须结合数量一起解读，且这些指标衡量的是特定维度的物理合理性，并不等同于完整的真实物理有效性。</p>
+<h3 id="扫描数据对通用智能体的影响">扫描数据对通用智能体的影响</h3>
+<p>把上表里通用智能体的 <code>RGB-only</code> 和 <code>+Scan</code> 放在一起看，能发现一个很关键的现象：</p>
+<ul>
+<li>加入扫描数据后，两个通用智能体的深度误差都出现了断崖式下降——GPT-6 从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>40.51</mn><mtext> </mtext><mtext>cm</mtext></mrow><annotation encoding="application/x-tex">40.51\,\text{cm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">40.51</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">cm</span></span></span></span></span> 降到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>13.33</mn><mtext> </mtext><mtext>cm</mtext></mrow><annotation encoding="application/x-tex">13.33\,\text{cm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">13.33</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">cm</span></span></span></span></span>（降幅 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>67.1</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">67.1\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">67.1%</span></span></span></span>），Fable 5.1 从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>58.64</mn><mtext> </mtext><mtext>cm</mtext></mrow><annotation encoding="application/x-tex">58.64\,\text{cm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">58.64</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">cm</span></span></span></span></span> 降到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>16.32</mn><mtext> </mtext><mtext>cm</mtext></mrow><annotation encoding="application/x-tex">16.32\,\text{cm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">16.32</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">cm</span></span></span></span></span>（降幅 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>72.2</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">72.2\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">72.2%</span></span></span></span>），PSNR 也分别提高了 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.418</mn><mtext> </mtext><mtext>dB</mtext></mrow><annotation encoding="application/x-tex">1.418\,\text{dB}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord">1.418</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">dB</span></span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.606</mn><mtext> </mtext><mtext>dB</mtext></mrow><annotation encoding="application/x-tex">1.606\,\text{dB}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord">1.606</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">dB</span></span></span></span></span>。</li>
+<li><strong>但家具层面的物理合理性非但没跟着变好，反而变差了</strong>：GPT-6 的家具穿模对数从 14 涨到 24，底部近接触率还从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>69.1</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">69.1\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">69.1%</span></span></span></span> 掉到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>63.0</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">63.0\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">63.0%</span></span></span></span>；Fable 5.1 的穿模对数也从 36 涨到 54。</li>
+</ul>
+<p><u>这个反差直接点出了 LiteReality-Agent 的核心价值：给前沿模型塞入原始 RGB-D 扫描，足以帮它们把宏观尺度和深度拉齐，但如果没有面向三维重建设计的布局修复、校准取证工具以及网格级碰撞/支撑门控，通用智能体很难同时兼顾几何贴合与物理无穿模。</u>当然，作者也如实说明，这组对照验证的是完整系统的整体效果，并未把编排框架与 Layout Agent、双路由物体重建拆开做单因素消融。</p>
+<h3 id="定性结果、场景编辑与仿真交互">定性结果、场景编辑与仿真交互</h3>
+<p>除了定量指标，作者还展示了多房间重建对比、程序化/自然语言编辑以及 MuJoCo 物理交互。</p>
+<p><img src="/blog/posts/2663b18a/reconstruction-comparisons.png" alt="代表性场景重建对比"></p>
+<p><em>图来自原论文 Figure 4：厨房（上）与会议室（下）的重建对比，包含采集照片、同机位重建渲染以及点云/俯视平面图对照。</em></p>
+<p>因为整个场景本身就是一份带语义命名和 <code>rests_on</code> / <code>attached_to</code> 依赖关系的 <code>Room.py</code> 代码，后续修改材质、清理桌面/地面或增加装饰不需要重新扫描和重建——直接把自然语言指令交给代码智能体改 <code>Room.py</code> 即可：</p>
+<p><img src="/blog/posts/2663b18a/interaction-edits.png" alt="自然语言场景编辑示例"></p>
+<p><em>图来自原论文 Figure A9：对重建办公室应用三条自然语言编辑指令（露出砖墙、清理地面以开站会、布置看世界杯主题装饰），每次修改均直接作用于 <code>Room.py</code>。</em></p>
+<p>导出到 MuJoCo 后，厨房场景里的橱柜门、洗碗机门和桌面物品具备独立的刚体、碰撞体与关节。在仿真中施加整体抖动时，洗碗机门会顺着铰链打开、台面上的杯子和厨具会发生真实的倾倒与碰撞；机械臂（Franka）也可以直接在场景里执行桌面抓取放置。不过作者同样明确划清了证据边界：<strong>这些仿真演示展示的是场景具备可交互结构，并没有定量评测机器人策略成功率，也没有辨识真实世界的物理动力学参数。</strong></p>
+<p><img src="/blog/posts/2663b18a/robotic-application.png" alt="MuJoCo 仿真与机械臂交互示例"></p>
+<p><em>图来自原论文 Figure 6：导出至 MuJoCo 的厨房场景，依次展示初始状态、施加抖动后的关节与物体响应，以及 Franka 机械臂抓取放置示例。</em></p>
+<h3 id="人工与智能体感知评测">人工与智能体感知评测</h3>
+<p>为了评估人眼主观感受，作者组织了匿名随机排序的人工评测（13 份有效提交，每人评 5 个场景，共 65 组配对评测），并额外引入两名智能体评测员（A1、A2），在 1–5 分制下分别给 LiteReality、Fable 5.1 (+Scan)、GPT-6 (+Scan) 和 LiteReality-Agent 的<strong>布局准确度</strong>、<strong>物体相似度</strong>和<strong>整体场景相似度</strong>打分：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th style="text-align:center">Layout (Hum. / A1 / A2) <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↑</mo></mrow><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↑</span></span></span></span></th>
+<th style="text-align:center">Object (Hum. / A1 / A2) <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↑</mo></mrow><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↑</span></span></span></span></th>
+<th style="text-align:center">Overall (Hum. / A1 / A2) <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↑</mo></mrow><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mrel">↑</span></span></span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LiteReality</td>
+<td style="text-align:center">2.03 / 3.00 / 3.00</td>
+<td style="text-align:center">1.95 / 1.70 / 1.70</td>
+<td style="text-align:center">2.11 / 1.80 / 1.80</td>
+</tr>
+<tr>
+<td>Fable 5.1 (+Scan)</td>
+<td style="text-align:center">2.80 / 3.10 / 3.00</td>
+<td style="text-align:center">2.66 / 2.50 / 2.30</td>
+<td style="text-align:center">2.82 / 3.00 / 2.30</td>
+</tr>
+<tr>
+<td>GPT-6 (+Scan)</td>
+<td style="text-align:center">3.11 / 4.10 / 3.60</td>
+<td style="text-align:center">2.98 / 3.20 / 2.90</td>
+<td style="text-align:center">3.00 / 3.60 / 2.90</td>
+</tr>
+<tr>
+<td><strong>LiteReality-Agent</strong></td>
+<td style="text-align:center"><strong>4.60</strong> / <strong>5.00</strong> / <strong>4.90</strong></td>
+<td style="text-align:center"><strong>4.58</strong> / <strong>4.80</strong> / <strong>4.20</strong></td>
+<td style="text-align:center"><strong>4.54</strong> / <strong>4.90</strong> / <strong>4.20</strong></td>
+</tr>
+</tbody>
+</table>
+<p>人工均分上，LiteReality-Agent 在三项维度均大幅领先第二名 GPT-6 (+Scan)（分别高出 1.49、1.60 和 1.54 分），且在整体相似度的 65 组配对比较中对 GPT-6 (+Scan) 取得 <strong>53 胜 11 平 1 负</strong>，在全部 10 个场景上都拿到最高人工均分。两个智能体评测员的排序与人类一致（LiteReality-Agent 第一、GPT-6 第二），但绝对分值与人类存在偏差。作者也指出了这项评测的局限：样本量偏小、各场景覆盖人数不均（3–11 人），且同一参与者对多场景评分存在相关性，因此不能当作严格统计显著性检验或物理有效性证明，智能体打分也不能替代人类评价。</p>
+<h2 id="核心价值与不足">核心价值与不足</h2>
+<h3 id="值得关注的设计">值得关注的设计</h3>
+<p>这篇论文最有启发性的地方，在于把三维实景重建重新定义为一个<strong>以可执行程序为持久状态、以校准取证与确定性门控为护栏的智能体系统工程</strong>。以往实景转仿真要么靠固定流水线硬写规则（泛化差），要么指望端到端大模型一步出结果（几何与物理约束极难守住）。LiteReality-Agent 把分工划得很清楚：<strong>让大语言模型负责语义理解、程序编写和开放式细化，而把相机标定投影、米制墙面测量、三角网格求交、支撑容差校验这些容易算错的硬活全部做成确定性工具与门控</strong>。更难得的是，这种 <em>harness</em> 架构不绑死在某一代底座模型上——随着未来代码智能体的视觉和编程能力继续变强，这套工具与门控框架可以直接吃到底座升级的红利。</p>
+<h3 id="局限与未解问题">局限与未解问题</h3>
+<p>结合原论文附录 F 的自述以及实验边界，目前还有三处明显的局限：</p>
+<ol>
+<li><strong>物理参数缺乏真实测量真值</strong>：物体的质量、惯量、摩擦系数和恢复系数主要靠语言模型推理、类别占有密度先验和几何体积估算，缺少真实世界的物理测量真值。因此「能导进 MuJoCo 且不穿模、不悬空」只能说明场景在几何和结构上可仿真，并不能保证其动力学响应与真实物体一致。</li>
+<li><strong>布局自洽不等于真实布局精确</strong>：RoomPlan 的初始检测框本身就可能存在尺寸和位姿误差；Layout Agent 的保真度约束和后续的碰撞/支撑门控虽然保证了输出场景内部自洽，甚至在采集视角上看起来很贴合，但这并不保证恢复出的布局与真实物理尺寸完全吻合。未来需要把图像观测更紧密地耦合进布局优化，并引入真值测量基准来评估。</li>
+<li><strong>评测规模与消融颗粒度有限</strong>：当前基准只覆盖 10 个室内房间，视觉指标仅在采集视角（而非新视角）下计算，且所有基线共用了 LiteReality-Agent 的场景灯光；此外，实验没有对 Layout Agent、双路由物体重建、墙面度量工具和质量门控做逐项消融，还难以定量拆解每个组件各自的边际贡献。</li>
+</ol>
+<h2 id="总结">总结</h2>
+<p>回顾整条链路，LiteReality-Agent 用三个紧密衔接的环节打通了从消费级 RGB-D 扫描到可交互仿真场景的闭环：</p>
+<ol>
+<li><strong>先修布局、双路由建资产</strong>：用场景图区分物理支撑与功能分组，在累计保真度上限内修净 RoomPlan 噪声，再将物体分流至程序化 <code>object.py</code>（带关节与物理元数据）或 TRELLIS.2 网格，装配成初始 <code>Room.py</code>。</li>
+<li><strong>在可执行的 <code>Room.py</code> 上闭环精修</strong>：借助三层视角选择、同机位渲染对比、正视墙面拼接度量网格和 PBR 材质检索，按材质→设施→小物件→资产精修四步迭代修改代码，并由有界预算与独立的网格碰撞/支撑门控兜底。</li>
+<li><strong>带物理属性导出仿真</strong>：汇总壳体、位姿、外观与物理元数据导出至 MuJoCo，同时保留一份人类和智能体都能直接读写的场景代码。</li>
+</ol>
+<p>如果对这条「代码即三维场景 + 智能体闭环逆向图形学」的路线感兴趣，建议顺着两条线索继续读：一是本文的直接前作 <strong>LiteReality</strong> (Huang et al., 2025) 与物体级程序化铰接资产系统 <strong>Articraft</strong> (Zhou et al., 2026)，看清楚系统如何从确定性管线和单物体 SDK 演进到全场景智能体编排；二是同期在程序化生成与实景转仿真方向上的代表工作 <strong>SceneSmith</strong> (Pfaff et al., 2026) 与 <strong>Agentic Real2Sim</strong> (Chen et al., 2026)，对比不同系统如何设计智能体的观测工具与物理验证闭环。</p>
+<h2 id="参考">参考</h2>
+<ul>
+<li>Huang, Z., Li, Y., Chiu, J., Lyu, X., Zhou, M., Yao, Y., Lasenby, J., &amp; Wu, S. (2026). LiteReality-Agent: An agentic system for interactable 3D indoor scene reconstruction. <em>arXiv preprint arXiv:2610.01863</em>. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2610.01863">https://doi.org/10.48550/arXiv.2610.01863</a></li>
+<li>Huang, Z., Wu, X., Zhong, F., Zhao, H., Nießner, M., &amp; Lasenby, J. (2025). LiteReality: Graphics-ready 3D scene reconstruction from RGB-D scans. In <em>Advances in Neural Information Processing Systems (NeurIPS)</em>.</li>
+<li>Zhou, M., Li, R., Lyu, X., Song, Z., Huang, Z., Zheng, C., Rupprecht, C., Vedaldi, A., &amp; Wu, S. (2026). Articraft: An agentic system for scalable articulated 3D asset generation. <em>arXiv preprint arXiv:2605.15187</em>. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2605.15187">https://doi.org/10.48550/arXiv.2605.15187</a></li>
+<li>Xiang, J., Chen, X., Xu, S., Wang, R., Lv, Z., Deng, Y., Zhu, H., Dong, Y., Zhao, H., Yuan, N. J., &amp; Yang, J. (2026). Native and compact structured latents for 3D generation. In <em>Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)</em>.</li>
+<li>Todorov, E., Erez, T., &amp; Tassa, Y. (2012). MuJoCo: A physics engine for model-based control. In <em>Proceedings of the IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)</em>.</li>
+<li>Avetisyan, A., Dahnert, M., Dai, A., Savva, M., Chang, A. X., &amp; Nießner, M. (2019). Scan2CAD: Learning CAD model alignment in RGB-D scans. In <em>Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)</em>.</li>
+<li>Gao, D., Rozenberszki, D., Leutenegger, S., &amp; Dai, A. (2024). DiffCAD: Weakly-supervised probabilistic CAD model retrieval and alignment from an RGB image. <em>ACM Transactions on Graphics (TOG)</em>.</li>
+<li>Yao, K., Zhang, L., Yan, X., Zeng, Y., Zhang, Q., Xu, L., Yang, W., Gu, J., &amp; Yu, J. (2025). CAST: Component-aligned 3D scene reconstruction from an RGB image. <em>ACM Transactions on Graphics (TOG)</em>.</li>
+<li>Yan, K., Luan, F., Hašan, M., Groueix, T., Deschaintre, V., &amp; Zhao, S. (2023). PSDR-Room: Single photo to scene using differentiable rendering. In <em>SIGGRAPH Asia</em>.</li>
+<li>Yang, Y., Sun, F.-Y., Weihs, L., Vanderbilt, E., Herrasti, A., Han, W., Wu, J., Haber, N., Krishna, R., Liu, L., Callison-Burch, C., Yatskar, M., Kembhavi, A., &amp; Clark, C. (2024). Holodeck: Language guided generation of 3D embodied AI environments. In <em>Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)</em>.</li>
+<li>Hu, Z., Iscen, A., Jain, A., Kipf, T., Yue, Y., Ross, D. A., Schmid, C., &amp; Fathi, A. (2024). SceneCraft: An LLM agent for synthesizing 3D scenes as Blender code. In <em>Proceedings of the International Conference on Machine Learning (ICML)</em>.</li>
+<li>Pfaff, N., Cohn, T., Zakharov, S., Cory, R., &amp; Tedrake, R. (2026). SceneSmith: Agentic generation of simulation-ready indoor scenes. In <em>Proceedings of the International Conference on Machine Learning (ICML)</em>.</li>
+<li>Chen, G., Xia, Q., Peng, J., Zhang, H., Jing, P., Ma, B., Qian, J., Cheng, Y., Jiao, Z., Zhou, B., Qu, Y., Ye, L., Zhang, K., Wang, K., Zeng, W., Chen, Y., Yang, P., Zeng, Z., Luo, S., Wang, H., Liu, C., Yuille, A., Shi, F., Zheng, C., Li, Y., Jiang, C., &amp; Chen, P. Y. (2026). Agentic Real2Sim: Physics-based world modeling with vision-language agents. <em>arXiv preprint arXiv:2607.19190</em>. <a target="_blank" rel="noopener" href="https://doi.org/10.48550/arXiv.2607.19190">https://doi.org/10.48550/arXiv.2607.19190</a></li>
+</ul>
+<figure class="highlight plaintext" data-language="bibtex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@misc&#123;huang2026literealityagent,</span><br><span class="line">  title         = &#123;LiteReality-Agent: An Agentic System for Interactable 3D Indoor Scene Reconstruction&#125;,</span><br><span class="line">  author        = &#123;Zhening Huang and Yueyan Li and Johnathan Chiu and Xiaoyang Lyu and Matt Zhou and Yuxin Yao and Joan Lasenby and Shangzhe Wu&#125;,</span><br><span class="line">  year          = &#123;2026&#125;,</span><br><span class="line">  eprint        = &#123;2610.01863&#125;,</span><br><span class="line">  archivePrefix = &#123;arXiv&#125;,</span><br><span class="line">  primaryClass  = &#123;cs.CV&#125;,</span><br><span class="line">  doi           = &#123;10.48550/arXiv.2610.01863&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://ziyuliu258.cn/blog">Derrick Liu</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://ziyuliu258.cn/blog/posts/2663b18a/">https://ziyuliu258.cn/blog/posts/2663b18a/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://ziyuliu258.cn/blog" target="_blank">Derrick Liu的个人博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">论文阅读笔记</a><a class="post-meta__tags" href="/blog/tags/3D-Reconstruction/">3D Reconstruction</a><a class="post-meta__tags" href="/blog/tags/Agent/">Agent</a><a class="post-meta__tags" href="/blog/tags/Real2Sim/">Real2Sim</a></div><div class="post-share"><div class="social-share" data-image="/blog/images/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/blog/vendor/extsrc/share.min.css" media="print" onload="this.media='all'"><script src="/blog/vendor/extsrc/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/blog/posts/c79a8e2/" title="论文阅读：3D Gaussian Splatting for Real-Time Radiance Field Rendering"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;c79a8e2&#x2F;pipeline.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-15</div><div class="info-item-2">论文阅读：3D Gaussian Splatting for Real-Time Radiance Field Rendering</div></div><div class="info-2"><div class="info-item-1"> 引：3D Gaussian Splatting (3DGS) 用一组可以优化位置、形状、透明度和颜色的三维高斯表示场景，再将它们投影到屏幕上进行快速混合。论文把表示、增密策略和光栅化一起设计，让场景能够从照片中重建，也能够实时渲染新视角。  背景 给定一个静态场景的多张照片以及拍摄这些照片的相机参数，新视角合成希望生成从其他位置看到的图像。NeRF 将场景表示成连续的辐射场：沿每条相机射线采样，得到不同位置的密度与颜色，再把它们累积成像素颜色。这样可以表达复杂的外观，但对许多射线和采样点求值会带来计算开销。后续方法通过网格、哈希编码等加速，但表示与采样方式仍影响质量和速度。 3DGS 选择一组显式的三维高斯作为场景元素。我们可以把每个高斯想象成一个有方向、有大小的模糊椭球：它有三维位置，也有随观察方向变化的颜色和透明度。渲染时不必沿每条射线逐点查询整个场，而是把这些椭球投影到图像上，只处理会影响画面的元素。 论文的三个关键设计是：可微的各向异性高斯表示、与参数优化交替进行的自适应增密，以及按 tile...</div></div></div></a><a class="pagination-related" href="/blog/posts/4318b9d/" title="论文阅读：BlenderFORGE"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;4318b9d&#x2F;teaser.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-20</div><div class="info-item-2">论文阅读：BlenderFORGE</div></div><div class="info-2"><div class="info-item-1"> 引：BlenderFORGE 研究如何让多模态大模型在 Blender 中反复观察、执行代码和检查结果，直到把场景改成目标状态。论文的重点是将已有 3D 资产转化为编辑任务，再用可执行环境和可验证奖励训练交互式编辑 agent。   图 1：BlenderFORGE 从场景扰动中构造编辑任务，使模型学习视觉变化与 3D 编辑操作之间的对应关系。 背景 给定一个室内场景和一张目标图片，我们希望模型把椅子移到目标位置。对人来说，这可能只是选择椅子、拖动并检查结果；对多模态大模型来说，这个过程涉及几个连续的判断：先从场景描述和图片中找到对象，判断目标与当前状态的差异，再生成可执行的 Blender Python 代码，并观察执行后的场景，决定是否继续修改。 已有的 3D 编辑方法可以直接操作 mesh、NeRF 等表示；另一类工作则让大模型通过代码或工具操作 Blender。这类 agent 通常在推理时生成候选编辑，再利用渲染反馈进行筛选和修正。BlenderFORGE...</div></div></div></a><a class="pagination-related" href="/blog/posts/ee17342c/" title="论文阅读：NeRF"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;ee17342c&#x2F;pipeline.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-15</div><div class="info-item-2">论文阅读：NeRF</div></div><div class="info-2"><div class="info-item-1"> 引：NeRF 用一个连续函数表示场景中任意位置的密度和颜色，再通过体渲染将沿相机射线采样的结果组合成图像。它用多张已知相机的照片，直接优化一个能解释这些照片的场景表示。  背景 假设我们围绕一座雕塑拍摄了一组照片，希望生成从一个没有拍摄过的位置看过去的画面。这个任务叫作新视角合成：输入是已有视角的图像，输出是目标相机看到的图像。为了让生成的画面在不同视角之间保持一致，模型需要在某种程度上理解场景的空间结构，以及不同方向上的外观。 一种做法是先建立 mesh，再为表面赋予纹理；另一种做法是用三维体素网格存储空间中的颜色和密度。mesh 需要处理表面形状和拓扑，体素网格则会随着空间分辨率增加而迅速增大。NeRF 的选择是把场景存进一个 MLP 的参数中：给它一个连续的三维位置和观察方向，让它输出该位置的密度和颜色。渲染时，再沿每个像素的射线查询这个函数。 作者要解决的并不只是“用 MLP 代替网格”。一个直接接收坐标的网络容易把细节拟合得过于平滑；沿射线均匀查询大量位置也很耗时。因此论文进一步引入位置编码和分层采样，分别解决细节表示和采样分配问题。 场景表示  图来自原论文...</div></div></div></a><a class="pagination-related" href="/blog/posts/7a994451/" title="论文阅读：OV-PEAR"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;7a994451&#x2F;pipeline.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-22</div><div class="info-item-2">论文阅读：OV-PEAR</div></div><div class="info-2"><div class="info-item-1"> 引：如果桌上放着一个没有 CAD 的连接器，单图生成模型可以补出它的背面，但也可能在插口边缘多生成一块材料。OV-PEAR 先把生成的模型缩放并对齐到机器人工作空间，再用多视角深度验证哪些体素该留下。这里最值得看的，是 同一张深度图既能支持表面存在，也能为表面前方的空闲空间提供证据。  背景 工业机械臂要把连接器插进插座，至少要知道三件事：工件的朝向和位置、实际尺寸，以及接触区域的局部形状。比如，我们可能已经找准了一个插头的中心，但只要插头有一点偏转，或者模型把卡扣多画了一截，用它规划出来的插入动作仍然可能卡住。 以 FoundationPose 为例，对于新物体，它可以用 CAD 模型，也可以用少量参考图建立可渲染的物体表示，然后通过渲染与观测的比较估计位姿（Wen et al., 2024）。OV-PEAR 考虑的是机器人在工作台上第一次见到一个零件的情形，手里已有的是现场 RGB-D、相机标定和能移动的视角。单图三维生成可以给它一个起点，深度则让系统有机会把模型放到实际尺寸上，再检查补出的结构。 于是问题自然分成两步。首先要让生成模型和深度点云...</div></div></div></a><a class="pagination-related" href="/blog/posts/6c23f67f/" title="论文阅读：VGGT"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;6c23f67f&#x2F;architecture.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-15</div><div class="info-item-2">论文阅读：VGGT</div></div><div class="info-2"><div class="info-item-1"> 引：VGGT 将相机、深度、点图和跨视图跟踪放进同一个前馈模型。它让多张图像的 token 在帧内和帧间交替交流，再用多个相互关联的几何任务共同训练这一特征。  背景 给定同一个场景的多张照片，我们希望知道每张照片从哪里拍摄、像素对应的深度，以及不同照片中的哪些像素看到的是同一个三维点。传统的 Structure from Motion (SfM) 通常要经过特征匹配、三角化和 Bundle Adjustment (BA)：先用匹配点估计相机与稀疏结构，再通过重投影误差联合调整。这个流程有明确的几何约束，但涉及多阶段计算与迭代优化。 DUSt3R 等方法开始用网络直接预测两张图像对应的三维点图；当输入超过两张时，还需要把多组两视图结果对齐。VGGT 进一步让网络直接处理一组图像，输出统一参考系中的几何结果。它仍然可以接 BA 做精修，但前馈结果本身就可以用于评估。 方法 输入和输出 输入是同一场景的 N 张 RGB 图像 Ii∈R3×H×W。论文把网络表示为： f((Ii)i=1N)=(gi,Di,Pi,Ti)i=1N 每张图像对应一个相机 gi、深度图 Di、点图 Pi...</div></div></div></a><a class="pagination-related" href="/blog/posts/fab21ae1/" title="论文阅读：PatchTST"><img class="cover" src="&#x2F;blog&#x2F;posts&#x2F;fab21ae1&#x2F;Pasted%20image%2020260123175115.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-03</div><div class="info-item-2">论文阅读：PatchTST</div></div><div class="info-2"><div class="info-item-1">引言 时间序列预测在许多实际应用中具有重要意义，如能源预测、交通流量预测、气象预测等。随着深度学习技术的进步，基于Transformer的模型在时间序列预测中表现出了强大的能力。然而，传统Transformer模型存在计算复杂度高、内存消耗大等问题，尤其在长序列预测中效果不佳。PatchTST模型通过创新性的设计，解决了这些问题，提出了分块（Patching）和逐通道独立建模（Channel-independence）的解决方案，显著提高了时间序列预测的效率和精度。 模型  Tip表示学习（Representation Learning），也常被称为特征学习（Feature Learning），是指让模型自动地从原始数据中发现和提取“特征”或“表示”的技术，而不是依靠人工手动设计规则 。 可以暂且认为，表示学习可分为以下三种：  有监督表示学习：在学习特征的同时，利用标签（如未来的真实值）来纠正模型，让特征直接服务于特定目标 。 自监督表示学习：不利用标签，通过数据自身的结构（如掩码 Patch）来学习特征 。这是本文的核心亮点。 迁移学习（Transfer...</div></div></div></a></div></div><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Derrick Liu</div><div class="author-info-description">An undergraduate majoring in CS.</div><div class="site-data"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ziyuliu258"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><button class="social-icon" type="button" data-copy="ZiyuLiu123456" title="点击复制" aria-label="ZiyuLiu123456"><i class="fab fa-weixin" style="color: #07c160;"></i></button><a class="social-icon" href="mailto:lzy1102@stu.xjtu.edu.cn" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BE%93%E5%85%A5"><span class="toc-number">2.1.</span> <span class="toc-text">输入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%BA%E6%99%AF%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">2.2.</span> <span class="toc-text">场景初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%83%E5%B1%80%E6%99%BA%E8%83%BD%E4%BD%93"><span class="toc-number">2.2.1.</span> <span class="toc-text">布局智能体</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%A9%E4%BD%93%E9%87%8D%E5%BB%BA%E4%B8%8E%E7%89%A9%E7%90%86%E5%85%83%E6%95%B0%E6%8D%AE"><span class="toc-number">2.2.2.</span> <span class="toc-text">物体重建与物理元数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9C%BA%E6%99%AF%E7%A8%8B%E5%BA%8F-Room-py"><span class="toc-number">2.2.3.</span> <span class="toc-text">场景程序 Room.py</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%99%BA%E8%83%BD%E4%BD%93%E7%B2%BE%E4%BF%AE"><span class="toc-number">2.3.</span> <span class="toc-text">智能体精修</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%96%E8%AF%81%E5%B7%A5%E5%85%B7"><span class="toc-number">2.3.1.</span> <span class="toc-text">取证工具</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%A2%84%E7%AE%97%E6%8E%A7%E5%88%B6%E4%B8%8E%E8%B4%A8%E9%87%8F%E9%97%A8%E6%8E%A7"><span class="toc-number">2.3.2.</span> <span class="toc-text">预算控制与质量门控</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%BF%E7%9C%9F%E5%AF%BC%E5%87%BA"><span class="toc-number">2.4.</span> <span class="toc-text">仿真导出</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C"><span class="toc-number">3.</span> <span class="toc-text">实验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E8%AE%BE%E7%BD%AE"><span class="toc-number">3.1.</span> <span class="toc-text">实验设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%86%E8%A7%89%E4%BF%9D%E7%9C%9F%E5%BA%A6"><span class="toc-number">3.2.</span> <span class="toc-text">视觉保真度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%A0%E4%BD%95%E4%B8%80%E8%87%B4%E6%80%A7%E4%B8%8E%E7%89%A9%E7%90%86%E5%90%88%E7%90%86%E6%80%A7"><span class="toc-number">3.3.</span> <span class="toc-text">几何一致性与物理合理性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%AB%E6%8F%8F%E6%95%B0%E6%8D%AE%E5%AF%B9%E9%80%9A%E7%94%A8%E6%99%BA%E8%83%BD%E4%BD%93%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="toc-number">3.4.</span> <span class="toc-text">扫描数据对通用智能体的影响</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E6%80%A7%E7%BB%93%E6%9E%9C%E3%80%81%E5%9C%BA%E6%99%AF%E7%BC%96%E8%BE%91%E4%B8%8E%E4%BB%BF%E7%9C%9F%E4%BA%A4%E4%BA%92"><span class="toc-number">3.5.</span> <span class="toc-text">定性结果、场景编辑与仿真交互</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%BA%E5%B7%A5%E4%B8%8E%E6%99%BA%E8%83%BD%E4%BD%93%E6%84%9F%E7%9F%A5%E8%AF%84%E6%B5%8B"><span class="toc-number">3.6.</span> <span class="toc-text">人工与智能体感知评测</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC%E4%B8%8E%E4%B8%8D%E8%B6%B3"><span class="toc-number">4.</span> <span class="toc-text">核心价值与不足</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%80%BC%E5%BE%97%E5%85%B3%E6%B3%A8%E7%9A%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">4.1.</span> <span class="toc-text">值得关注的设计</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B1%80%E9%99%90%E4%B8%8E%E6%9C%AA%E8%A7%A3%E9%97%AE%E9%A2%98"><span class="toc-number">4.2.</span> <span class="toc-text">局限与未解问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">6.</span> <span class="toc-text">参考</span></a></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url(/blog/images/bg2.jpg);"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Derrick Liu</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/ziyuliu258/hexo-theme-liquid">Liquid</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"></div><div id="rightside-config-show"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="bg-toggle" type="button" title="切换纯色或图片背景"><i class="fas fa-image"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js?v=015ce7bb676e"></script><script defer src="/blog/js/liquid-glass.js?v=4b24a5e49d72"></script><script defer src="/blog/js/aside-motion.js?v=bc00aa983ae7"></script><script defer src="/blog/js/background-toggle.js?v=417640e536eb"></script><link rel="stylesheet" href="/blog/css/reading-mode.css?v=9046c3538107"><script defer src="/blog/js/reading-guide.js?v=4a444c1f3094"></script><script defer src="/blog/js/reading-mode.js?v=c5b16cad640b"></script><script defer src="/blog/js/article-export.js?v=ac423277d7ca"></script><script src="/blog/vendor/extsrc/turndown.js"></script><script src="/blog/vendor/extsrc/turndown-plugin-gfm.js"></script><script defer src="/blog/js/copy-markdown.js?v=7ed3c3d4196f"></script><script defer src="/blog/js/image-viewer.js?v=43011cd2eca9"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex, #card-toc .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script><script>(() => {
+  const styles = {"themes":{"light":"base","dark":"base"},"variables":{"light":{"background":"#ffffff","primaryColor":"#f5f5f5","primaryBorderColor":"#b8b8b8","primaryTextColor":"#262626","lineColor":"#737373","edgeLabelBackground":"#ffffff"},"dark":{"darkMode":true,"background":"#282828","primaryColor":"#303030","primaryBorderColor":"#818181","primaryTextColor":"#ededed","lineColor":"#b3b3b3","edgeLabelBackground":"#282828"}},"options":{"look":"classic","fontFamily":"\"Noto Sans SC\", \"Source Han Sans SC\", system-ui, -apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Noto Sans CJK SC\", sans-serif","flowchart":{"nodeSpacing":20,"rankSpacing":32,"padding":12,"wrappingWidth":212}}}
+  let library
+  let renderPass = 0
+  let renderQueue = Promise.resolve()
+
+  const runMermaid = async (diagrams, pass) => {
+    if (pass !== renderPass || !diagrams[0].isConnected) return
+    if (!window.mermaid) {
+      try {
+        await (library ||= btf.getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'))
+      } catch (error) {
+        library = undefined
+        console.error('Could not load Mermaid', error)
+        return
+      }
+    }
+
+    if (pass !== renderPass || !diagrams[0].isConnected) return
+    const mode = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
+    mermaid.initialize({
+      ...styles.options,
+      startOnLoad: false,
+      theme: styles.themes[mode],
+      themeVariables: styles.variables?.[mode]
+    })
+    for (const [index, diagram] of diagrams.entries()) {
+      if (pass !== renderPass || !diagram.isConnected) return
+      const source = diagram.firstElementChild
+      try {
+        const result = await mermaid.render(`mermaid-${pass}-${index}`, source.textContent)
+        if (pass !== renderPass || !diagram.isConnected) return
+        diagram.querySelector(':scope > svg')?.remove()
+        diagram.insertAdjacentHTML('beforeend', typeof result === 'string' ? result : result.svg)
+        result.bindFunctions?.(diagram)
+        source.hidden = true
+      } catch (error) {
+        console.error('Could not render Mermaid diagram', error)
+      }
+    }
+  }
+
+  const codeToMermaid = () => {
+    const blocks = document.querySelectorAll('#article-container pre > code.mermaid, #article-container pre > code.language-mermaid')
+    blocks.forEach(code => {
+      const source = code.parentElement
+      const diagram = document.createElement('div')
+      diagram.className = 'mermaid-wrap'
+      source.classList.add('mermaid-src')
+      source.replaceWith(diagram)
+      diagram.append(source)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const diagrams = document.querySelectorAll('#article-container .mermaid-wrap')
+    if (!diagrams.length) return
+
+    const render = () => {
+      const pass = ++renderPass
+      renderQueue = renderQueue.then(() => runMermaid(diagrams, pass)).catch(error => {
+        console.error('Could not render Mermaid diagrams', error)
+      })
+    }
+    btf.addGlobalFn('themeChange', render, 'mermaid')
+    render()
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-category":"Announcements","data-mapping":"pathname","data-strict":"1","data-lang":"zh-CN","data-input-position":"top","data-reactions-enabled":"1","data-emit-metadata":"0"}
+  const siteRoot = "/blog/"
+  const texts = {"loading":"评论区加载中…","error":"评论区暂时无法加载。","retry":"重试"}
+
+  // PJAX can execute this script before location.pathname changes. The new
+  // page's canonical link has already been swapped at that point.
+  const getPathnameTerm = () => {
+    const canonical = document.querySelector('link[rel="canonical"]')
+    const url = canonical ? new URL(canonical.href, location.href) : new URL(location.href)
+    const pathname = (url.origin === location.origin ? url.pathname : location.pathname).replace(/\/index\.html$/, '/')
+    const relative = pathname.startsWith(siteRoot) ? '/' + pathname.slice(siteRoot.length) : pathname
+    return relative.length < 2 ? 'index' : relative.slice(1).replace(/\.\w+$/, '')
+  }
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'noborder_dark' : 'noborder_light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : (!option || !option['data-mapping'] || option['data-mapping'] === 'pathname')
+        ? { 'data-mapping': 'specific', 'data-term': getPathnameTerm() }
+        : { 'data-mapping': option['data-mapping'] }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'ziyuliu258/ziyuliu258.github.io',
+      'data-repo-id': 'R_kgDONzQxiw',
+      'data-category-id': 'DIC_kwDONzQxi84DJPXY',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const wrap = el.querySelector('#giscus-wrap')
+    if (!wrap || wrap.dataset.giscusStarted === 'true') return
+    wrap.dataset.giscusStarted = 'true'
+    let attempts = 0
+    let timer
+    const message = document.createElement('div')
+    message.className = 'giscus-load-message'
+    message.setAttribute('role', 'status')
+    message.textContent = texts.loading
+    wrap.appendChild(message)
+
+    const retry = () => {
+      if (!wrap.isConnected) return
+      clearTimeout(timer)
+      wrap.querySelectorAll('script, .giscus').forEach(node => node.remove())
+      message.replaceChildren(document.createTextNode(texts.error))
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.textContent = texts.retry
+      button.addEventListener('click', () => { attempts = 0; start() })
+      message.appendChild(button)
+    }
+    const start = () => {
+      if (!wrap.isConnected) return
+      clearTimeout(timer)
+      wrap.querySelectorAll('script, .giscus').forEach(node => node.remove())
+      attempts++
+      message.textContent = texts.loading
+      const scriptElement = createScriptElement(giscusConfig)
+      scriptElement.onerror = () => {
+        clearTimeout(timer)
+        if (attempts < 2) timer = setTimeout(start, 1500)
+        else retry()
+      }
+      wrap.appendChild(scriptElement)
+      timer = setTimeout(() => {
+        if (!wrap.isConnected) return
+        const frame = wrap.querySelector('iframe.giscus-frame')
+        if (frame && !frame.classList.contains('giscus-frame--loading')) {
+          message.remove()
+        } else if (attempts < 2) {
+          start()
+        } else {
+          retry()
+        }
+      }, 20000)
+      scriptElement.onload = () => {
+        const frame = wrap.querySelector('iframe.giscus-frame')
+        if (frame) frame.addEventListener('load', () => { clearTimeout(timer); message.remove() }, { once: true })
+      }
+    }
+    start()
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else setTimeout(loadGiscus, 0)
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"]):not([href="https://ziyuliu258.cn/profile/"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    $bodyClassList.remove('read-mode')
+    document.querySelector('.exit-readmode')?.remove()
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      pjax.loadUrl('/blog/404.html')
+    }
+  })
+})()</script><script defer src="/blog/js/site-statistics.js?v=6049b5963362"></script><script defer src="/blog/js/music-player.js?v=5aee7ea03d5c"></script><div class="spotlight-search" id="local-search" hidden="hidden" aria-hidden="true"><div class="spotlight-mask" id="search-mask"></div><div class="search-dialog spotlight-dialog" role="dialog" aria-modal="true" aria-label="搜索文章、标签、分类…"><div class="spotlight-bar"><span class="spotlight-icon" aria-hidden="true"><i class="fas fa-search"></i></span><div class="spotlight-input-wrap" id="local-search-input"><input class="local-search-box--input" type="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="搜索文章、标签、分类…" aria-label="搜索文章、标签、分类…" aria-autocomplete="list" aria-controls="local-search-results"/></div><button class="spotlight-clear" type="button" hidden="hidden" aria-label="清空搜索"><i class="fas fa-times-circle" aria-hidden="true"></i></button><button class="search-close-button spotlight-esc" type="button" aria-label="关闭搜索"><kbd>ESC</kbd></button></div><div class="spotlight-body" hidden="hidden"><div class="spotlight-results" id="local-search-results" role="listbox"></div></div><div class="spotlight-footer"><div class="spotlight-stats" id="local-search-stats-wrap" aria-live="polite"></div><div class="spotlight-hints" aria-hidden="true"><span><kbd>↑</kbd><kbd>↓</kbd> 选择</span><span><kbd>↵</kbd> 打开</span><span><kbd>ESC</kbd> 关闭</span></div></div></div></div><script defer="defer" src="/blog/js/search/local-search.js?v=d2b8eca6f10b"></script></div></body></html>
