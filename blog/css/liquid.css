@@ -1508,6 +1508,11 @@ html:not(.solid-bg)[data-theme='dark'] #page-header.not-top-img > #nav > .nav-ba
   content: none;
 }
 
+/* The floating menu uses white text in both themes, including on its solid fallback. */
+#nav #menus > .nav-pill-glass {
+  --glass-solid: #303840;
+}
+
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .liquid-glass,
   html:not(.solid-bg) #page-header:not(.nav-fixed):not(.not-top-img) > #nav #menus > .nav-pill-glass,
