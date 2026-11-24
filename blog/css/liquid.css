@@ -1508,15 +1508,15 @@ html:not(.solid-bg)[data-theme='dark'] #page-header.not-top-img > #nav > .nav-ba
   content: none;
 }
 
-/* On Edge, tint the actual backdrop under the floating white menu text. */
+/* Edge uses native blur without adding a blue tint to the background image. */
 html.native-glass:not(.solid-bg) #page-header > #nav #menus > .nav-pill-glass {
   --glass-backdrop: blur(9px) saturate(145%);
-  --nav-glass-tint: rgba(23, 31, 40, 0.46);
+  --nav-glass-tint: transparent;
 }
 
-/* The floating menu uses white text in both themes, including on its solid fallback. */
+/* Keep the floating white menu translucent when backdrop blur is unavailable. */
 #nav #menus > .nav-pill-glass {
-  --glass-solid: #303840;
+  --glass-solid: rgba(0, 0, 0, 0.20);
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
