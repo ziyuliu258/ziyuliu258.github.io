@@ -7,7 +7,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://ziyuliu258.cn/blog/images/avatar.jpg">
 <meta property="article:published_time" content="2026-10-29T17:03:48.000Z">
-<meta property="article:modified_time" content="2026-11-24T17:12:47.765Z">
+<meta property="article:modified_time" content="2026-11-24T17:22:34.181Z">
 <meta property="article:author" content="Derrick Liu">
 <meta property="article:tag" content="论文阅读笔记">
 <meta property="article:tag" content="3D Generation">
@@ -20,7 +20,7 @@
   "url": "https://ziyuliu258.cn/blog/posts/32a3a35f/",
   "image": "https://ziyuliu258.cn/blog/images/avatar.jpg",
   "datePublished": "2026-10-29T17:03:48.000Z",
-  "dateModified": "2026-11-24T17:12:47.765Z",
+  "dateModified": "2026-11-24T17:22:34.181Z",
   "author": [
     {
       "@type": "Person",
@@ -28,9 +28,10 @@
       "url": "https://ziyuliu258.cn/blog/"
     }
   ]
-}</script><link rel="shortcut icon" href="/blog/images/avatar.jpg"><link rel="canonical" href="https://ziyuliu258.cn/blog/posts/32a3a35f/index.html"><link rel="preconnect" href="https://bsz.iirose.cn" crossorigin><link rel="preconnect" href="https://giscus.app" crossorigin><link rel="stylesheet" href="/blog/css/index.css?v=0ccc94b91964"><link rel="stylesheet" href="/blog/vendor/fontawesome/css/all.min.css"><link rel="stylesheet" href="/blog/css/image-viewer.css?v=2059977d432b"><script>
+}</script><link rel="shortcut icon" href="/blog/images/avatar.jpg"><link rel="canonical" href="https://ziyuliu258.cn/blog/posts/32a3a35f/index.html"><link rel="preconnect" href="https://cdn.jsdmirror.com" crossorigin><link rel="preconnect" href="https://bsz.iirose.cn" crossorigin><link rel="preconnect" href="https://giscus.app" crossorigin><link rel="stylesheet" href="/blog/css/index.css?v=01e008614cfd"><link rel="stylesheet" href="/blog/vendor/fontawesome/css/all.min.css"><link rel="stylesheet" href="/blog/css/image-viewer.css?v=2059977d432b"><script>
     (() => {
       
+    const resourceFallbacks = {"https://cdn.jsdmirror.com/npm/@egjs/infinitegrid@4.13.1/dist/infinitegrid.min.js":"/blog/vendor/infinitegrid/infinitegrid.min.js","https://cdn.jsdmirror.com/npm/pjax@0.2.8/pjax.min.js":"/blog/vendor/pjax/pjax.min.js","https://cdn.jsdmirror.com/npm/typed.js@2.1.0/dist/typed.umd.js":"/blog/vendor/typed.js/typed.umd.js","https://cdn.jsdmirror.com/npm/mermaid@11.17.2/dist/mermaid.min.js":"/blog/vendor/mermaid/mermaid.min.js","https://cdn.jsdmirror.com/npm/katex@0.16.45/dist/katex.min.css":"/blog/vendor/katex/katex.min.css","https://cdn.jsdmirror.com/npm/katex@0.16.45/dist/contrib/copy-tex.min.js":"/blog/vendor/katex/contrib/copy-tex.min.js","https://cdn.jsdmirror.com/npm/@fontsource-variable/noto-sans-sc@5.3.1/wght.css":"/blog/vendor/noto-sans-sc/wght.css","https://cdn.jsdmirror.com/npm/@fontsource-variable/noto-serif-sc@5.3.1/wght.css":"/blog/vendor/noto-serif-sc/wght.css"}
     const saveToLocal = {
       set: (key, value, ttl) => {
         if (!ttl) return
@@ -51,6 +52,12 @@
 
     window.btf = {
       saveToLocal,
+      loadCSSFallback: link => {
+        const fallback = resourceFallbacks[link.href]
+        if (!fallback) return false
+        link.href = fallback
+        return true
+      },
       getScript: (url, attr = {}) => new Promise((resolve, reject) => {
         const script = document.createElement('script')
         script.src = url
@@ -59,7 +66,12 @@
         script.onload = script.onreadystatechange = () => {
           if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
         }
-        script.onerror = reject
+        script.onerror = error => {
+          const fallback = resourceFallbacks[script.src]
+          script.remove()
+          if (fallback) btf.getScript(fallback, attr).then(resolve, reject)
+          else reject(error)
+        }
         document.head.appendChild(script)
       }),
       getCSS: (url, id) => new Promise((resolve, reject) => {
@@ -70,7 +82,9 @@
         link.onload = link.onreadystatechange = () => {
           if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
         }
-        link.onerror = reject
+        link.onerror = error => {
+          if (!btf.loadCSSFallback(link)) reject(error)
+        }
         document.head.appendChild(link)
       }),
       addGlobalFn: (key, fn, name = false, parent = window) => {
@@ -118,10 +132,10 @@
     detectApple()
   
     })()
-  </script><link rel="stylesheet" href="/blog/vendor/noto-sans-sc/wght.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="/blog/vendor/noto-serif-sc/wght.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  </script><link rel="stylesheet" href="https://cdn.jsdmirror.com/npm/@fontsource-variable/noto-sans-sc@5.3.1/wght.css" onerror="btf.loadCSSFallback(this)" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdmirror.com/npm/@fontsource-variable/noto-serif-sc@5.3.1/wght.css" onerror="btf.loadCSSFallback(this)" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
   root: '/blog/',
   algolia: undefined,
-  localSearch: {"path":"/blog/search.json?v=3ca142978b86","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"未找到与「${query}」相关的内容","hits_stats":"共找到 ${hits} 篇文章","load_data":"正在加载搜索索引…","indexed_stats":"共收录 ${total} 篇文章","load_error":"搜索索引加载失败","retry":"重试","show_more":"展开其余 ${remaining} 篇结果"}},
+  localSearch: {"path":"/blog/search.json?v=2d251a206994","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"未找到与「${query}」相关的内容","hits_stats":"共找到 ${hits} 篇文章","load_data":"正在加载搜索索引…","indexed_stats":"共收录 ${total} 篇文章","load_error":"搜索索引加载失败","retry":"重试","show_more":"展开其余 ${remaining} 篇结果"}},
   translate: undefined,
   highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":false},
   copy: {
@@ -146,7 +160,7 @@
   lightbox: 'viewer',
   Snackbar: undefined,
   infinitegrid: {
-    js: '/blog/vendor/infinitegrid/infinitegrid.min.js',
+    js: 'https://cdn.jsdmirror.com/npm/@egjs/infinitegrid@4.13.1/dist/infinitegrid.min.js',
     buttonText: '加载更多'
   },
   isPhotoFigcaption: true,
@@ -174,10 +188,10 @@
     document.documentElement.style.setProperty('--solid-fg', night ? 'rgba(255, 255, 255, 0.82)' : '#2c3138')
     document.documentElement.classList.add('solid-bg')
   } catch (error) {}
-})()</script><link rel="stylesheet" href="/blog/css/liquid.css?v=8e7ea6270cf5"><link rel="preload" as="image" href="/blog/images/bg2.avif" type="image/avif"><style>#web_bg[style*="/blog/images/bg2.jpg"], #page-header[style*="/blog/images/bg2.jpg"], #footer[style*="/blog/images/bg2.jpg"] {
+})()</script><link rel="stylesheet" href="/blog/css/liquid.css?v=072e8401e4e9"><link rel="preload" as="image" href="/blog/images/bg2.avif" type="image/avif"><style>#web_bg[style*="/blog/images/bg2.jpg"], #page-header[style*="/blog/images/bg2.jpg"], #footer[style*="/blog/images/bg2.jpg"] {
   background-image: image-set(url("/blog/images/bg2.avif") type("image/avif"), url("/blog/images/bg2.jpg") type("image/jpeg")) !important;
 }</style><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/blog/atom.xml" title="Derrick Liu的个人博客" type="application/atom+xml">
-<link rel="stylesheet" href="/blog/vendor/katex/katex.min.css"></head><body><div id="web_bg" style="background-image: url(/blog/images/bg2.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"></div><div class="site-data text-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> More</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/blog/images/bg2.jpg);"><nav id="nav"><div class="nav-bar-glass" aria-hidden="true"></div><span id="blog-info"><a class="nav-site-title" href="/blog/"></a><button class="nav-back" id="nav-back" type="button" title="返回上一页" aria-label="返回上一页"><i class="fas fa-chevron-left"></i></button><a class="nav-page-title" href="#"><span class="site-name">论文阅读：Lucida</span></a></span><div id="menus"><canvas class="nav-glass-canvas" aria-hidden="true"></canvas><div class="nav-pill-glass" aria-hidden="true"></div><div class="nav-hover-lens" aria-hidden="true"></div><div id="nav-darkmode"><button class="site-page social-icon nav-darkmode-btn" type="button" title="日间和夜间模式切换" aria-label="日间和夜间模式切换"><svg class="nav-theme-icon icon-light" viewbox="0.5 0.5 23 23" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" fill="none"/></svg><svg class="nav-theme-icon icon-dark" viewbox="2 2.5 19.5 19.5" aria-hidden="true" focusable="false"><path d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646Z" fill="currentColor"/></svg></button></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div id="search-button"><button class="site-page social-icon search" type="button" title="Search (⌘K / Ctrl+K)" aria-label="Search" aria-haspopup="dialog" aria-controls="local-search" aria-keyshortcuts="Meta+K Control+K"><i class="fas fa-search fa-fw" aria-hidden="true"></i><span> Search</span></button></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> More</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">论文阅读：Lucida</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-29T17:03:48.000Z" title="发表于 2026-10-30 01:03:48">2026-10-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-24T17:12:47.765Z" title="更新于 2026-11-25 01:12:47">2026-11-25</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">8.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>31分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id data-flag-title><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv" title="新统计服务从启用时开始计数" aria-live="polite">—</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<link rel="stylesheet" href="https://cdn.jsdmirror.com/npm/katex@0.16.45/dist/katex.min.css" onerror="this.onerror=null;this.href="/blog/vendor/katex/katex.min.css""></head><body><div id="web_bg" style="background-image: url(/blog/images/bg2.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/blog/images/avatar.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"></div><div class="site-data text-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> More</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/blog/images/bg2.jpg);"><nav id="nav"><div class="nav-bar-glass" aria-hidden="true"></div><span id="blog-info"><a class="nav-site-title" href="/blog/"></a><button class="nav-back" id="nav-back" type="button" title="返回上一页" aria-label="返回上一页"><i class="fas fa-chevron-left"></i></button><a class="nav-page-title" href="#"><span class="site-name">论文阅读：Lucida</span></a></span><div id="menus"><canvas class="nav-glass-canvas" aria-hidden="true"></canvas><div class="nav-pill-glass" aria-hidden="true"></div><div class="nav-hover-lens" aria-hidden="true"></div><div id="nav-darkmode"><button class="site-page social-icon nav-darkmode-btn" type="button" title="日间和夜间模式切换" aria-label="日间和夜间模式切换"><svg class="nav-theme-icon icon-light" viewbox="0.5 0.5 23 23" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" fill="none"/></svg><svg class="nav-theme-icon icon-dark" viewbox="2 2.5 19.5 19.5" aria-hidden="true" focusable="false"><path d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646Z" fill="currentColor"/></svg></button></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div id="search-button"><button class="site-page social-icon search" type="button" title="Search (⌘K / Ctrl+K)" aria-label="Search" aria-haspopup="dialog" aria-controls="local-search" aria-keyshortcuts="Meta+K Control+K"><i class="fas fa-search fa-fw" aria-hidden="true"></i><span> Search</span></button></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-handshake"></i><span> Friends</span></a></div><div class="menus_item"><a class="site-page" href="https://ziyuliu258.cn/profile/"><i class="fa-fw fas fa-address-card"></i><span> Profile</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> More</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/blog/series/"><i class="fa-fw fas fa-layer-group"></i><span> Series</span></a></li><li><a class="site-page child" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/blog/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">论文阅读：Lucida</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-29T17:03:48.000Z" title="发表于 2026-10-30 01:03:48">2026-10-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-24T17:22:34.181Z" title="更新于 2026-11-25 01:22:34">2026-11-25</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">8.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>31分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id data-flag-title><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv" title="新统计服务从启用时开始计数" aria-live="polite">—</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
 <p>引：Minghan Qin、Yuang Wang、Xiuyu Yang 等人提出 Lucida，从真实室内场景的多视角观测中恢复完整、可独立编辑的物体资产，并将它们放回原来的位置。本文保留“解析、生成、摆放”的三阶段流程，最值得关注的是最后的 GizmoAct：让 VLM 像使用三维编辑器一样，观察模型与场景的重叠关系，通过连续多轮的旋转、平移和缩放完成对齐，并自行决定何时停止。</p>
 </blockquote>
 <h2 id="背景">背景</h2>
@@ -663,9 +677,9 @@ r(\xi)=\frac{S}{8}\Big(&amp;4
 
   if (!window.katex_js_css) {
     window.katex_js_css = true
-    await btf.getCSS('/blog/vendor/katex/katex.min.css')
+    await btf.getCSS('https://cdn.jsdmirror.com/npm/katex@0.16.45/dist/katex.min.css')
     if (true) {
-      await btf.getScript('/blog/vendor/katex/contrib/copy-tex.min.js')
+      await btf.getScript('https://cdn.jsdmirror.com/npm/katex@0.16.45/dist/contrib/copy-tex.min.js')
     }
   }
 
@@ -680,7 +694,7 @@ r(\xi)=\frac{S}{8}\Big(&amp;4
     if (pass !== renderPass || !diagrams[0].isConnected) return
     if (!window.mermaid) {
       try {
-        await (library ||= btf.getScript('/blog/vendor/mermaid/mermaid.min.js'))
+        await (library ||= btf.getScript('https://cdn.jsdmirror.com/npm/mermaid@11.17.2/dist/mermaid.min.js'))
       } catch (error) {
         library = undefined
         console.error('Could not load Mermaid', error)
@@ -879,7 +893,8 @@ r(\xi)=\frac{S}{8}\Big(&amp;4
   } else {
     window.loadOtherComment = loadGiscus
   }
-})()</script></div><script src="/blog/vendor/pjax/pjax.min.js"></script><script>(() => {
+})()</script></div><script>(async () => {
+  await btf.getScript('https://cdn.jsdmirror.com/npm/pjax@0.2.8/pjax.min.js')
   const pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
 
   window.pjax = new Pjax({
