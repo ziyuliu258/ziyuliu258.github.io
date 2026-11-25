@@ -21,7 +21,8 @@
   const liquidSite = (window.GLOBAL_CONFIG_SITE && GLOBAL_CONFIG_SITE.liquid) || {}
   const glassConfig = liquidSite.glass || {}
   const chromium = /Chrome\/|Chromium\//.test(navigator.userAgent)
-  // Edge uses native backdrop blur to avoid opaque GPU-composited glass layers.
+  // Keep native blur in Edge for the live backdrop layers. The hero capsule
+  // samples the cover image directly in WebGL and can use refraction there.
   const nativeGlass = /Edg(?:A|iOS)?\//.test(navigator.userAgent)
   const refracting = glassConfig.refraction !== false && chromium && !nativeGlass && CSS.supports('backdrop-filter', 'url("#glass")') && 'ResizeObserver' in window
   // Cache shared SVG filters and specular overlays by geometry signature so 10 post cards only build 1 filter!
@@ -663,12 +664,8 @@
 
   function extractHeaderBgUrl(header) {
     const bgCfg = liquidSite.background || {}
-    const inlineBg = header ? header.style.backgroundImage : ''
-    const compBg = (!inlineBg && header) ? getComputedStyle(header).backgroundImage : ''
-    const bgStr = inlineBg || compBg || ''
-    const match = bgStr.match(/url\(['"]?([^)'"]+)['"]?\)/)
-    const rawUrl = (match && match[1]) || bgCfg.image || ''
-    return rawUrl
+    const match = getComputedStyle(header).backgroundImage.match(/url\(['"]?([^)'"]+)['"]?\)/)
+    return match?.[1] || bgCfg.image || ''
   }
 
   function loadBgImage(url) {
@@ -691,13 +688,15 @@
   }
 
   function createNavWebGLGlass(header, nav, menus, canvas) {
-    if (nativeGlass || !canvas || !header || !nav || !menus || reducedTransparency.matches) return null
+    if (!canvas || reducedTransparency.matches) return null
     const gl = canvas.getContext('webgl', {
       alpha: true,
       antialias: false,
       depth: false,
       stencil: false,
       premultipliedAlpha: true,
+      // Keep the last frame while the navigation is idle or being revealed.
+      preserveDrawingBuffer: true,
       powerPreference: 'low-power'
     })
     if (!gl) return null
@@ -1015,18 +1014,38 @@
 
     let imgW = 0
     let imgH = 0
+    let textureRequested = false
+    let hasTexture = false
     let ready = false
     let destroyed = false
     let lensState = { x: 0, w: 76, alpha: 0, vel: 0 }
 
+    const destroy = () => {
+      if (destroyed) return
+      destroyed = true
+      menus.classList.remove('has-webgl-glass')
+      canvas.removeEventListener('webglcontextlost', destroy)
+      gl.deleteTexture(tex)
+      gl.deleteBuffer(buf)
+      gl.deleteProgram(prog)
+      gl.deleteShader(vs)
+      gl.deleteShader(fs)
+    }
+    canvas.addEventListener('webglcontextlost', destroy)
+
     const render = () => {
-      if (destroyed || !ready) return
+      if (destroyed) return
       if (document.documentElement.classList.contains('solid-bg')) return
       if (header.classList.contains('not-top-img')) return
       if (nav.classList.contains('nav-pill-hidden')) return
       if (!header.classList.contains('nav-morph-ready') && header.classList.contains('nav-fixed')) return
-      const cRect = canvas.getBoundingClientRect()
+      // The canvas fills #menus but stays hidden until its first usable frame.
+      const cRect = menus.getBoundingClientRect()
       if (!cRect.width || !cRect.height) return
+      if (!hasTexture) {
+        if (!textureRequested) loadTexture()
+        return
+      }
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
       const pw = Math.max(1, Math.round(cRect.width * dpr))
@@ -1074,21 +1093,38 @@
       gl.uniform1f(uDark, isDark ? 1.0 : 0.0)
       gl.uniform4f(uLens, lensState.x, lensState.w, lensState.alpha, lensState.vel)
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+
+      if (!ready) {
+        // The darkened cover should produce a visible, non-white center.
+        // Check once before hiding the CSS fallback, outside the animation path.
+        const center = new Uint8Array(4)
+        gl.readPixels(pw >> 1, ph >> 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, center)
+        if (gl.getError() !== gl.NO_ERROR || center[3] < 250 || Math.min(center[0], center[1], center[2]) >= 245) {
+          destroy()
+          return
+        }
+        ready = true
+        menus.classList.add('has-webgl-glass')
+      }
     }
 
-    const bgUrl = extractHeaderBgUrl(header)
-    loadBgImage(bgUrl).then(img => {
-      if (destroyed) return
-      imgW = img.naturalWidth || img.width
-      imgH = img.naturalHeight || img.height
-      if (!imgW || !imgH) return
-      gl.bindTexture(gl.TEXTURE_2D, tex)
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
-      ready = true
-      menus.classList.add('has-webgl-glass')
-      render()
-    }).catch(() => {})
+    function loadTexture() {
+      textureRequested = true
+      loadBgImage(extractHeaderBgUrl(header)).then(img => {
+        if (destroyed) return
+        imgW = img.naturalWidth || img.width
+        imgH = img.naturalHeight || img.height
+        if (!imgW || !imgH) return destroy()
+        gl.bindTexture(gl.TEXTURE_2D, tex)
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
+        if (gl.getError() !== gl.NO_ERROR) return destroy()
+        hasTexture = true
+        render()
+      }).catch(destroy)
+    }
+
+    render()
 
     return {
       isReady: () => ready && !destroyed,
@@ -1100,10 +1136,7 @@
         render()
       },
       render,
-      destroy() {
-        destroyed = true
-        menus.classList.remove('has-webgl-glass')
-      }
+      destroy
     }
   }
 
@@ -1142,6 +1175,7 @@
       controller.abort()
       if (hideTimer) clearTimeout(hideTimer)
       if (rafId) cancelAnimationFrame(rafId)
+      lens.classList.remove('is-visible')
     }
 
     const isEligible = () =>
@@ -1520,7 +1554,7 @@
       nav.classList.toggle('nav-pill-hidden', pillOpacity <= 0.005)
       nav.classList.toggle('nav-bar-active', barOpacity > 0.005)
       nav.classList.toggle('nav-docked', p >= 0.52)
-      if (pillOpacity > 0.005 && navWebGL && navWebGL.isReady()) navWebGL.render()
+      if (pillOpacity > 0.005) navWebGL?.render()
 
       if (metrics.hero && heroTitle && navHomeTitle) {
         const { docLeft, docCY, navLeft, navCY, scaleEnd } = metrics.hero
@@ -1582,7 +1616,7 @@
     const refresh = () => {
       measure()
       if (metrics) apply()
-      else if (navWebGL && navWebGL.isReady()) navWebGL.render()
+      else navWebGL?.render()
     }
 
     if (navSiteLink && isHome) {
@@ -1644,6 +1678,7 @@
       })
     })
   }
+  reducedTransparency.addEventListener('change', initNavHoverLens)
   document.addEventListener('blog:aside-motion-end', () => {
     if (!resize) return
     document.querySelectorAll('.liquid-glass').forEach(surface => updateRefraction(surface))
