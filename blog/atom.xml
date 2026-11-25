@@ -12,7 +12,26 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-11-24T17:22:34.164Z</updated>
+  <updated>2026-11-25T06:22:48.721Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="3D Instance Segmentation" scheme="https://ziyuliu258.cn/blog/tags/3D-Instance-Segmentation/"/>
+    <category term="Open-Vocabulary" scheme="https://ziyuliu258.cn/blog/tags/Open-Vocabulary/"/>
+    <category term="3D Understanding" scheme="https://ziyuliu258.cn/blog/tags/3D-Understanding/"/>
+    <id>https://ziyuliu258.cn/blog/posts/b5b91273/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/b5b91273/"/>
+    <published>2026-11-25T06:19:05.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：SpaCeFormer 由 NVIDIA 的 Chris Choy、Jan Kautz 与 POSTECH 团队（Junha Lee、Chunghyun Park、Minsu]]>
+    </summary>
+    <title>论文阅读：SpaCeFormer</title>
+    <updated>2026-11-25T06:22:48.721Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -30,7 +49,7 @@
 <p>引：LiteReality-Agent 由剑桥大学、帝国理工学院等机构的研究者完成（Zhening Huang、Yueyan Li、Johnathan Chiu、Shangzhe Wu 等），是 LiteReality (Huang et]]>
     </summary>
     <title>论文阅读：LiteReality-Agent</title>
-    <updated>2026-11-24T17:22:34.164Z</updated>
+    <updated>2026-11-25T06:22:48.645Z</updated>
   </entry>
   <entry>
     <author>
@@ -49,7 +68,7 @@
 <p>引：SpaceAct 由 Tencent HY 团队完成（Chenglong Shi、Zekai Yuan 等），是一个面向三维时空推理的交互式评测基准，配套提出了统一的主动感知智能体框架]]>
     </summary>
     <title>论文阅读：SpaceAct</title>
-    <updated>2026-11-24T17:22:34.227Z</updated>
+    <updated>2026-11-25T06:22:48.724Z</updated>
   </entry>
   <entry>
     <author>
@@ -68,7 +87,7 @@
 <p>引：如果桌上放着一个没有 CAD 的连接器，单图生成模型可以补出它的背面，但也可能在插口边缘多生成一块材料。OV-PEAR 先把生成的模型缩放并对齐到机器人工作空间，再用多视角深度验证哪些体素该留下。这里最值得看的，是]]>
     </summary>
     <title>论文阅读：OV-PEAR</title>
-    <updated>2026-11-24T17:22:34.200Z</updated>
+    <updated>2026-11-25T06:22:48.687Z</updated>
   </entry>
   <entry>
     <author>
@@ -85,7 +104,7 @@
 <p>相机向右转时，一把静止的椅子也会在画面里向左移动。Spatial-Interactor 把这个观察用在了视觉语言模型的训练上。先让模型从相邻画面推断]]>
     </summary>
     <title>论文阅读：Spatial-Interactor</title>
-    <updated>2026-11-24T17:22:34.237Z</updated>
+    <updated>2026-11-25T06:22:48.738Z</updated>
   </entry>
   <entry>
     <author>
@@ -103,7 +122,7 @@
 <p>引：Spatial Harness 由香港浸会大学 TMLR Group 与 ByteDance Seed 合作完成（Chentao Cao、Zhanke Zhou 等，通讯作者 Bo Han），发表于 NeurIPS]]>
     </summary>
     <title>论文阅读：Spatial Harness</title>
-    <updated>2026-11-24T17:22:34.234Z</updated>
+    <updated>2026-11-25T06:22:48.734Z</updated>
   </entry>
   <entry>
     <author>
@@ -121,7 +140,7 @@
 <p>引：本文来自 NVIDIA (Bowen Wen, Wei Yang, Jan Kautz, Stan Birchfield)，CVPR 2024。它想用<strong>一个模型</strong>同时解决四件事：新物体的 6D]]>
     </summary>
     <title>论文阅读：FoundationPose</title>
-    <updated>2026-11-24T17:22:34.153Z</updated>
+    <updated>2026-11-25T06:22:48.634Z</updated>
   </entry>
   <entry>
     <author>
@@ -139,7 +158,7 @@
 <p>引：本文由 Georgia Tech 的 Xuanyou Chen、Jinyu Chen 与 Glen Chou 完成。它要解决的是机器人操作里最别扭的一步：目标用语言说不清，用图能画出来，但规划器只接受六自由度位姿。VerifLM]]>
     </summary>
     <title>论文阅读：VerifLM</title>
-    <updated>2026-11-24T17:22:34.262Z</updated>
+    <updated>2026-11-25T06:22:48.771Z</updated>
   </entry>
   <entry>
     <author>
@@ -157,7 +176,7 @@
 <p>引：本文由 UIUC、上海交大、UC Merced 与 Amazon AGI 的研究者完成。它要解决的是 VLM 的<strong>视角采择 (perspective]]>
     </summary>
     <title>论文阅读：LeRF</title>
-    <updated>2026-11-24T17:22:34.157Z</updated>
+    <updated>2026-11-25T06:22:48.638Z</updated>
   </entry>
   <entry>
     <author>
@@ -175,7 +194,7 @@
 <p>引：本文由香港科技大学、深圳 Loop Area Institute、香港大学与清华的研究者完成。它处理的是“把生成出来的物体放回场景”这一步：给定一张 RGB]]>
     </summary>
     <title>论文阅读：ScenePlacer</title>
-    <updated>2026-11-24T17:22:34.222Z</updated>
+    <updated>2026-11-25T06:22:48.714Z</updated>
   </entry>
   <entry>
     <author>
@@ -193,7 +212,7 @@
 <p>引：BlenderFORGE 研究如何让多模态大模型在 Blender 中反复观察、执行代码和检查结果，直到把场景改成目标状态。论文的重点是将已有 3D 资产转化为编辑任务，再用可执行环境和可验证奖励训练交互式编辑]]>
     </summary>
     <title>论文阅读：BlenderFORGE</title>
-    <updated>2026-11-24T17:22:34.143Z</updated>
+    <updated>2026-11-25T06:22:48.624Z</updated>
   </entry>
   <entry>
     <author>
@@ -211,7 +230,7 @@
 <p>引：VULCAN 由 Stanford、Google 与 NYU 合作完成，第一作者 Zhengfei Kuang 在 Google 实习期间完成这项工作，谢赛宁 (Saining Xie) 是作者之一。论文要解决的是让多模态大模型在三维场景里]]>
     </summary>
     <title>论文阅读：VULCAN</title>
-    <updated>2026-11-24T17:22:34.258Z</updated>
+    <updated>2026-11-25T06:22:48.767Z</updated>
   </entry>
   <entry>
     <author>
@@ -231,7 +250,7 @@
 <h2]]>
     </summary>
     <title>论文阅读：NeRF</title>
-    <updated>2026-11-24T17:22:34.186Z</updated>
+    <updated>2026-11-25T06:22:48.671Z</updated>
   </entry>
   <entry>
     <author>
@@ -249,7 +268,7 @@
 <p>引：3D Gaussian Splatting (3DGS)]]>
     </summary>
     <title>论文阅读：3D Gaussian Splatting for Real-Time Radiance Field Rendering</title>
-    <updated>2026-11-24T17:22:34.141Z</updated>
+    <updated>2026-11-25T06:22:48.622Z</updated>
   </entry>
   <entry>
     <author>
@@ -269,7 +288,7 @@
 <h2]]>
     </summary>
     <title>论文阅读：VGGT</title>
-    <updated>2026-11-24T17:22:34.251Z</updated>
+    <updated>2026-11-25T06:22:48.759Z</updated>
   </entry>
   <entry>
     <author>
@@ -284,7 +303,7 @@
 <p>原文：<a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/">What are Diffusion Models?</a>，作者 Lilian]]>
     </summary>
     <title>转载：What are Diffusion Models?</title>
-    <updated>2026-11-24T17:22:34.284Z</updated>
+    <updated>2026-11-25T06:22:48.796Z</updated>
   </entry>
   <entry>
     <author>
@@ -300,7 +319,7 @@
 <p>一直以来，我觉得 <em>“必须守在电脑前用规范的Markdown语法编辑个人博客”</em> 是一件荒谬的事，一个好的博客管理方式应该类似于<strong>“随身记”</strong>]]>
     </summary>
     <title>在手机上管理Hexo博客？</title>
-    <updated>2026-11-24T17:22:34.140Z</updated>
+    <updated>2026-11-25T06:22:48.622Z</updated>
   </entry>
   <entry>
     <author>
@@ -319,7 +338,7 @@
 <p>引：VIMA 把“按语言操作”“达到目标图像”“观看一次示范”“根据图片学习新概念”等任务，统一为 <strong>文字与图像交错的 multimodal prompt</strong>。模型再将画面拆成 object tokens，用]]>
     </summary>
     <title>论文阅读：VIMA</title>
-    <updated>2026-11-24T17:22:34.251Z</updated>
+    <updated>2026-11-25T06:22:48.760Z</updated>
   </entry>
   <entry>
     <author>
@@ -338,7 +357,7 @@
 <p>引：<span class="katex"><span class="katex-mathml"><math]]>
     </summary>
     <title>论文阅读：$\pi_0$</title>
-    <updated>2026-11-24T17:22:34.269Z</updated>
+    <updated>2026-11-25T06:22:48.779Z</updated>
   </entry>
   <entry>
     <author>
@@ -356,25 +375,6 @@
 <p>引：DAgger 研究的问题很直接： <strong>策略做出的动作会改变下一次看到的输入，那么只在专家走过的状态上训练，为什么能保证策略独立执行时也表现良好？</strong>]]>
     </summary>
     <title>论文阅读：DAgger</title>
-    <updated>2026-11-24T17:22:34.145Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="Vision-Language Models" scheme="https://ziyuliu258.cn/blog/tags/Vision-Language-Models/"/>
-    <category term="GUI Agent" scheme="https://ziyuliu258.cn/blog/tags/GUI-Agent/"/>
-    <category term="SFT" scheme="https://ziyuliu258.cn/blog/tags/SFT/"/>
-    <id>https://ziyuliu258.cn/blog/posts/2e949ae7/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/2e949ae7/"/>
-    <published>2026-11-05T15:13:58.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>引：UI-TARS 将 GUI agent 中的感知、动作选择和部分工作流程，放进一个接收截图、生成操作的 VLM。本文最值得关注的是它怎样构造训练数据：从界面元素理解到多步轨迹，再到模型亲自执行后产生的错误与纠正。尤其是]]>
-    </summary>
-    <title>论文阅读：UI-TARS</title>
-    <updated>2026-11-24T17:22:34.245Z</updated>
+    <updated>2026-11-25T06:22:48.626Z</updated>
   </entry>
 </feed>
