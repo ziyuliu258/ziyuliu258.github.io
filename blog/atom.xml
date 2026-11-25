@@ -12,7 +12,26 @@
   <rights>All rights reserved 2026, Derrick Liu</rights>
   <subtitle>昼短苦夜长，何不秉烛游！</subtitle>
   <title>Derrick Liu的个人博客</title>
-  <updated>2026-11-25T12:29:35.658Z</updated>
+  <updated>2026-11-25T14:34:26.286Z</updated>
+  <entry>
+    <author>
+      <name>Derrick Liu</name>
+      <email>1209830516abc@gmail.com</email>
+    </author>
+    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    <category term="VAE" scheme="https://ziyuliu258.cn/blog/tags/VAE/"/>
+    <category term="Generative Models" scheme="https://ziyuliu258.cn/blog/tags/Generative-Models/"/>
+    <category term="Variational Inference" scheme="https://ziyuliu258.cn/blog/tags/Variational-Inference/"/>
+    <id>https://ziyuliu258.cn/blog/posts/667e16f8/</id>
+    <link href="https://ziyuliu258.cn/blog/posts/667e16f8/"/>
+    <published>2026-11-25T14:31:09.000Z</published>
+    <summary>
+      <![CDATA[<blockquote>
+<p>引：今天从 Latent Diffusion、DiT 到 TRELLIS、SAM 3D，几乎所有主流生成模型都在“先把高维数据压缩进隐空间，再在隐空间里做生成”的范式上运转，而把这套概率编解码地基打下来的，正是 Diederik P.]]>
+    </summary>
+    <title>论文阅读：Auto-Encoding Variational Bayes</title>
+    <updated>2026-11-25T14:34:26.286Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Derrick Liu</name>
@@ -30,7 +49,7 @@
 <p>引：给一张日常实拍照片，用鼠标点一下画面里被遮了一半的藤编沙发、桌角的多肉，或是运河桥上的自行车，模型能不能在亚秒级的时间里，直接把它的完整三维几何、表面纹理以及在相机坐标系下的三维位置、朝向与尺度一起还原出来？Meta]]>
     </summary>
     <title>论文阅读：SAM 3D</title>
-    <updated>2026-11-25T12:29:35.658Z</updated>
+    <updated>2026-11-25T14:34:26.369Z</updated>
   </entry>
   <entry>
     <author>
@@ -49,7 +68,7 @@
 <p>引：Point Transformer V3（PTv3）由香港大学（Xiaoyang Wu、Hengshuang Zhao 等）、上海人工智能实验室、港中深、北大与 MIT 联合提出（CVPR 2024]]>
     </summary>
     <title>论文阅读：Point Transformer V3</title>
-    <updated>2026-11-25T12:29:35.655Z</updated>
+    <updated>2026-11-25T14:34:26.366Z</updated>
   </entry>
   <entry>
     <author>
@@ -68,7 +87,7 @@
 <p>引：SpaCeFormer 由 NVIDIA 的 Chris Choy、Jan Kautz 与 POSTECH 团队（Junha Lee、Chunghyun Park、Minsu]]>
     </summary>
     <title>论文阅读：SpaCeFormer</title>
-    <updated>2026-11-25T12:29:35.683Z</updated>
+    <updated>2026-11-25T14:34:26.396Z</updated>
   </entry>
   <entry>
     <author>
@@ -87,7 +106,7 @@
 <p>引：LiteReality-Agent 由剑桥大学、帝国理工学院等机构的研究者完成（Zhening Huang、Yueyan Li、Johnathan Chiu、Shangzhe Wu 等），是 LiteReality (Huang et]]>
     </summary>
     <title>论文阅读：LiteReality-Agent</title>
-    <updated>2026-11-25T12:29:35.603Z</updated>
+    <updated>2026-11-25T14:34:26.311Z</updated>
   </entry>
   <entry>
     <author>
@@ -106,7 +125,7 @@
 <p>引：SpaceAct 由 Tencent HY 团队完成（Chenglong Shi、Zekai Yuan 等），是一个面向三维时空推理的交互式评测基准，配套提出了统一的主动感知智能体框架]]>
     </summary>
     <title>论文阅读：SpaceAct</title>
-    <updated>2026-11-25T12:29:35.685Z</updated>
+    <updated>2026-11-25T14:34:26.398Z</updated>
   </entry>
   <entry>
     <author>
@@ -125,7 +144,7 @@
 <p>引：如果桌上放着一个没有 CAD 的连接器，单图生成模型可以补出它的背面，但也可能在插口边缘多生成一块材料。OV-PEAR 先把生成的模型缩放并对齐到机器人工作空间，再用多视角深度验证哪些体素该留下。这里最值得看的，是]]>
     </summary>
     <title>论文阅读：OV-PEAR</title>
-    <updated>2026-11-25T12:29:35.639Z</updated>
+    <updated>2026-11-25T14:34:26.349Z</updated>
   </entry>
   <entry>
     <author>
@@ -142,7 +161,7 @@
 <p>相机向右转时，一把静止的椅子也会在画面里向左移动。Spatial-Interactor 把这个观察用在了视觉语言模型的训练上。先让模型从相邻画面推断]]>
     </summary>
     <title>论文阅读：Spatial-Interactor</title>
-    <updated>2026-11-25T12:29:35.696Z</updated>
+    <updated>2026-11-25T14:34:26.410Z</updated>
   </entry>
   <entry>
     <author>
@@ -160,7 +179,7 @@
 <p>引：Spatial Harness 由香港浸会大学 TMLR Group 与 ByteDance Seed 合作完成（Chentao Cao、Zhanke Zhou 等，通讯作者 Bo Han），发表于 NeurIPS]]>
     </summary>
     <title>论文阅读：Spatial Harness</title>
-    <updated>2026-11-25T12:29:35.693Z</updated>
+    <updated>2026-11-25T14:34:26.406Z</updated>
   </entry>
   <entry>
     <author>
@@ -178,7 +197,7 @@
 <p>引：本文来自 NVIDIA (Bowen Wen, Wei Yang, Jan Kautz, Stan Birchfield)，CVPR 2024。它想用<strong>一个模型</strong>同时解决四件事：新物体的 6D]]>
     </summary>
     <title>论文阅读：FoundationPose</title>
-    <updated>2026-11-25T12:29:35.591Z</updated>
+    <updated>2026-11-25T14:34:26.299Z</updated>
   </entry>
   <entry>
     <author>
@@ -196,7 +215,7 @@
 <p>引：本文由 Georgia Tech 的 Xuanyou Chen、Jinyu Chen 与 Glen Chou 完成。它要解决的是机器人操作里最别扭的一步：目标用语言说不清，用图能画出来，但规划器只接受六自由度位姿。VerifLM]]>
     </summary>
     <title>论文阅读：VerifLM</title>
-    <updated>2026-11-25T12:29:35.723Z</updated>
+    <updated>2026-11-25T14:34:26.438Z</updated>
   </entry>
   <entry>
     <author>
@@ -214,7 +233,7 @@
 <p>引：本文由 UIUC、上海交大、UC Merced 与 Amazon AGI 的研究者完成。它要解决的是 VLM 的<strong>视角采择 (perspective]]>
     </summary>
     <title>论文阅读：LeRF</title>
-    <updated>2026-11-25T12:29:35.595Z</updated>
+    <updated>2026-11-25T14:34:26.303Z</updated>
   </entry>
   <entry>
     <author>
@@ -232,7 +251,7 @@
 <p>引：本文由香港科技大学、深圳 Loop Area Institute、香港大学与清华的研究者完成。它处理的是“把生成出来的物体放回场景”这一步：给定一张 RGB]]>
     </summary>
     <title>论文阅读：ScenePlacer</title>
-    <updated>2026-11-25T12:29:35.678Z</updated>
+    <updated>2026-11-25T14:34:26.391Z</updated>
   </entry>
   <entry>
     <author>
@@ -250,7 +269,7 @@
 <p>引：BlenderFORGE 研究如何让多模态大模型在 Blender 中反复观察、执行代码和检查结果，直到把场景改成目标状态。论文的重点是将已有 3D 资产转化为编辑任务，再用可执行环境和可验证奖励训练交互式编辑]]>
     </summary>
     <title>论文阅读：BlenderFORGE</title>
-    <updated>2026-11-25T12:29:35.582Z</updated>
+    <updated>2026-11-25T14:34:26.289Z</updated>
   </entry>
   <entry>
     <author>
@@ -268,7 +287,7 @@
 <p>引：VULCAN 由 Stanford、Google 与 NYU 合作完成，第一作者 Zhengfei Kuang 在 Google 实习期间完成这项工作，谢赛宁 (Saining Xie) 是作者之一。论文要解决的是让多模态大模型在三维场景里]]>
     </summary>
     <title>论文阅读：VULCAN</title>
-    <updated>2026-11-25T12:29:35.719Z</updated>
+    <updated>2026-11-25T14:34:26.434Z</updated>
   </entry>
   <entry>
     <author>
@@ -288,7 +307,7 @@
 <h2]]>
     </summary>
     <title>论文阅读：NeRF</title>
-    <updated>2026-11-25T12:29:35.625Z</updated>
+    <updated>2026-11-25T14:34:26.334Z</updated>
   </entry>
   <entry>
     <author>
@@ -306,7 +325,7 @@
 <p>引：3D Gaussian Splatting (3DGS)]]>
     </summary>
     <title>论文阅读：3D Gaussian Splatting for Real-Time Radiance Field Rendering</title>
-    <updated>2026-11-25T12:29:35.581Z</updated>
+    <updated>2026-11-25T14:34:26.284Z</updated>
   </entry>
   <entry>
     <author>
@@ -326,7 +345,7 @@
 <h2]]>
     </summary>
     <title>论文阅读：VGGT</title>
-    <updated>2026-11-25T12:29:35.711Z</updated>
+    <updated>2026-11-25T14:34:26.426Z</updated>
   </entry>
   <entry>
     <author>
@@ -341,7 +360,7 @@
 <p>原文：<a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/">What are Diffusion Models?</a>，作者 Lilian]]>
     </summary>
     <title>转载：What are Diffusion Models?</title>
-    <updated>2026-11-25T12:29:35.748Z</updated>
+    <updated>2026-11-25T14:34:26.465Z</updated>
   </entry>
   <entry>
     <author>
@@ -357,25 +376,6 @@
 <p>一直以来，我觉得 <em>“必须守在电脑前用规范的Markdown语法编辑个人博客”</em> 是一件荒谬的事，一个好的博客管理方式应该类似于<strong>“随身记”</strong>]]>
     </summary>
     <title>在手机上管理Hexo博客？</title>
-    <updated>2026-11-25T12:29:35.581Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Derrick Liu</name>
-      <email>1209830516abc@gmail.com</email>
-    </author>
-    <category term="论文阅读笔记" scheme="https://ziyuliu258.cn/blog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
-    <category term="Imitation Learning" scheme="https://ziyuliu258.cn/blog/tags/Imitation-Learning/"/>
-    <category term="Embodied Intelligence" scheme="https://ziyuliu258.cn/blog/tags/Embodied-Intelligence/"/>
-    <category term="Multimodal Learning" scheme="https://ziyuliu258.cn/blog/tags/Multimodal-Learning/"/>
-    <id>https://ziyuliu258.cn/blog/posts/bfa59942/</id>
-    <link href="https://ziyuliu258.cn/blog/posts/bfa59942/"/>
-    <published>2026-11-05T15:14:01.000Z</published>
-    <summary>
-      <![CDATA[<blockquote>
-<p>引：VIMA 把“按语言操作”“达到目标图像”“观看一次示范”“根据图片学习新概念”等任务，统一为 <strong>文字与图像交错的 multimodal prompt</strong>。模型再将画面拆成 object tokens，用]]>
-    </summary>
-    <title>论文阅读：VIMA</title>
-    <updated>2026-11-25T12:29:35.712Z</updated>
+    <updated>2026-11-25T14:34:26.284Z</updated>
   </entry>
 </feed>
